@@ -1,0 +1,22 @@
+[gd_resource type="ShaderMaterial" load_steps=3 format=3]
+
+[ext_resource type="Shader" path="res://shaders/wall_ink.gdshader" id="1"]
+[ext_resource type="Texture2D" path="res://assets/textures/walls/stylized_low-poly_wooden_beam/textures/Material_baseColor.png" id="2"]
+
+[resource]
+shader = ExtResource("1")
+shader_parameter/tint_color = Color(1, 1, 1, 1)
+shader_parameter/line_color = Color(0.03, 0.03, 0.03, 1)
+shader_parameter/hatch_color = Color(0.14, 0.13, 0.12, 1)
+shader_parameter/roughness_value = 0.9
+shader_parameter/edge_strength = 2.0
+shader_parameter/edge_power = 2.2
+shader_parameter/hatch_density = 22.0
+shader_parameter/hatch_strength = 0.2
+shader_parameter/paper_grain_strength = 0.1
+shader_parameter/topdown_ink_boost = 0.28
+shader_parameter/albedo_tex = ExtResource("2")
+shader_parameter/use_albedo_tex = true
+shader_parameter/uv_tiling = Vector2(1, 1)
+shader_parameter/is_preview = false
+shader_parameter/preview_alpha = 0.5

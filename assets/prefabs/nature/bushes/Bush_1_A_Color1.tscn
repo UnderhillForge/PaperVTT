@@ -1,0 +1,18 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="PackedScene" path="res://assets/models/nature/bushes/Bush_1_A_Color1.gltf" id="1"]
+[ext_resource type="Material" path="res://assets/materials/nature_matte.tres" id="2"]
+[ext_resource type="Script" path="res://scripts/assets/prefab_surface_style.gd" id="3"]
+[sub_resource type="BoxShape3D" id="1"]
+size = Vector3(2.0, 1.8, 2.0)
+
+[node name="Nature_Bush_1_A_Color1" type="Node3D"]
+script = ExtResource("3")
+shared_material = ExtResource("2")
+
+[node name="Model" parent="." instance=ExtResource("1")]
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+shape = SubResource("1")

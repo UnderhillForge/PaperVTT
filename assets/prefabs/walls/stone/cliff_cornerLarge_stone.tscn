@@ -1,0 +1,18 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="PackedScene" path="res://assets/models/walls/stone/cliff_cornerLarge_stone.glb" id="1"]
+[ext_resource type="Material" path="res://assets/materials/wall_matte.tres" id="2"]
+[ext_resource type="Script" path="res://scripts/assets/prefab_surface_style.gd" id="3"]
+[sub_resource type="BoxShape3D" id="1"]
+size = Vector3(1.8, 2.4, 1.8)
+
+[node name="Wall_cliff_cornerLarge_stone" type="Node3D"]
+script = ExtResource("3")
+shared_material = ExtResource("2")
+
+[node name="Model" parent="." instance=ExtResource("1")]
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+shape = SubResource("1")

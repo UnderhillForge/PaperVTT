@@ -1,0 +1,38 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Shader" path="res://shaders/pen_outline.gdshader" id="1"]
+[ext_resource type="Script" path="res://scripts/environment/post_process_controller.gd" id="2"]
+
+[sub_resource type="ShaderMaterial" id="1"]
+shader = ExtResource("1")
+shader_parameter/enabled = true
+shader_parameter/outline_color = Color(0, 0, 0, 1)
+shader_parameter/outline_thickness = 4.0
+shader_parameter/outline_strength = 2.35
+shader_parameter/edge_threshold = 0.013
+shader_parameter/hatch_opacity = 0.24
+shader_parameter/hatch_scale = 560.0
+shader_parameter/hatch_contrast = 1.15
+shader_parameter/paper_tint = Color(0.95, 0.93, 0.88, 1)
+shader_parameter/paper_strength = 0.05
+shader_parameter/line_darken = 0.085
+
+[node name="PostProcessCanvas" type="CanvasLayer"]
+layer = 50
+script = ExtResource("2")
+
+[node name="SceneViewport" type="SubViewport" parent="."]
+handle_input_locally = false
+usage = 2
+render_target_update_mode = 4
+
+[node name="FullscreenOverlay" type="TextureRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+material = SubResource("1")
+expand_mode = 1
+stretch_mode = 6
