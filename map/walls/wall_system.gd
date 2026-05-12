@@ -737,12 +737,21 @@ func _build_foundations(target_parent: Node3D, is_preview: bool) -> void:
 			for piece_info in piece_plan:
 				if piece_info is not Dictionary:
 					continue
-				var piece_type: String = String(piece_info.get("type", ""))
-				var piece_length: float = float(piece_info.get("length", 4.0))
+				var piece_key: String = String(piece_info.get("key", ""))
+				var piece_length: float = float(piece_info.get("len", 4.0))
 				
-				if piece_type == "straight":
-					var size: String = String(piece_info.get("size", "4m"))
-					var key: String = "foundation_straight_%s" % size
+				if piece_key.contains("straight"):
+					# Extract size from key (e.g., "straight_4m" -> "4m")
+					var size_match: String = "4m"  # default
+					if piece_key.contains("_8m"):
+						size_match = "8m"
+					elif piece_key.contains("_4m"):
+						size_match = "4m"
+					elif piece_key.contains("_2m"):
+						size_match = "2m"
+					elif piece_key.contains("_1m"):
+						size_match = "1m"
+					var key: String = "foundation_straight_%s" % size_match
 					
 					# Try to load modular prefab (flat structure: variant_piecekey.tscn)
 					var prefab_path: String = modular_piece_base_path.path_join("%s_%s.tscn" % [wall_type, key])
@@ -751,10 +760,10 @@ func _build_foundations(target_parent: Node3D, is_preview: bool) -> void:
 					if prefab:
 						var inst: Node3D = prefab.instantiate() as Node3D
 						if inst:
+							root.add_child(inst)
 							inst.global_position = current_pos + direction * (piece_length * 0.5)
 							inst.global_position.y = top_y - (fh * 0.5) + top_overlap
 							inst.rotation.y = yaw
-							root.add_child(inst)
 					else:
 						# Fallback: create simple box for this segment
 						var mesh_instance := MeshInstance3D.new()
@@ -762,18 +771,11 @@ func _build_foundations(target_parent: Node3D, is_preview: bool) -> void:
 						box.size = Vector3(piece_length, fh, default_wall_thickness)
 						mesh_instance.mesh = box
 						mesh_instance.material_override = _get_foundation_material(is_preview, wall_type, piece_length, default_wall_thickness)
-						var pos: Vector3 = current_pos + direction * (piece_length * 0.5)
-						pos.y = top_y - (fh * 0.5) + top_overlap
-						mesh_instance.global_position = pos
-						mesh_instance.rotation.y = yaw
-						root.add_child(mesh_instance)
-				
-				current_pos += direction * piece_length
-		
-		# Place corner pieces at the four corners
-		var corners: Array[Vector3] = [
-			Vector3(padded_min_x, 0.0, padded_min_z),
-			Vector3(padded_max_x, 0.0, padded_min_z),
+					root.add_child(mesh_instance)
+					var pos: Vector3 = current_pos + direction * (piece_length * 0.5)
+					pos.y = top_y - (fh * 0.5) + top_overlap
+					mesh_instance.global_position = pos
+					mesh_instance.rotation.y = yaw
 			Vector3(padded_max_x, 0.0, padded_max_z),
 			Vector3(padded_min_x, 0.0, padded_max_z)
 		]
@@ -791,10 +793,10 @@ func _build_foundations(target_parent: Node3D, is_preview: bool) -> void:
 			if prefab:
 				var inst: Node3D = prefab.instantiate() as Node3D
 				if inst:
+					root.add_child(inst)
 					inst.global_position = corner_pos
 					inst.global_position.y = top_y - (fh * 0.5) + top_overlap
 					inst.rotation.y = corner_rot
-					root.add_child(inst)
 
 func _build_segment(target_parent: Node3D, source_segments: Array, idx: int, is_preview: bool, highlight_indices: Array[int]) -> void:
 	if idx < 0 or idx >= source_segments.size():
