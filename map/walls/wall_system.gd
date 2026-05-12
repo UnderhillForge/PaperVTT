@@ -744,8 +744,8 @@ func _build_foundations(target_parent: Node3D, is_preview: bool) -> void:
 					var size: String = String(piece_info.get("size", "4m"))
 					var key: String = "foundation_straight_%s" % size
 					
-					# Try to load modular prefab
-					var prefab_path: String = modular_piece_base_path.path_join(wall_type).path_join("%s.tscn" % key)
+					# Try to load modular prefab (flat structure: variant_piecekey.tscn)
+					var prefab_path: String = modular_piece_base_path.path_join("%s_%s.tscn" % [wall_type, key])
 					var prefab: PackedScene = load(prefab_path)
 					
 					if prefab:
@@ -778,14 +778,14 @@ func _build_foundations(target_parent: Node3D, is_preview: bool) -> void:
 			Vector3(padded_min_x, 0.0, padded_max_z)
 		]
 		var corner_rotations: Array[float] = [0.0, PI * 0.5, PI, PI * 1.5]
-		var corner_names: Array[String] = ["foundation_corner_outer_90", "foundation_corner_outer_90", "foundation_corner_outer_90", "foundation_corner_outer_90"]
+		var corner_names: Array[String] = ["foundation_corner_outer", "foundation_corner_outer", "foundation_corner_outer", "foundation_corner_outer"]
 		
 		for corner_idx in range(corners.size()):
 			var corner_pos: Vector3 = corners[corner_idx]
 			var corner_rot: float = corner_rotations[corner_idx]
 			var corner_key: String = corner_names[corner_idx]
 			
-			var prefab_path: String = modular_piece_base_path.path_join(wall_type).path_join("%s.tscn" % corner_key)
+			var prefab_path: String = modular_piece_base_path.path_join("%s_%s.tscn" % [wall_type, corner_key])
 			var prefab: PackedScene = load(prefab_path)
 			
 			if prefab:
