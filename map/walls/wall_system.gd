@@ -714,7 +714,7 @@ func _build_foundations(target_parent: Node3D, is_preview: bool) -> void:
 		box.size = Vector3(width_x, fh, width_z)
 		mesh_instance.mesh = box
 		mesh_instance.material_override = _get_foundation_material(is_preview, String(d.get("wall_type", "stone")), width_x, width_z)
-		mesh_instance.global_position = Vector3(center_x, center_y, center_z)
+		mesh_instance.position = Vector3(center_x, center_y, center_z)
 		root.add_child(mesh_instance)
 
 		if not is_preview:
@@ -725,7 +725,7 @@ func _build_foundations(target_parent: Node3D, is_preview: bool) -> void:
 			shape.size = box.size
 			col.shape = shape
 			body.add_child(col)
-			body.global_position = mesh_instance.global_position
+			body.position = mesh_instance.position
 			root.add_child(body)
 
 func _build_segment(target_parent: Node3D, source_segments: Array, idx: int, is_preview: bool, highlight_indices: Array[int]) -> void:
@@ -809,6 +809,14 @@ func _build_segment(target_parent: Node3D, source_segments: Array, idx: int, is_
 	for opening in opening_instances:
 		_place_opening_piece(segment_root, seg, trimmed_start, direction, yaw, opening, is_preview, piece_tint)
 
+	# Safety fallback: if no wall geometry was produced, create one straight fallback piece.
+	# This prevents empty rectangles when modular key resolution or interval planning fails.
+	if segment_root.get_child_count() == 0 and trimmed_length >= 0.05:
+		var fallback_node: Node3D = _instantiate_prefab_or_box(segment_root, seg, "", trimmed_length, is_preview, piece_tint)
+		var fallback_center: Vector3 = (trimmed_start + trimmed_end) * 0.5
+		fallback_node.position = Vector3(fallback_center.x, _sample_segment_height(seg, fallback_center), fallback_center.z)
+		fallback_node.rotation = Vector3(0.0, yaw, 0.0)
+
 	if start_connections <= 1:
 		_place_cap(segment_root, seg, seg.start, yaw + PI, true, is_preview, piece_tint)
 	if end_connections <= 1:
@@ -874,8 +882,8 @@ func _place_straight_pieces(
 			var side: Vector3 = Vector3(-direction.z, 0.0, direction.x)
 			var offset_amount: float = hand_drawn_jitter_offset * (((1.0 - jitter_seed) * 2.0) - 1.0)
 			final_center += side * offset_amount
-		node.global_position = Vector3(final_center.x, _sample_segment_height(seg, final_center), final_center.z)
-		node.global_rotation = Vector3(0.0, final_yaw, 0.0)
+		node.position = Vector3(final_center.x, _sample_segment_height(seg, final_center), final_center.z)
+		node.rotation = Vector3(0.0, final_yaw, 0.0)
 		if not window_opening.is_empty():
 			_apply_window_cutout(node, seg, piece_len, cursor, window_opening, is_preview)
 		cursor += piece_len
@@ -1078,8 +1086,8 @@ func _place_opening_piece(
 
 	var piece_len: float = 4.0 if key.ends_with("_4m") else 2.0
 	var node: Node3D = _instantiate_prefab_or_box(parent, seg, key, piece_len, is_preview, tint, opening)
-	node.global_position = Vector3(opening_pos.x, opening_base_y, opening_pos.z)
-	node.global_rotation = Vector3(0.0, yaw, 0.0)
+	node.position = Vector3(opening_pos.x, opening_base_y, opening_pos.z)
+	node.rotation = Vector3(0.0, yaw, 0.0)
 
 	if opening_type == "window":
 		_place_window_in_gap(parent, seg, opening_pos, opening_base_y, direction, yaw, opening_width, opening_height, sill_height, wall_height, opening, is_preview, tint)
@@ -1144,8 +1152,8 @@ func _place_window_in_gap(
 	# Window should be centered horizontally in the gap
 	# Vertically: base_y - half_wall_height + sill_height + half_opening_height
 	var window_center_y: float = gap_base_y - (wall_height * 0.5) + sill_height + (opening_height * 0.5)
-	node.global_position = Vector3(gap_pos.x, window_center_y, gap_pos.z)
-	node.global_rotation = Vector3(0.0, yaw, 0.0)
+	node.position = Vector3(gap_pos.x, window_center_y, gap_pos.z)
+	node.rotation = Vector3(0.0, yaw, 0.0)
 	
 	# Scale the window to fit the opening
 	_fit_window_instance_to_opening(node, opening_width * 0.95, opening_height * 0.95)
@@ -1282,8 +1290,8 @@ func _instantiate_tudor_window(window_pos: Vector3, center_y: float, yaw: float,
 	_openings_root.add_child(window_node)
 	
 	# Position window in the gap
-	window_node.global_position = Vector3(window_pos.x, center_y, window_pos.z)
-	window_node.global_rotation = Vector3(0.0, yaw, 0.0)
+	window_node.position = Vector3(window_pos.x, center_y, window_pos.z)
+	window_node.rotation = Vector3(0.0, yaw, 0.0)
 	
 	# Scale window to fit opening
 	_fit_window_instance_to_opening(window_node, width * 0.95, height * 0.95)
@@ -1296,8 +1304,8 @@ func _place_cap(parent: Node3D, seg: WallSegment, point: Vector3, yaw: float, is
 	if not _has_prefab(key):
 		return
 	var node: Node3D = _instantiate_prefab_or_box(parent, seg, key, 0.6, is_preview, tint)
-	node.global_position = Vector3(point.x, _sample_segment_height(seg, point), point.z)
-	node.global_rotation = Vector3(0.0, yaw, 0.0)
+	node.position = Vector3(point.x, _sample_segment_height(seg, point), point.z)
+	node.rotation = Vector3(0.0, yaw, 0.0)
 
 func _build_junctions(target_parent: Node3D, source_segments: Array, is_preview: bool) -> void:
 	var junction_root := Node3D.new()
@@ -1363,14 +1371,14 @@ func _place_junction_piece(parent: Node3D, wall_type: String, position: Vector3,
 		# the beam extends from base_y to base_y + max_height
 		var scale_factor: float = max_height / 3.4
 		var centered_y: float = base_y + (max_height * 0.5)
-		node.global_position = Vector3(position.x, centered_y, position.z)
+		node.position = Vector3(position.x, centered_y, position.z)
 		node.scale.y = scale_factor
 	else:
-		node.global_position = position
+		node.position = position
 	# Cardinal corner stays aligned to cardinal axes (no Y rotation)
 	# Non-cardinal corners get rotated to face the junction bisector
 	if not is_tudor_cardinal:
-		node.global_rotation = Vector3(0.0, _cluster_rotation(cluster), 0.0)
+		node.rotation = Vector3(0.0, _cluster_rotation(cluster), 0.0)
 	if not is_preview:
 		for endpoint in cluster.get("endpoints", []):
 			if endpoint is Dictionary:
@@ -1402,7 +1410,7 @@ func _build_junction_markers(parent: Node3D, feedback: Dictionary) -> void:
 		mat.emission_energy_multiplier = 1.0
 		marker.material_override = mat
 		marker_root.add_child(marker)
-		marker.global_position = (p as Vector3) + Vector3(0.06, 0.12, 0.06)
+		marker.position = (p as Vector3) + Vector3(0.06, 0.12, 0.06)
 
 func _instantiate_prefab_or_box(parent: Node3D, seg: WallSegment, key: String, piece_length: float, is_preview: bool, tint: Color, opening: Dictionary = {}) -> Node3D:
 	var packed: PackedScene = _resolve_prefab(key)
@@ -1523,8 +1531,8 @@ func _add_segment_collision(parent: Node3D, idx: int, seg: WallSegment) -> void:
 	col.shape = shape
 	body.add_child(col)
 	parent.add_child(body)
-	body.global_position = Vector3(seg.get_midpoint().x, _sample_segment_height(seg, seg.get_midpoint()), seg.get_midpoint().z)
-	body.global_rotation = Vector3(0.0, atan2(delta.z, delta.x), 0.0)
+	body.position = Vector3(seg.get_midpoint().x, _sample_segment_height(seg, seg.get_midpoint()), seg.get_midpoint().z)
+	body.rotation = Vector3(0.0, atan2(delta.z, delta.x), 0.0)
 
 func _build_endpoint_clusters(source_segments: Array) -> void:
 	_cluster_data.clear()

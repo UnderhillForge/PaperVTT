@@ -47,6 +47,7 @@ var _preview_cache: Dictionary = {}
 var _preview_targets: Dictionary = {}
 var _preview_queue: Array[String] = []
 var _preview_queued_set: Dictionary = {}
+var _preview_failed_paths: Dictionary = {}
 var _preview_pending_capture_path: String = ""
 var _preview_pending_frames: int = 0
 
@@ -299,6 +300,10 @@ func _process(_delta: float) -> void:
 		_set_preview_result(next_path, _placeholder_texture())
 
 func _enqueue_preview(path: String, target: TextureRect) -> void:
+	if _preview_failed_paths.has(path):
+		target.texture = _placeholder_texture()
+		return
+
 	if _preview_cache.has(path):
 		target.texture = _preview_cache[path]
 		return
@@ -329,11 +334,16 @@ func _setup_preview_scene(path: String) -> bool:
 	for child in _preview_stage.get_children():
 		child.queue_free()
 
+	if _preview_failed_paths.has(path):
+		return false
+
 	var packed: PackedScene = load(path) as PackedScene
 	if packed == null:
+		_preview_failed_paths[path] = true
 		return false
 	var inst: Node = packed.instantiate()
 	if inst == null:
+		_preview_failed_paths[path] = true
 		return false
 
 	var holder := Node3D.new()
@@ -347,6 +357,7 @@ func _setup_preview_scene(path: String) -> bool:
 
 	var aabb_data: Dictionary = _collect_scene_aabb(holder)
 	if not bool(aabb_data.get("valid", false)):
+		_preview_failed_paths[path] = true
 		return false
 	var aabb: AABB = aabb_data["aabb"]
 	var center: Vector3 = aabb.position + aabb.size * 0.5
