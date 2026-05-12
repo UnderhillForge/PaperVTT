@@ -141,9 +141,6 @@ func auto_register_prefabs(base_path: String = "res://assets/prefabs/walls") -> 
 				wall_prefabs[typed_key] = packed
 
 func _ensure_modular_library_generated() -> void:
-	if _modular_prefab_count() > 0:
-		return
-	
 	var gen_script: Script = load("res://scripts/tools/wall_piece_generator.gd") as Script
 	if gen_script == null:
 		push_warning("WallPieceGenerator script missing; modular wall generation skipped")

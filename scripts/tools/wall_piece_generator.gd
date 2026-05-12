@@ -99,12 +99,19 @@ func _generate_piece(piece: Dictionary, variant: String) -> void:
 
 	var local_name: String = String(piece.get("name", "piece"))
 	var tscn_path: String = "%s/%s_%s.tscn" % [OUTPUT_DIR, variant, local_name]
+	for child in root.get_children():
+		_set_owner_recursive(child, root)
 	var packed := PackedScene.new()
 	var pack_err: int = packed.pack(root)
 	if pack_err == OK:
 		ResourceSaver.save(packed, tscn_path)
 	_export_glb(root, "%s/%s_%s.glb" % [OUTPUT_DIR, variant, local_name])
 	root.free()
+
+func _set_owner_recursive(node: Node, owner: Node) -> void:
+	node.owner = owner
+	for child in node.get_children():
+		_set_owner_recursive(child, owner)
 
 func _build_opening_piece(root: Node3D, piece: Dictionary, variant: String) -> void:
 	var length_m: float = maxf(1.0, float(piece.get("length", 2.0)))
