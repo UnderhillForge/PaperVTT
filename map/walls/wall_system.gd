@@ -689,6 +689,8 @@ func _build_foundations(target_parent: Node3D, is_preview: bool) -> void:
 	root.name = "Foundations"
 	target_parent.add_child(root)
 	
+	# Temporarily use simple box fallback instead of modular pieces
+	# This simplifies debugging and lets us validate wall + window system first
 	for f in foundations:
 		if f is not Dictionary:
 			continue
@@ -700,110 +702,31 @@ func _build_foundations(target_parent: Node3D, is_preview: bool) -> void:
 		var top_y: float = float(d.get("top_y", 0.0))
 		var fh: float = maxf(0.05, float(d.get("height", foundation_height)))
 		var ov: float = maxf(0.0, float(d.get("overhang", foundation_overhang)))
-		var wall_type: String = String(d.get("wall_type", "stone"))
+		var width_x: float = maxf(0.1, (max_x - min_x) + (ov * 2.0))
+		var width_z: float = maxf(0.1, (max_z - min_z) + (ov * 2.0))
+		var center_x: float = (min_x + max_x) * 0.5
+		var center_z: float = (min_z + max_z) * 0.5
 		var top_overlap: float = clampf(foundation_top_overlap, 0.0, 0.15)
-		
-		# Apply overhang to bounds
-		var padded_min_x: float = min_x - ov
-		var padded_max_x: float = max_x + ov
-		var padded_min_z: float = min_z - ov
-		var padded_max_z: float = max_z + ov
-		
-		# Four sides: [start_pos, end_pos, direction_name]
-		var sides: Array[Array] = [
-			[Vector3(padded_min_x, 0.0, padded_min_z), Vector3(padded_max_x, 0.0, padded_min_z), "south"],
-			[Vector3(padded_max_x, 0.0, padded_min_z), Vector3(padded_max_x, 0.0, padded_max_z), "east"],
-			[Vector3(padded_max_x, 0.0, padded_max_z), Vector3(padded_min_x, 0.0, padded_max_z), "north"],
-			[Vector3(padded_min_x, 0.0, padded_max_z), Vector3(padded_min_x, 0.0, padded_min_z), "west"]
-		]
-		
-		# Build foundation pieces for each side
-		for side in sides:
-			var start_pos: Vector3 = side[0] as Vector3
-			var end_pos: Vector3 = side[1] as Vector3
-			var side_name: String = side[2] as String
-			var delta: Vector3 = end_pos - start_pos
-			var length: float = delta.length()
-			if length < 0.1:
-				continue
-			
-			var direction: Vector3 = delta.normalized()
-			var yaw: float = atan2(direction.z, direction.x)
-			
-			# Decompose length into 8m + 4m pieces
-			var piece_plan: Array[Dictionary] = _make_piece_plan(length, false, false, true, true, true)
-			
-			var current_pos: Vector3 = start_pos
-			for piece_info in piece_plan:
-				if piece_info is not Dictionary:
-					continue
-				var piece_key: String = String(piece_info.get("key", ""))
-				var piece_length: float = float(piece_info.get("len", 4.0))
-				
-				if piece_key.contains("straight"):
-					# Extract size from key (e.g., "straight_4m" -> "4m")
-					var size_match: String = "4m"  # default
-					if piece_key.contains("_8m"):
-						size_match = "8m"
-					elif piece_key.contains("_4m"):
-						size_match = "4m"
-					elif piece_key.contains("_2m"):
-						size_match = "2m"
-					elif piece_key.contains("_1m"):
-						size_match = "1m"
-					var key: String = "foundation_straight_%s" % size_match
-					
-					# Try to load modular prefab (flat structure: variant_piecekey.tscn)
-					var prefab_path: String = modular_piece_base_path.path_join("%s_%s.tscn" % [wall_type, key])
-					var prefab: PackedScene = load(prefab_path)
-					
-					if prefab:
-						var inst: Node3D = prefab.instantiate() as Node3D
-						if inst:
-							root.add_child(inst)
-							inst.global_position = current_pos + direction * (piece_length * 0.5)
-							inst.global_position.y = top_y - (fh * 0.5) + top_overlap
-							inst.rotation.y = yaw
-					else:
-						# Fallback: create simple box for this segment
-						var mesh_instance := MeshInstance3D.new()
-						var box := BoxMesh.new()
-						box.size = Vector3(piece_length, fh, default_wall_thickness)
-						mesh_instance.mesh = box
-						mesh_instance.material_override = _get_foundation_material(is_preview, wall_type, piece_length, default_wall_thickness)
-						root.add_child(mesh_instance)
-						var pos: Vector3 = current_pos + direction * (piece_length * 0.5)
-						pos.y = top_y - (fh * 0.5) + top_overlap
-						mesh_instance.global_position = pos
-						mesh_instance.rotation.y = yaw
-				
-				current_pos += direction * piece_length
-		
-		# Place corner pieces at the four corners
-		var corners: Array[Vector3] = [
-			Vector3(padded_min_x, 0.0, padded_min_z),
-			Vector3(padded_max_x, 0.0, padded_min_z),
-			Vector3(padded_max_x, 0.0, padded_max_z),
-			Vector3(padded_min_x, 0.0, padded_max_z)
-		]
-		var corner_rotations: Array[float] = [0.0, PI * 0.5, PI, PI * 1.5]
-		var corner_names: Array[String] = ["foundation_corner_outer", "foundation_corner_outer", "foundation_corner_outer", "foundation_corner_outer"]
-		
-		for corner_idx in range(corners.size()):
-			var corner_pos: Vector3 = corners[corner_idx]
-			var corner_rot: float = corner_rotations[corner_idx]
-			var corner_key: String = corner_names[corner_idx]
-			
-			var prefab_path: String = modular_piece_base_path.path_join("%s_%s.tscn" % [wall_type, corner_key])
-			var prefab: PackedScene = load(prefab_path)
-			
-			if prefab:
-				var inst: Node3D = prefab.instantiate() as Node3D
-				if inst:
-					root.add_child(inst)
-					inst.global_position = corner_pos
-					inst.global_position.y = top_y - (fh * 0.5) + top_overlap
-					inst.rotation.y = corner_rot
+		var center_y: float = top_y - (fh * 0.5) + top_overlap
+
+		var mesh_instance := MeshInstance3D.new()
+		var box := BoxMesh.new()
+		box.size = Vector3(width_x, fh, width_z)
+		mesh_instance.mesh = box
+		mesh_instance.material_override = _get_foundation_material(is_preview, String(d.get("wall_type", "stone")), width_x, width_z)
+		mesh_instance.global_position = Vector3(center_x, center_y, center_z)
+		root.add_child(mesh_instance)
+
+		if not is_preview:
+			var body := StaticBody3D.new()
+			body.name = "FoundationCollision"
+			var col := CollisionShape3D.new()
+			var shape := BoxShape3D.new()
+			shape.size = box.size
+			col.shape = shape
+			body.add_child(col)
+			body.global_position = mesh_instance.global_position
+			root.add_child(body)
 
 func _build_segment(target_parent: Node3D, source_segments: Array, idx: int, is_preview: bool, highlight_indices: Array[int]) -> void:
 	if idx < 0 or idx >= source_segments.size():
