@@ -22,6 +22,7 @@ const HEIGHT_NORMALIZE_EPSILON: float = 0.01
 @export var hand_drawn_jitter_degrees: float = 2.0
 @export var hand_drawn_jitter_offset: float = 0.045
 @export var wall_material: Material
+@export var modular_piece_base_path: String = "res://assets/prefabs/walls/modular"
 @export var tudor_texture_dir: String = DEFAULT_TUDOR_TEXTURE_DIR
 @export var tudor_texture_paths: Array[String] = []
 @export var tudor_window_texture_dir: String = DEFAULT_TUDOR_WINDOW_TEXTURE_DIR
@@ -57,8 +58,8 @@ func _ready() -> void:
 	_load_tudor_window_textures()
 	_ensure_wall_material()
 	_ensure_openings_root()
-	if wall_prefabs.is_empty():
-		auto_register_prefabs()
+	_ensure_modular_library_generated()
+	auto_register_prefabs()
 
 func rebuild_all() -> void:
 	normalize_connected_heights()
@@ -117,6 +118,9 @@ func undo_last_segment() -> bool:
 
 func auto_register_prefabs(base_path: String = "res://assets/prefabs/walls") -> void:
 	_prefab_cache.clear()
+	var modular_abs: String = ProjectSettings.globalize_path(modular_piece_base_path)
+	if DirAccess.dir_exists_absolute(modular_abs):
+		base_path = modular_piece_base_path
 	if not DirAccess.dir_exists_absolute(ProjectSettings.globalize_path(base_path)):
 		return
 	var paths: Array[String] = []
@@ -135,6 +139,43 @@ func auto_register_prefabs(base_path: String = "res://assets/prefabs/walls") -> 
 			var typed_key: String = "%s_%s" % [wall_type, key]
 			if not wall_prefabs.has(typed_key):
 				wall_prefabs[typed_key] = packed
+
+func _ensure_modular_library_generated() -> void:
+	if _modular_prefab_count() > 0:
+		return
+	var gen_script: Script = load("res://scripts/tools/wall_piece_generator.gd") as Script
+	if gen_script == null:
+		push_warning("WallPieceGenerator script missing; modular wall generation skipped")
+		return
+	var gen_obj: Object = gen_script.new()
+	if gen_obj == null:
+		return
+	if gen_obj.has_method("generate_library"):
+		gen_obj.call("generate_library")
+	if gen_obj is Node:
+		(gen_obj as Node).queue_free()
+
+func _modular_prefab_count() -> int:
+	var abs_dir: String = ProjectSettings.globalize_path(modular_piece_base_path)
+	var dir := DirAccess.open(modular_piece_base_path)
+	if dir == null:
+		if not DirAccess.dir_exists_absolute(abs_dir):
+			return 0
+		dir = DirAccess.open(modular_piece_base_path)
+		if dir == null:
+			return 0
+	var count: int = 0
+	dir.list_dir_begin()
+	while true:
+		var name: String = dir.get_next()
+		if name == "":
+			break
+		if dir.current_is_dir():
+			continue
+		if name.ends_with(".tscn"):
+			count += 1
+	dir.list_dir_end()
+	return count
 
 func get_connection_feedback(new_segment: WallSegment) -> Dictionary:
 	var highlight_indices: Array[int] = []
@@ -194,70 +235,23 @@ func insert_opening(segment_idx: int, opening_type: String, ratio: float, width:
 	var seg: WallSegment = segments[segment_idx]
 	if seg == null:
 		return false
-	
+
 	var ot: String = opening_type.strip_edges().to_lower()
 	var opening_height: float = maxf(0.2, height if height > 0.0 else (1.7 if ot == "window" else 2.2))
 	var opening_sill: float = maxf(0.0, sill_height if sill_height >= 0.0 else (0.75 if ot == "window" else 0.0))
-	
 	if ot == "window":
 		opening_height = minf(opening_height, maxf(0.35, seg.height - opening_sill - 0.1))
 		opening_sill = clampf(opening_sill, 0.0, maxf(0.0, seg.height - opening_height - 0.1))
-	
-	# NEW SPLIT-BASED ARCHITECTURE: Split segment into left/right/header pieces
-	# This prevents skewing and keeps the rectangle perfectly aligned
-	var total_length: float = seg.start.distance_to(seg.end)
-	if total_length < 0.1:
-		return false
-	
-	var center_dist: float = clampf(ratio * total_length, 0.0, total_length)
-	var gap_start: float = maxf(0.0, center_dist - (width * 0.5))
-	var gap_end: float = minf(total_length, center_dist + (width * 0.5))
-	var direction: Vector3 = (seg.end - seg.start).normalized()
-	
-	if gap_end - gap_start < 0.1:
-		return false
-	
-	var new_segments: Array[WallSegment] = []
-	for i in range(segments.size()):
-		if i != segment_idx:
-			new_segments.append(segments[i])
-			continue
-		# Create left piece (full height, from start to gap_start)
-		if gap_start > 0.05:
-			var left_seg := WallSegment.new()
-			left_seg.start = seg.start
-			left_seg.end = seg.start + (direction * gap_start)
-			left_seg.height = seg.height
-			left_seg.wall_type = seg.wall_type
-			new_segments.append(left_seg)
-		# Create header piece (reduced height, above the window opening)
-		if ot == "window" and opening_height < seg.height - opening_sill - 0.05:
-			var header_height: float = seg.height - opening_sill - opening_height
-			var header_seg := WallSegment.new()
-			header_seg.start = seg.start + (direction * gap_start)
-			header_seg.end = seg.start + (direction * gap_end)
-			header_seg.height = header_height
-			header_seg.wall_type = seg.wall_type
-			new_segments.append(header_seg)
-		# Create right piece (full height, from gap_end to end)
-		if gap_end < total_length - 0.05:
-			var right_seg := WallSegment.new()
-			right_seg.start = seg.start + (direction * gap_end)
-			right_seg.end = seg.end
-			right_seg.height = seg.height
-			right_seg.wall_type = seg.wall_type
-			new_segments.append(right_seg)
-	segments = new_segments
-	
-	# Calculate window position and instantiate prefab
-	var window_pos: Vector3 = seg.start + (direction * center_dist)
-	var yaw: float = atan2(direction.z, direction.x)
-	var window_center_y: float = _sample_segment_height(seg, window_pos) - (seg.height * 0.5) + opening_sill + (opening_height * 0.5)
-	
-	_instantiate_tudor_window(window_pos, window_center_y, yaw, width, opening_height, opening_sill, variant)
-	
-	# Rebuild everything with the new split segments
-	rebuild_all()
+
+	seg.openings.append({
+		"type": ot,
+		"position": clampf(ratio, 0.0, 1.0),
+		"width": clampf(width, 0.35, maxf(0.5, seg.get_length() - 0.2)),
+		"height": opening_height,
+		"sill_height": opening_sill,
+		"variant": variant.strip_edges()
+	})
+	_rebuild_geometry_only()
 	return true
 
 func add_opening(idx: int, opening_type: String, ratio: float, width: float = 1.2, height: float = -1.0, sill_height: float = -1.0, variant: String = "") -> bool:
@@ -691,6 +685,7 @@ func _build_foundations(target_parent: Node3D, is_preview: bool) -> void:
 	var root := Node3D.new()
 	root.name = "Foundations"
 	target_parent.add_child(root)
+	
 	for f in foundations:
 		if f is not Dictionary:
 			continue
@@ -702,31 +697,101 @@ func _build_foundations(target_parent: Node3D, is_preview: bool) -> void:
 		var top_y: float = float(d.get("top_y", 0.0))
 		var fh: float = maxf(0.05, float(d.get("height", foundation_height)))
 		var ov: float = maxf(0.0, float(d.get("overhang", foundation_overhang)))
-		var width_x: float = maxf(0.1, (max_x - min_x) + (ov * 2.0))
-		var width_z: float = maxf(0.1, (max_z - min_z) + (ov * 2.0))
-		var center_x: float = (min_x + max_x) * 0.5
-		var center_z: float = (min_z + max_z) * 0.5
+		var wall_type: String = String(d.get("wall_type", "stone"))
 		var top_overlap: float = clampf(foundation_top_overlap, 0.0, 0.15)
-		var center_y: float = top_y - (fh * 0.5) + top_overlap
-
-		var mesh_instance := MeshInstance3D.new()
-		var box := BoxMesh.new()
-		box.size = Vector3(width_x, fh, width_z)
-		mesh_instance.mesh = box
-		mesh_instance.material_override = _get_foundation_material(is_preview, String(d.get("wall_type", "stone")), width_x, width_z)
-		mesh_instance.global_position = Vector3(center_x, center_y, center_z)
-		root.add_child(mesh_instance)
-
-		if not is_preview:
-			var body := StaticBody3D.new()
-			body.name = "FoundationCollision"
-			var col := CollisionShape3D.new()
-			var shape := BoxShape3D.new()
-			shape.size = box.size
-			col.shape = shape
-			body.add_child(col)
-			body.global_position = mesh_instance.global_position
-			root.add_child(body)
+		
+		# Apply overhang to bounds
+		var padded_min_x: float = min_x - ov
+		var padded_max_x: float = max_x + ov
+		var padded_min_z: float = min_z - ov
+		var padded_max_z: float = max_z + ov
+		
+		# Four sides: [start_pos, end_pos, direction_name]
+		var sides: Array[Array] = [
+			[Vector3(padded_min_x, 0.0, padded_min_z), Vector3(padded_max_x, 0.0, padded_min_z), "south"],
+			[Vector3(padded_max_x, 0.0, padded_min_z), Vector3(padded_max_x, 0.0, padded_max_z), "east"],
+			[Vector3(padded_max_x, 0.0, padded_max_z), Vector3(padded_min_x, 0.0, padded_max_z), "north"],
+			[Vector3(padded_min_x, 0.0, padded_max_z), Vector3(padded_min_x, 0.0, padded_min_z), "west"]
+		]
+		
+		# Build foundation pieces for each side
+		for side in sides:
+			var start_pos: Vector3 = side[0] as Vector3
+			var end_pos: Vector3 = side[1] as Vector3
+			var side_name: String = side[2] as String
+			var delta: Vector3 = end_pos - start_pos
+			var length: float = delta.length()
+			if length < 0.1:
+				continue
+			
+			var direction: Vector3 = delta.normalized()
+			var yaw: float = atan2(direction.z, direction.x)
+			
+			# Decompose length into 8m + 4m pieces
+			var piece_plan: Array[Dictionary] = _make_piece_plan(length, true, true, false, false)
+			
+			var current_pos: Vector3 = start_pos
+			for piece_info in piece_plan:
+				if piece_info is not Dictionary:
+					continue
+				var piece_type: String = String(piece_info.get("type", ""))
+				var piece_length: float = float(piece_info.get("length", 4.0))
+				
+				if piece_type == "straight":
+					var size: String = String(piece_info.get("size", "4m"))
+					var key: String = "foundation_straight_%s" % size
+					
+					# Try to load modular prefab
+					var prefab_path: String = modular_piece_base_path.path_join(wall_type).path_join("%s.tscn" % key)
+					var prefab: PackedScene = load(prefab_path)
+					
+					if prefab:
+						var inst: Node3D = prefab.instantiate() as Node3D
+						if inst:
+							inst.global_position = current_pos + direction * (piece_length * 0.5)
+							inst.global_position.y = top_y - (fh * 0.5) + top_overlap
+							inst.rotation.y = yaw
+							root.add_child(inst)
+					else:
+						# Fallback: create simple box for this segment
+						var mesh_instance := MeshInstance3D.new()
+						var box := BoxMesh.new()
+						box.size = Vector3(piece_length, fh, default_wall_thickness)
+						mesh_instance.mesh = box
+						mesh_instance.material_override = _get_foundation_material(is_preview, wall_type, piece_length, default_wall_thickness)
+						var pos: Vector3 = current_pos + direction * (piece_length * 0.5)
+						pos.y = top_y - (fh * 0.5) + top_overlap
+						mesh_instance.global_position = pos
+						mesh_instance.rotation.y = yaw
+						root.add_child(mesh_instance)
+				
+				current_pos += direction * piece_length
+		
+		# Place corner pieces at the four corners
+		var corners: Array[Vector3] = [
+			Vector3(padded_min_x, 0.0, padded_min_z),
+			Vector3(padded_max_x, 0.0, padded_min_z),
+			Vector3(padded_max_x, 0.0, padded_max_z),
+			Vector3(padded_min_x, 0.0, padded_max_z)
+		]
+		var corner_rotations: Array[float] = [0.0, PI * 0.5, PI, PI * 1.5]
+		var corner_names: Array[String] = ["foundation_corner_outer_90", "foundation_corner_outer_90", "foundation_corner_outer_90", "foundation_corner_outer_90"]
+		
+		for corner_idx in range(corners.size()):
+			var corner_pos: Vector3 = corners[corner_idx]
+			var corner_rot: float = corner_rotations[corner_idx]
+			var corner_key: String = corner_names[corner_idx]
+			
+			var prefab_path: String = modular_piece_base_path.path_join(wall_type).path_join("%s.tscn" % corner_key)
+			var prefab: PackedScene = load(prefab_path)
+			
+			if prefab:
+				var inst: Node3D = prefab.instantiate() as Node3D
+				if inst:
+					inst.global_position = corner_pos
+					inst.global_position.y = top_y - (fh * 0.5) + top_overlap
+					inst.rotation.y = corner_rot
+					root.add_child(inst)
 
 func _build_segment(target_parent: Node3D, source_segments: Array, idx: int, is_preview: bool, highlight_indices: Array[int]) -> void:
 	if idx < 0 or idx >= source_segments.size():
@@ -774,8 +839,10 @@ func _build_segment(target_parent: Node3D, source_segments: Array, idx: int, is_
 	if is_preview and idx == source_segments.size() - 1:
 		piece_tint.a = minf(0.58, piece_tint.a + 0.12)
 
-	var straight_key_2m: String = "%s_straight_2m" % seg.wall_type
-	var straight_key_4m: String = "%s_straight_4m" % seg.wall_type
+	var straight_key_1m: String = "%s_wall_straight_1m" % seg.wall_type
+	var straight_key_2m: String = "%s_wall_straight_2m" % seg.wall_type
+	var straight_key_4m: String = "%s_wall_straight_4m" % seg.wall_type
+	var straight_key_8m: String = "%s_wall_straight_8m" % seg.wall_type
 	var straight_key_any: String = "%s_straight" % seg.wall_type
 	var opening_instances: Array[Dictionary] = []
 	var window_instances: Array[Dictionary] = []
@@ -794,8 +861,10 @@ func _build_segment(target_parent: Node3D, source_segments: Array, idx: int, is_
 			interval_end,
 			yaw,
 			seg,
+			straight_key_1m,
 			straight_key_2m,
 			straight_key_4m,
+			straight_key_8m,
 			straight_key_any,
 			is_preview,
 			piece_tint,
@@ -819,8 +888,10 @@ func _place_straight_pieces(
 	segment_end: Vector3,
 	yaw: float,
 	seg: WallSegment,
+	straight_key_1m: String,
 	straight_key_2m: String,
 	straight_key_4m: String,
+	straight_key_8m: String,
 	straight_key_any: String,
 	is_preview: bool,
 	tint: Color,
@@ -831,7 +902,14 @@ func _place_straight_pieces(
 	if run < 0.05:
 		return
 	var direction: Vector3 = delta.normalized()
-	var plan: Array[Dictionary] = _make_piece_plan(run, _has_prefab(straight_key_2m), _has_prefab(straight_key_4m), _has_prefab(straight_key_any))
+	var plan: Array[Dictionary] = _make_piece_plan(
+		run,
+		_has_prefab(straight_key_1m),
+		_has_prefab(straight_key_2m),
+		_has_prefab(straight_key_4m),
+		_has_prefab(straight_key_8m),
+		_has_prefab(straight_key_any)
+	)
 	var cursor: float = 0.0
 	for piece in plan:
 		var piece_len: float = float(piece.get("len", 1.0))
@@ -839,8 +917,12 @@ func _place_straight_pieces(
 		var resolved_key: String = piece_key
 		if piece_key == "straight_4m":
 			resolved_key = straight_key_4m
+		elif piece_key == "straight_8m":
+			resolved_key = straight_key_8m
 		elif piece_key == "straight_2m":
 			resolved_key = straight_key_2m
+		elif piece_key == "straight_1m":
+			resolved_key = straight_key_1m
 		elif piece_key == "straight_any":
 			resolved_key = straight_key_any
 		elif piece_key == "fallback":
@@ -863,32 +945,49 @@ func _place_straight_pieces(
 			_apply_window_cutout(node, seg, piece_len, cursor, window_opening, is_preview)
 		cursor += piece_len
 
-func _make_piece_plan(length: float, has_2m: bool, has_4m: bool, has_any: bool) -> Array[Dictionary]:
+func _make_piece_plan(length: float, has_1m: bool, has_2m: bool, has_4m: bool, has_8m: bool, has_any: bool) -> Array[Dictionary]:
 	var plan: Array[Dictionary] = []
+	var best_n8: int = 0
 	var best_n4: int = 0
 	var best_n2: int = 0
+	var best_n1: int = 0
 	var best_error: float = 1e20
-
-	if has_2m or has_4m:
-		var max_n4: int = int(floor(length / 4.0)) + 1
-		for n4 in range(max_n4 + 1):
-			var rem_after_4: float = length - (float(n4) * 4.0)
-			if rem_after_4 < -0.01:
+	if has_1m or has_2m or has_4m or has_8m:
+		var max_n8: int = int(floor(length / 8.0)) + 1
+		for n8 in range(max_n8 + 1):
+			var rem8: float = length - (float(n8) * 8.0)
+			if rem8 < -0.01:
 				continue
-			var n2: int = 0
-			if has_2m:
-				n2 = maxi(0, int(round(rem_after_4 / 2.0)))
-			var built: float = (float(n4) * 4.0) + (float(n2) * 2.0)
-			var err: float = absf(length - built)
-			if err < best_error:
-				best_error = err
-				best_n4 = n4 if has_4m else 0
-				best_n2 = n2 if has_2m else 0
+			var max_n4: int = int(floor(rem8 / 4.0)) + 1
+			for n4 in range(max_n4 + 1):
+				var rem4: float = rem8 - (float(n4) * 4.0)
+				if rem4 < -0.01:
+					continue
+				var max_n2: int = int(floor(rem4 / 2.0)) + 1
+				for n2 in range(max_n2 + 1):
+					var rem2: float = rem4 - (float(n2) * 2.0)
+					if rem2 < -0.01:
+						continue
+					var n1: int = 0
+					if has_1m:
+						n1 = maxi(0, int(round(rem2 / 1.0)))
+					var built: float = float(n8) * 8.0 + float(n4) * 4.0 + float(n2) * 2.0 + float(n1)
+					var err: float = absf(length - built)
+					if err < best_error:
+						best_error = err
+						best_n8 = n8 if has_8m else 0
+						best_n4 = n4 if has_4m else 0
+						best_n2 = n2 if has_2m else 0
+						best_n1 = n1 if has_1m else 0
 
+	for i in range(best_n8):
+		plan.append({"len": 8.0, "key": "straight_8m"})
 	for i in range(best_n4):
 		plan.append({"len": 4.0, "key": "straight_4m"})
 	for i in range(best_n2):
 		plan.append({"len": 2.0, "key": "straight_2m"})
+	for i in range(best_n1):
+		plan.append({"len": 1.0, "key": "straight_1m"})
 
 	var covered: float = 0.0
 	for p in plan:
@@ -1033,22 +1132,22 @@ func _place_opening_piece(
 	var opening_base_y: float = _sample_segment_height(seg, opening_pos)
 	var wall_height: float = maxf(0.2, seg.height if seg.height > 0.0 else default_wall_height)
 	
-	# For windows: instantiate the real prefab in the gap
-	if opening_type == "window":
-		_place_window_in_gap(parent, seg, opening_pos, opening_base_y, direction, yaw, opening_width, opening_height, sill_height, wall_height, opening, is_preview, tint)
-		return
-	
-	# For doors: keep existing behavior (or use prefab if available)
-	var key_exact: String = "%s_%s" % [seg.wall_type, opening_type]
-	var key_door: String = "%s_door" % seg.wall_type
-	var key: String = key_exact if _has_prefab(key_exact) else key_door
-	
+	var snapped_len: int = 4 if opening_width >= 3.0 else 2
+	var key: String = "%s_wall_%s_%dm" % [seg.wall_type, opening_type, snapped_len]
+	if not _has_prefab(key):
+		key = "%s_wall_%s_4m" % [seg.wall_type, opening_type]
+	if not _has_prefab(key):
+		key = "%s_wall_%s_2m" % [seg.wall_type, opening_type]
 	if not _has_prefab(key):
 		return
-	
-	var node: Node3D = _instantiate_prefab_or_box(parent, seg, key, opening_width, is_preview, tint)
+
+	var piece_len: float = 4.0 if key.ends_with("_4m") else 2.0
+	var node: Node3D = _instantiate_prefab_or_box(parent, seg, key, piece_len, is_preview, tint, opening)
 	node.global_position = Vector3(opening_pos.x, opening_base_y, opening_pos.z)
 	node.global_rotation = Vector3(0.0, yaw, 0.0)
+
+	if opening_type == "window":
+		_place_window_in_gap(parent, seg, opening_pos, opening_base_y, direction, yaw, opening_width, opening_height, sill_height, wall_height, opening, is_preview, tint)
 
 func _place_window_in_gap(
 	parent: Node3D,
@@ -1258,9 +1357,7 @@ func _instantiate_tudor_window(window_pos: Vector3, center_y: float, yaw: float,
 	_apply_window_materials_to_prefab(window_node)
 
 func _place_cap(parent: Node3D, seg: WallSegment, point: Vector3, yaw: float, is_start: bool, is_preview: bool, tint: Color) -> void:
-	var typed: String = "%s_%s" % [seg.wall_type, "start_cap" if is_start else "end_cap"]
-	var generic: String = "%s_cap" % seg.wall_type
-	var key: String = typed if _has_prefab(typed) else generic
+	var key: String = "%s_wall_end_cap" % seg.wall_type
 	if not _has_prefab(key):
 		return
 	var node: Node3D = _instantiate_prefab_or_box(parent, seg, key, 0.6, is_preview, tint)
@@ -1286,27 +1383,16 @@ func _build_junctions(target_parent: Node3D, source_segments: Array, is_preview:
 func _place_junction_piece(parent: Node3D, wall_type: String, position: Vector3, junction_type: String, cluster: Dictionary, is_preview: bool, tint: Color) -> void:
 	var key: String = ""
 	var is_tudor_cardinal: bool = false
-	if wall_type == "tudor":
-		# For Tudor L-corners, use the cardinal corner (single centered beam, no rotation)
-		if junction_type == "l_corner" and _has_prefab("tudor_corner_cardinal"):
-			key = "tudor_corner_cardinal"
-			is_tudor_cardinal = true
-		else:
-			# For T/X junctions or if cardinal not available, fallback to outer/inner
-			if _has_prefab("tudor_corner_outer"):
-				key = "tudor_corner_outer"
-			elif _has_prefab("tudor_corner_inner"):
-				key = "tudor_corner_inner"
 	if key == "":
 		match junction_type:
 			"l_corner":
-				var inner: String = "%s_corner_inner" % wall_type
-				var outer: String = "%s_corner_outer" % wall_type
+				var inner: String = "%s_corner_inner_90" % wall_type
+				var outer: String = "%s_corner_outer_90" % wall_type
 				key = inner if _has_prefab(inner) else outer
 			"t_junction":
-				key = "%s_t_junction" % wall_type
+				key = "%s_junction_t" % wall_type
 			"x_junction":
-				key = "%s_x_junction" % wall_type
+				key = "%s_junction_x" % wall_type
 
 	if key == "":
 		return

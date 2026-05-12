@@ -146,7 +146,7 @@ func _walk_prefabs(path: String) -> void:
 		var full := "%s/%s" % [path, entry_name]
 		if dir.current_is_dir():
 			_walk_prefabs(full)
-		elif entry_name.ends_with(".tscn"):
+		elif entry_name.ends_with(".tscn") or entry_name.ends_with(".glb") or entry_name.ends_with(".blend"):
 			_prefab_paths.append(full)
 	dir.list_dir_end()
 
@@ -421,7 +421,7 @@ func _transform_aabb(aabb: AABB, xform: Transform3D) -> AABB:
 	return result
 
 func _default_display_name(path: String) -> String:
-	return path.trim_prefix("res://assets/prefabs/").trim_suffix(".tscn")
+	return path.trim_prefix("res://assets/prefabs/").trim_suffix(".tscn").trim_suffix(".glb").trim_suffix(".blend")
 
 func _derive_category_from_path(path: String) -> String:
 	var lower: String = path.to_lower()
@@ -569,7 +569,7 @@ func _placeholder_texture() -> Texture2D:
 	return ImageTexture.create_from_image(img)
 
 func _preview_cache_path(prefab_path: String) -> String:
-	var rel: String = prefab_path.trim_prefix("res://assets/prefabs/").trim_suffix(".tscn")
+	var rel: String = prefab_path.trim_prefix("res://assets/prefabs/").trim_suffix(".tscn").trim_suffix(".glb").trim_suffix(".blend")
 	return "%s/%s.png" % [PREVIEW_ROOT_PATH, rel]
 
 func _ensure_preview_folder() -> void:

@@ -673,7 +673,7 @@ func _on_context_menu_id_pressed(id: int) -> void:
 			var window_height: float = _snap_opening_height(1.7) if _opening_height_snap_enabled else 1.7
 			var window_sill: float = _snap_opening_sill_height(0.75)
 			var variant: String = ""
-			var window_ratio: float = 0.5
+			var window_ratio: float = _context_ratio
 			if _wall_system != null and _wall_system.has_method("_pick_window_variant"):
 				variant = String(_wall_system.call("_pick_window_variant", _wall_system.get_segment(_context_segment_idx), window_ratio))
 			if _wall_system.has_method("insert_opening"):

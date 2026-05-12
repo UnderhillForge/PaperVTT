@@ -63,6 +63,7 @@ const PREFAB_VISIBILITY_END_FAR_EDITOR: float = 72.0
 const STARTER_TREE_CLUSTER_COUNT: int = 10
 const AUTO_DEBUG_SCREENSHOTS: bool = false
 const PERF_OVERLAY_INTERVAL_SEC: float = 0.25
+const DISABLE_CUSTOM_POSTFX_DEFAULT: bool = true
 const DEFAULT_DUNGEONDRAFT_MAP_PATH: String = "res://dd_testing/test1.dungeondraft_map"
 const IMPORT_WALL_TEXTURE_PATH: String = "res://assets/textures/materials/kenney_nature-kit/cliff_block_stone_NW.png"
 const IMPORT_FLOOR_TEXTURE_PATH: String = "res://assets/textures/materials/kenney_nature-kit/stone_smallFlatC.png"
@@ -129,6 +130,8 @@ func _ready() -> void:
 		call_deferred("_capture_full_editor_screenshot", "startup")
 	if not _load_map_from_path(_current_map_path):
 		_create_new_flat_map()
+	if DISABLE_CUSTOM_POSTFX_DEFAULT:
+		_set_post_process_disabled(true)
 
 func _exit_tree() -> void:
 	_runtime_terrain_editor.end_stroke()

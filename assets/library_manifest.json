@@ -7440,6 +7440,54 @@
 			"tags": [],
 			"uniform_scale": true
 		},
+		"res://assets/prefabs/test/ThePaintedWench_02Upload.blend": {
+			"category": "props",
+			"name": "test/ThePaintedWench_02Upload",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.4,
+				1.4,
+				1.4
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/test/house65.blend": {
+			"category": "props",
+			"name": "test/house65",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/test/house65.glb": {
+			"category": "props",
+			"name": "test/house65",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
 		"res://assets/prefabs/walls/arches/wall_arched.tscn": {
 			"category": "walls",
 			"name": "walls/arches/wall_arched",
