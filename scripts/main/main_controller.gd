@@ -26,6 +26,12 @@ var _grid_snap: bool = true
 var _is_tool_dragging: bool = false
 var _terrain_node: Node = null
 var _grass_system: Node3D = null
+var _scatter_system: Node3D = null
+var _scatter_density: float = 1.2
+var _scatter_scale_min: float = 0.85
+var _scatter_scale_max: float = 1.35
+var _scatter_rotation_randomness: float = 180.0
+var _scatter_tilt: float = 8.0
 var _stamp_rotation_deg: float = 0.0
 var _stamp_preview: Node3D = null
 var _brush_preview: MeshInstance3D = null
@@ -52,6 +58,7 @@ const ASSET_BROWSER_SCENE: PackedScene = preload("res://scenes/ui/AssetBrowser.t
 const CUSTOM_TERRAIN_SCENE: PackedScene = preload("res://scenes/terrain/CustomHeightmapTerrain.tscn")
 const DUNGEONDRAFT_IMPORTER_SCRIPT: Script = preload("res://scripts/import/dungeondraft_importer.gd")
 const GRASS_SYSTEM_SCRIPT: Script = preload("res://scripts/terrain/grass_system.gd")
+const SCATTER_SYSTEM_SCRIPT: Script = preload("res://scripts/scatter/scatter_system.gd")
 const PLAYER_CHARACTER_SCENE: PackedScene = preload("res://scenes/characters/PlayerCharacter.tscn")
 const WALL_TOOL_SCRIPT: Script = preload("res://scripts/tools/wall_tool.gd")
 const USER_SCREENSHOT_PATH: String = "user://full_editor_screenshot.png"
@@ -124,6 +131,13 @@ func _ready() -> void:
 	_grass_system.set_script(GRASS_SYSTEM_SCRIPT)
 	terrain_placeholder.add_child(_grass_system)
 	_grass_system.call("initialize", _terrain_node, camera, 256.0)
+
+	_scatter_system = Node3D.new()
+	_scatter_system.name = "ScatterSystem"
+	_scatter_system.set_script(SCATTER_SYSTEM_SCRIPT)
+	add_child(_scatter_system)
+	if _scatter_system.has_method("initialize"):
+		_scatter_system.call("initialize", _terrain_node, 256.0)
 	_ensure_character_setup()
 
 	if AUTO_DEBUG_SCREENSHOTS:
@@ -218,6 +232,10 @@ func _unhandled_input(event: InputEvent) -> void:
 				_switch_tool("wall")
 				get_viewport().set_input_as_handled()
 				return
+			KEY_0:
+				_switch_tool("scatterpaint")
+				get_viewport().set_input_as_handled()
+				return
 
 	if get_viewport().gui_get_hovered_control() != null:
 		return
@@ -247,7 +265,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			_is_stamp_dragging = false
 			if _is_tool_dragging:
 				_is_tool_dragging = false
-				if not _current_tool.begins_with("grass"):
+				if not _current_tool.begins_with("grass") and not _current_tool.begins_with("scatter"):
 					_runtime_terrain_editor.end_stroke()
 
 	if event is InputEventMouseMotion and _is_tool_dragging:
@@ -360,6 +378,16 @@ func _on_tool_setting_changed(setting_name: String, value: Variant) -> void:
 		"grass_height":
 			if _grass_system != null and _grass_system.has_method("set_grass_height"):
 				_grass_system.call("set_grass_height", float(value))
+		"scatter_density":
+			_scatter_density = float(value)
+		"scatter_scale_min":
+			_scatter_scale_min = float(value)
+		"scatter_scale_max":
+			_scatter_scale_max = float(value)
+		"scatter_rotation_randomness":
+			_scatter_rotation_randomness = float(value)
+		"scatter_tilt":
+			_scatter_tilt = float(value)
 		"wall_height":
 			if _wall_tool != null and _wall_tool.has_method("set_segment_height"):
 				_wall_tool.call("set_segment_height", float(value))
@@ -384,6 +412,8 @@ func _on_tool_setting_changed(setting_name: String, value: Variant) -> void:
 
 func _on_prefab_selected(prefab_path: String) -> void:
 	_selected_prefab = prefab_path
+	if _scatter_system != null and _scatter_system.has_method("set_active_prefab"):
+		_scatter_system.call("set_active_prefab", prefab_path)
 	_rebuild_stamp_preview()
 	_update_active_tool_feedback()
 	_set_status("Selected prefab: %s" % prefab_path.get_file())
@@ -406,6 +436,8 @@ func _create_new_flat_map(include_seed_content: bool = true) -> void:
 	var wall_system: Node = get_node_or_null("WallSystem")
 	if wall_system != null and wall_system.has_method("clear_segments"):
 		wall_system.call("clear_segments")
+	if _scatter_system != null and _scatter_system.has_method("clear_all"):
+		_scatter_system.call("clear_all")
 	_stamp_rotation_deg = 0.0
 	_stroke_interval_accum = 0.0
 	_stamp_drag_interval_accum = 0.0
@@ -1066,6 +1098,8 @@ func _update_active_tool_feedback() -> void:
 			viewport_hint.text = "Mode: %s | Hold LMB to sculpt | Brush %.1f | Strength %.2f | Esc clears tool" % [_format_tool_name(_current_tool), _brush_size, _brush_strength]
 		"grasspaint", "grasserase":
 			viewport_hint.text = "Mode: %s | Hold LMB to paint | Radius %.1f | Density %.2f | Esc clears tool" % [_format_tool_name(_current_tool), _brush_size, _brush_strength]
+		"scatterpaint", "scattererase":
+			viewport_hint.text = "Mode: %s | Hold LMB to spray/erase | Radius %.1f | Density %.2f | Scale %.2f-%.2f" % [_format_tool_name(_current_tool), _brush_size, _scatter_density, _scatter_scale_min, _scatter_scale_max]
 		_:
 			viewport_hint.text = "Mode: %s" % _format_tool_name(_current_tool)
 
@@ -1075,6 +1109,10 @@ func _format_tool_name(tool_name: String) -> String:
 			return "Grass Paint"
 		"grasserase":
 			return "Grass Erase"
+		"scatterpaint":
+			return "Scatter Paint"
+		"scattererase":
+			return "Scatter Erase"
 		"wall":
 			return "Smart Wall"
 		"select":
@@ -1131,6 +1169,10 @@ func _begin_tool_stroke() -> void:
 		return
 	_is_tool_dragging = true
 	_stroke_interval_accum = 0.0
+	if _current_tool.begins_with("scatter"):
+		if _scatter_system != null and _scatter_system.has_method("apply_brush"):
+			_scatter_system.call("apply_brush", _current_tool, hit as Vector3, _brush_size, _brush_strength, _scatter_density, _scatter_scale_min, _scatter_scale_max, _scatter_rotation_randomness, _scatter_tilt)
+		return
 	if _current_tool.begins_with("grass"):
 		if _grass_system != null and _grass_system.has_method("apply_brush"):
 			_grass_system.call("apply_brush", _current_tool, hit as Vector3, _brush_size, _brush_strength)
@@ -1141,6 +1183,10 @@ func _begin_tool_stroke() -> void:
 func _continue_tool_stroke() -> void:
 	var hit: Variant = _get_mouse_world_position()
 	if hit == null:
+		return
+	if _current_tool.begins_with("scatter"):
+		if _scatter_system != null and _scatter_system.has_method("apply_brush"):
+			_scatter_system.call("apply_brush", _current_tool, hit as Vector3, _brush_size, _brush_strength, _scatter_density, _scatter_scale_min, _scatter_scale_max, _scatter_rotation_randomness, _scatter_tilt)
 		return
 	if _current_tool.begins_with("grass"):
 		if _grass_system != null and _grass_system.has_method("apply_brush"):
@@ -1257,7 +1303,7 @@ func _update_stamp_preview(world_pos: Vector3) -> void:
 func _update_brush_preview(world_pos: Vector3) -> void:
 	if _brush_preview == null:
 		return
-	if _current_tool == "stamp" or _current_tool == "wall":
+	if _current_tool == "stamp" or _current_tool == "wall" or _current_tool.begins_with("scatter"):
 		_brush_preview.visible = false
 		return
 	_brush_preview.visible = true
@@ -1603,12 +1649,15 @@ func _save_map_to_path(path: String) -> bool:
 		"version": 2,
 		"saved_at": Time.get_datetime_string_from_system(true, true),
 		"walls": {},
+		"scatter": {},
 		"stamps": [],
 		"terrain": {}
 	}
 	var wall_system: Node = _get_or_create_wall_system()
 	if wall_system != null and wall_system.has_method("save_data"):
 		data["walls"] = wall_system.call("save_data")
+	if _scatter_system != null and _scatter_system.has_method("serialize_state"):
+		data["scatter"] = _scatter_system.call("serialize_state")
 	data["stamps"] = _serialize_stamp_instances()
 	data["terrain"] = _serialize_terrain_data()
 	var file := FileAccess.open(path, FileAccess.WRITE)
@@ -1635,11 +1684,14 @@ func _load_map_from_path(path: String) -> bool:
 	_create_new_flat_map(false)
 	var data: Dictionary = parsed
 	var wall_data: Dictionary = data.get("walls", {})
+	var scatter_data: Dictionary = data.get("scatter", {})
 	var stamp_data: Array = data.get("stamps", [])
 	var terrain_data: Dictionary = data.get("terrain", {})
 	var wall_system: Node = _get_or_create_wall_system()
 	if wall_system != null and wall_system.has_method("load_data"):
 		wall_system.call("load_data", wall_data)
+	if _scatter_system != null and _scatter_system.has_method("load_state"):
+		_scatter_system.call("load_state", scatter_data)
 	_deserialize_stamp_instances(stamp_data)
 	_deserialize_terrain_data(terrain_data)
 	_set_status("Loaded map: %s" % path)

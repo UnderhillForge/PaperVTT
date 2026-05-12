@@ -37,7 +37,7 @@ var _collapsed: bool = false
 
 var _active_category: String = "all"
 var _category_buttons: Dictionary = {}
-var _categories: Array[String] = ["all", "walls", "floors", "furniture", "props", "nature", "characters", "dungeon"]
+var _categories: Array[String] = ["all", "walls", "floors", "furniture", "props", "nature", "characters", "dungeon", "scatter", "rocks", "foliage", "debris", "flowers", "mushrooms", "dirt"]
 var _selected_prefab: String = ""
 var _selected_property_prefab: String = ""
 
@@ -436,6 +436,20 @@ func _default_display_name(path: String) -> String:
 
 func _derive_category_from_path(path: String) -> String:
 	var lower: String = path.to_lower()
+	if lower.contains("/scatter/"):
+		if lower.contains("/rocks/"):
+			return "rocks"
+		if lower.contains("/foliage/"):
+			return "foliage"
+		if lower.contains("/debris/"):
+			return "debris"
+		if lower.contains("/flowers/"):
+			return "flowers"
+		if lower.contains("/mushrooms/"):
+			return "mushrooms"
+		if lower.contains("/dirt/"):
+			return "dirt"
+		return "scatter"
 	for category in _categories:
 		if category == "all":
 			continue

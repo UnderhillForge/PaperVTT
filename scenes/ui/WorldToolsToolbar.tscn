@@ -80,6 +80,19 @@ text = "Paint Grass"
 toggle_mode = true
 text = "Erase Grass"
 
+[node name="ScatterSectionLabel" type="Label" parent="Margin/Root/ToolButtons"]
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.65, 0.8, 0.95, 1)
+text = "- Scatter -"
+
+[node name="ScatterPaint" type="Button" parent="Margin/Root/ToolButtons" groups=["tool_button"]]
+toggle_mode = true
+text = "Paint Scatter"
+
+[node name="ScatterErase" type="Button" parent="Margin/Root/ToolButtons" groups=["tool_button"]]
+toggle_mode = true
+text = "Erase Scatter"
+
 [node name="Separator1" type="HSeparator" parent="Margin/Root"]
 
 [node name="BrushLabel" type="Label" parent="Margin/Root"]
@@ -218,6 +231,101 @@ min_value = 0.2
 max_value = 2.5
 step = 0.05
 value = 0.65
+
+[node name="ScatterSettingsLabel" type="Label" parent="Margin/Root"]
+theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(0.65, 0.8, 0.95, 1)
+text = "SCATTER SETTINGS"
+
+[node name="ScatterDensityRow" type="HBoxContainer" parent="Margin/Root"]
+
+[node name="ScatterDensityLabel" type="Label" parent="Margin/Root/ScatterDensityRow"]
+text = "Density / m²"
+
+[node name="ScatterDensityValue" type="Label" parent="Margin/Root/ScatterDensityRow"]
+unique_name_in_owner = true
+size_flags_horizontal = 10
+horizontal_alignment = 2
+text = "1.20"
+
+[node name="ScatterDensitySlider" type="HSlider" parent="Margin/Root"]
+unique_name_in_owner = true
+min_value = 0.1
+max_value = 8.0
+step = 0.1
+value = 1.2
+
+[node name="ScatterScaleMinRow" type="HBoxContainer" parent="Margin/Root"]
+
+[node name="ScatterScaleMinLabel" type="Label" parent="Margin/Root/ScatterScaleMinRow"]
+text = "Scale Min"
+
+[node name="ScatterScaleMinValue" type="Label" parent="Margin/Root/ScatterScaleMinRow"]
+unique_name_in_owner = true
+size_flags_horizontal = 10
+horizontal_alignment = 2
+text = "0.85"
+
+[node name="ScatterScaleMinSlider" type="HSlider" parent="Margin/Root"]
+unique_name_in_owner = true
+min_value = 0.1
+max_value = 3.0
+step = 0.05
+value = 0.85
+
+[node name="ScatterScaleMaxRow" type="HBoxContainer" parent="Margin/Root"]
+
+[node name="ScatterScaleMaxLabel" type="Label" parent="Margin/Root/ScatterScaleMaxRow"]
+text = "Scale Max"
+
+[node name="ScatterScaleMaxValue" type="Label" parent="Margin/Root/ScatterScaleMaxRow"]
+unique_name_in_owner = true
+size_flags_horizontal = 10
+horizontal_alignment = 2
+text = "1.35"
+
+[node name="ScatterScaleMaxSlider" type="HSlider" parent="Margin/Root"]
+unique_name_in_owner = true
+min_value = 0.1
+max_value = 3.0
+step = 0.05
+value = 1.35
+
+[node name="ScatterRotationRow" type="HBoxContainer" parent="Margin/Root"]
+
+[node name="ScatterRotationLabel" type="Label" parent="Margin/Root/ScatterRotationRow"]
+text = "Y Random"
+
+[node name="ScatterRotationValue" type="Label" parent="Margin/Root/ScatterRotationRow"]
+unique_name_in_owner = true
+size_flags_horizontal = 10
+horizontal_alignment = 2
+text = "180°"
+
+[node name="ScatterRotationSlider" type="HSlider" parent="Margin/Root"]
+unique_name_in_owner = true
+min_value = 0.0
+max_value = 360.0
+step = 1.0
+value = 180.0
+
+[node name="ScatterTiltRow" type="HBoxContainer" parent="Margin/Root"]
+
+[node name="ScatterTiltLabel" type="Label" parent="Margin/Root/ScatterTiltRow"]
+text = "Tilt"
+
+[node name="ScatterTiltValue" type="Label" parent="Margin/Root/ScatterTiltRow"]
+unique_name_in_owner = true
+size_flags_horizontal = 10
+horizontal_alignment = 2
+text = "8°"
+
+[node name="ScatterTiltSlider" type="HSlider" parent="Margin/Root"]
+unique_name_in_owner = true
+min_value = 0.0
+max_value = 45.0
+step = 1.0
+value = 8.0
 
 [node name="Separator3" type="HSeparator" parent="Margin/Root"]
 

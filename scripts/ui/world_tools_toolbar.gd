@@ -20,6 +20,16 @@ signal clear_requested()
 @onready var _grass_wind_value: Label = %GrassWindValue
 @onready var _grass_wind_dir_value: Label = %GrassWindDirValue
 @onready var _grass_height_value: Label = %GrassHeightValue
+@onready var _scatter_density_slider: HSlider = %ScatterDensitySlider
+@onready var _scatter_density_value: Label = %ScatterDensityValue
+@onready var _scatter_scale_min_slider: HSlider = %ScatterScaleMinSlider
+@onready var _scatter_scale_max_slider: HSlider = %ScatterScaleMaxSlider
+@onready var _scatter_scale_min_value: Label = %ScatterScaleMinValue
+@onready var _scatter_scale_max_value: Label = %ScatterScaleMaxValue
+@onready var _scatter_rotation_slider: HSlider = %ScatterRotationSlider
+@onready var _scatter_rotation_value: Label = %ScatterRotationValue
+@onready var _scatter_tilt_slider: HSlider = %ScatterTiltSlider
+@onready var _scatter_tilt_value: Label = %ScatterTiltValue
 @onready var _tool_mode_label: Label = %ToolModeLabel
 @onready var _clear_tool_button: Button = %ClearToolButton
 @onready var _wall_height_slider: HSlider = %WallHeightSlider
@@ -41,6 +51,12 @@ signal clear_requested()
 @onready var _grass_wind_row: HBoxContainer = $Margin/Root/GrassWindRow
 @onready var _grass_wind_dir_row: HBoxContainer = $Margin/Root/GrassWindDirRow
 @onready var _grass_height_row: HBoxContainer = $Margin/Root/GrassHeightRow
+@onready var _scatter_settings_label: Label = $Margin/Root/ScatterSettingsLabel
+@onready var _scatter_density_row: HBoxContainer = $Margin/Root/ScatterDensityRow
+@onready var _scatter_scale_min_row: HBoxContainer = $Margin/Root/ScatterScaleMinRow
+@onready var _scatter_scale_max_row: HBoxContainer = $Margin/Root/ScatterScaleMaxRow
+@onready var _scatter_rotation_row: HBoxContainer = $Margin/Root/ScatterRotationRow
+@onready var _scatter_tilt_row: HBoxContainer = $Margin/Root/ScatterTiltRow
 @onready var _separator3: HSeparator = $Margin/Root/Separator3
 @onready var _wall_height_row: HBoxContainer = $Margin/Root/WallHeightRow
 @onready var _wall_type_row: HBoxContainer = $Margin/Root/WallTypeRow
@@ -66,6 +82,19 @@ func _ready() -> void:
 	_grass_wind_slider.value_changed.connect(func(v: float) -> void: setting_changed.emit("grass_wind", v))
 	_grass_wind_dir_slider.value_changed.connect(func(v: float) -> void: setting_changed.emit("grass_wind_dir", v))
 	_grass_height_slider.value_changed.connect(func(v: float) -> void: setting_changed.emit("grass_height", v))
+	_scatter_density_slider.value_changed.connect(func(v: float) -> void: setting_changed.emit("scatter_density", v))
+	_scatter_scale_min_slider.value_changed.connect(func(v: float) -> void:
+		if v > _scatter_scale_max_slider.value:
+			_scatter_scale_max_slider.value = v
+		setting_changed.emit("scatter_scale_min", v)
+	)
+	_scatter_scale_max_slider.value_changed.connect(func(v: float) -> void:
+		if v < _scatter_scale_min_slider.value:
+			_scatter_scale_min_slider.value = v
+		setting_changed.emit("scatter_scale_max", v)
+	)
+	_scatter_rotation_slider.value_changed.connect(func(v: float) -> void: setting_changed.emit("scatter_rotation_randomness", v))
+	_scatter_tilt_slider.value_changed.connect(func(v: float) -> void: setting_changed.emit("scatter_tilt", v))
 	_wall_height_slider.value_changed.connect(func(v: float) -> void: setting_changed.emit("wall_height", v))
 	_wall_rect_mode_check.toggled.connect(func(v: bool) -> void: setting_changed.emit("wall_rect_mode", v))
 	_wall_match_heights_check.toggled.connect(func(v: bool) -> void: setting_changed.emit("wall_match_connected_heights", v))
@@ -88,6 +117,11 @@ func _ready() -> void:
 	_grass_wind_slider.value_changed.connect(_update_value_labels)
 	_grass_wind_dir_slider.value_changed.connect(_update_value_labels)
 	_grass_height_slider.value_changed.connect(_update_value_labels)
+	_scatter_density_slider.value_changed.connect(_update_value_labels)
+	_scatter_scale_min_slider.value_changed.connect(_update_value_labels)
+	_scatter_scale_max_slider.value_changed.connect(_update_value_labels)
+	_scatter_rotation_slider.value_changed.connect(_update_value_labels)
+	_scatter_tilt_slider.value_changed.connect(_update_value_labels)
 	_wall_height_slider.value_changed.connect(_update_value_labels)
 	_clear_tool_button.pressed.connect(func() -> void: clear_requested.emit())
 
@@ -122,6 +156,11 @@ func _update_value_labels(_value: float) -> void:
 	_grass_wind_value.text = "%.2f" % _grass_wind_slider.value
 	_grass_wind_dir_value.text = "%d°" % int(round(_grass_wind_dir_slider.value))
 	_grass_height_value.text = "%.2f" % _grass_height_slider.value
+	_scatter_density_value.text = "%.2f" % _scatter_density_slider.value
+	_scatter_scale_min_value.text = "%.2f" % _scatter_scale_min_slider.value
+	_scatter_scale_max_value.text = "%.2f" % _scatter_scale_max_slider.value
+	_scatter_rotation_value.text = "%d°" % int(round(_scatter_rotation_slider.value))
+	_scatter_tilt_value.text = "%d°" % int(round(_scatter_tilt_slider.value))
 	_wall_height_value.text = "%.1f" % _wall_height_slider.value
 
 func _update_tool_hint(tool_name: String) -> void:
@@ -144,6 +183,10 @@ func _update_tool_hint(tool_name: String) -> void:
 			_tool_hint.text = "[b]Paint Grass[/b]  [i]7[/i]\nHold LMB to paint thick swathes\nRadius = area, Strength = fill speed\nEsc: back to Select"
 		"grasserase":
 			_tool_hint.text = "[b]Erase Grass[/b]  [i]8[/i]\nHold LMB to remove grass\nEsc: back to Select"
+		"scatterpaint":
+			_tool_hint.text = "[b]Scatter Paint[/b]\nHold LMB to spray selected scatter asset\nUses Radius + Strength and scatter settings\nEsc: back to Select"
+		"scattererase":
+			_tool_hint.text = "[b]Scatter Erase[/b]\nHold LMB to erase scattered instances\nRadius controls erase area\nEsc: back to Select"
 		"wall":
 			_tool_hint.text = "[b]Smart Wall[/b]  [i]9[/i]\nLMB: click A then click B/C for chain walls\nCtrl-drag: rectangle • Shift in drag: perfect square\nRMB or Esc: end chain • Match Connected Heights keeps structures uniform\nRMB menu: Add Window • Ctrl-drag window height, Alt-drag width\nSnap to Standard Heights keeps openings tidy"
 		_:
@@ -173,6 +216,7 @@ func _update_mode_badge(tool_name: String) -> void:
 
 func _update_tool_visibility(tool_name: String) -> void:
 	var terrain_tools_visible: bool = tool_name != "wall"
+	var scatter_controls_visible: bool = (tool_name == "scatterpaint" or tool_name == "scattererase")
 	var wall_controls_visible: bool = tool_name == "wall"
 
 	_brush_label.visible = terrain_tools_visible
@@ -192,6 +236,17 @@ func _update_tool_visibility(tool_name: String) -> void:
 	_grass_wind_dir_slider.visible = terrain_tools_visible
 	_grass_height_row.visible = terrain_tools_visible
 	_grass_height_slider.visible = terrain_tools_visible
+	_scatter_settings_label.visible = scatter_controls_visible
+	_scatter_density_row.visible = scatter_controls_visible
+	_scatter_density_slider.visible = scatter_controls_visible
+	_scatter_scale_min_row.visible = scatter_controls_visible
+	_scatter_scale_min_slider.visible = scatter_controls_visible
+	_scatter_scale_max_row.visible = scatter_controls_visible
+	_scatter_scale_max_slider.visible = scatter_controls_visible
+	_scatter_rotation_row.visible = scatter_controls_visible
+	_scatter_rotation_slider.visible = scatter_controls_visible
+	_scatter_tilt_row.visible = scatter_controls_visible
+	_scatter_tilt_slider.visible = scatter_controls_visible
 	_separator3.visible = true
 
 	_wall_height_row.visible = wall_controls_visible
@@ -209,6 +264,10 @@ func _format_tool_name(tool_name: String) -> String:
 			return "Grass Paint"
 		"grasserase":
 			return "Grass Erase"
+		"scatterpaint":
+			return "Scatter Paint"
+		"scattererase":
+			return "Scatter Erase"
 		"select":
 			return "Select / None"
 		"wall":
@@ -231,6 +290,11 @@ func get_settings() -> Dictionary:
 		"grass_wind": _grass_wind_slider.value,
 		"grass_wind_dir": _grass_wind_dir_slider.value,
 		"grass_height": _grass_height_slider.value,
+		"scatter_density": _scatter_density_slider.value,
+		"scatter_scale_min": _scatter_scale_min_slider.value,
+		"scatter_scale_max": _scatter_scale_max_slider.value,
+		"scatter_rotation_randomness": _scatter_rotation_slider.value,
+		"scatter_tilt": _scatter_tilt_slider.value,
 		"wall_height": _wall_height_slider.value,
 		"wall_type": wall_type,
 		"wall_rect_mode": _wall_rect_mode_check.button_pressed,
