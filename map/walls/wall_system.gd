@@ -728,7 +728,7 @@ func _build_foundations(target_parent: Node3D, is_preview: bool) -> void:
 			var yaw: float = atan2(direction.z, direction.x)
 			
 			# Decompose length into 8m + 4m pieces
-			var piece_plan: Array[Dictionary] = _make_piece_plan(length, true, true, false, false)
+			var piece_plan: Array[Dictionary] = _make_piece_plan(length, false, false, true, true, true)
 			
 			var current_pos: Vector3 = start_pos
 			for piece_info in piece_plan:
