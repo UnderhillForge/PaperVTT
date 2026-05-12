@@ -771,11 +771,18 @@ func _build_foundations(target_parent: Node3D, is_preview: bool) -> void:
 						box.size = Vector3(piece_length, fh, default_wall_thickness)
 						mesh_instance.mesh = box
 						mesh_instance.material_override = _get_foundation_material(is_preview, wall_type, piece_length, default_wall_thickness)
-					root.add_child(mesh_instance)
-					var pos: Vector3 = current_pos + direction * (piece_length * 0.5)
-					pos.y = top_y - (fh * 0.5) + top_overlap
-					mesh_instance.global_position = pos
-					mesh_instance.rotation.y = yaw
+						root.add_child(mesh_instance)
+						var pos: Vector3 = current_pos + direction * (piece_length * 0.5)
+						pos.y = top_y - (fh * 0.5) + top_overlap
+						mesh_instance.global_position = pos
+						mesh_instance.rotation.y = yaw
+				
+				current_pos += direction * piece_length
+		
+		# Place corner pieces at the four corners
+		var corners: Array[Vector3] = [
+			Vector3(padded_min_x, 0.0, padded_min_z),
+			Vector3(padded_max_x, 0.0, padded_min_z),
 			Vector3(padded_max_x, 0.0, padded_max_z),
 			Vector3(padded_min_x, 0.0, padded_max_z)
 		]
