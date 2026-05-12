@@ -143,17 +143,20 @@ func auto_register_prefabs(base_path: String = "res://assets/prefabs/walls") -> 
 func _ensure_modular_library_generated() -> void:
 	if _modular_prefab_count() > 0:
 		return
+	
 	var gen_script: Script = load("res://scripts/tools/wall_piece_generator.gd") as Script
 	if gen_script == null:
 		push_warning("WallPieceGenerator script missing; modular wall generation skipped")
 		return
-	var gen_obj: Object = gen_script.new()
-	if gen_obj == null:
+	
+	var gen_node := gen_script.new() as Node
+	if gen_node == null:
 		return
-	if gen_obj.has_method("generate_library"):
-		gen_obj.call("generate_library")
-	if gen_obj is Node:
-		(gen_obj as Node).queue_free()
+	
+	# Ensure auto_generate_on_ready is true so it runs
+	gen_node.set("auto_generate_on_ready", true)
+	add_child(gen_node)
+	gen_node.queue_free()
 
 func _modular_prefab_count() -> int:
 	var abs_dir: String = ProjectSettings.globalize_path(modular_piece_base_path)

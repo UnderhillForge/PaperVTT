@@ -8176,6 +8176,1222 @@
 			"tags": [],
 			"uniform_scale": true
 		},
+		"res://assets/prefabs/walls/modular/stone_corner_inner_90.glb": {
+			"category": "walls",
+			"name": "walls/modular/stone_corner_inner_90",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/stone_corner_inner_90.tscn": {
+			"category": "walls",
+			"name": "walls/modular/stone_corner_inner_90",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/stone_corner_outer_90.glb": {
+			"category": "walls",
+			"name": "walls/modular/stone_corner_outer_90",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/stone_corner_outer_90.tscn": {
+			"category": "walls",
+			"name": "walls/modular/stone_corner_outer_90",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/stone_foundation_corner_inner.glb": {
+			"category": "walls",
+			"name": "walls/modular/stone_foundation_corner_inner",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/stone_foundation_corner_inner.tscn": {
+			"category": "walls",
+			"name": "walls/modular/stone_foundation_corner_inner",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/stone_foundation_corner_outer.glb": {
+			"category": "walls",
+			"name": "walls/modular/stone_foundation_corner_outer",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/stone_foundation_corner_outer.tscn": {
+			"category": "walls",
+			"name": "walls/modular/stone_foundation_corner_outer",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/stone_foundation_straight_4m.glb": {
+			"category": "walls",
+			"name": "walls/modular/stone_foundation_straight_4m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/stone_foundation_straight_4m.tscn": {
+			"category": "walls",
+			"name": "walls/modular/stone_foundation_straight_4m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/stone_foundation_straight_8m.glb": {
+			"category": "walls",
+			"name": "walls/modular/stone_foundation_straight_8m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/stone_foundation_straight_8m.tscn": {
+			"category": "walls",
+			"name": "walls/modular/stone_foundation_straight_8m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/stone_junction_t.glb": {
+			"category": "walls",
+			"name": "walls/modular/stone_junction_t",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/stone_junction_t.tscn": {
+			"category": "walls",
+			"name": "walls/modular/stone_junction_t",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/stone_junction_x.glb": {
+			"category": "walls",
+			"name": "walls/modular/stone_junction_x",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/stone_junction_x.tscn": {
+			"category": "walls",
+			"name": "walls/modular/stone_junction_x",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/stone_wall_arch_4m.glb": {
+			"category": "walls",
+			"name": "walls/modular/stone_wall_arch_4m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/stone_wall_arch_4m.tscn": {
+			"category": "walls",
+			"name": "walls/modular/stone_wall_arch_4m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/stone_wall_door_2m.glb": {
+			"category": "walls",
+			"name": "walls/modular/stone_wall_door_2m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/stone_wall_door_2m.tscn": {
+			"category": "walls",
+			"name": "walls/modular/stone_wall_door_2m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/stone_wall_door_4m.glb": {
+			"category": "walls",
+			"name": "walls/modular/stone_wall_door_4m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/stone_wall_door_4m.tscn": {
+			"category": "walls",
+			"name": "walls/modular/stone_wall_door_4m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/stone_wall_end_cap.glb": {
+			"category": "walls",
+			"name": "walls/modular/stone_wall_end_cap",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/stone_wall_end_cap.tscn": {
+			"category": "walls",
+			"name": "walls/modular/stone_wall_end_cap",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/stone_wall_header.glb": {
+			"category": "walls",
+			"name": "walls/modular/stone_wall_header",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/stone_wall_header.tscn": {
+			"category": "walls",
+			"name": "walls/modular/stone_wall_header",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/stone_wall_straight_1m.glb": {
+			"category": "walls",
+			"name": "walls/modular/stone_wall_straight_1m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/stone_wall_straight_1m.tscn": {
+			"category": "walls",
+			"name": "walls/modular/stone_wall_straight_1m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/stone_wall_straight_2m.glb": {
+			"category": "walls",
+			"name": "walls/modular/stone_wall_straight_2m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/stone_wall_straight_2m.tscn": {
+			"category": "walls",
+			"name": "walls/modular/stone_wall_straight_2m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/stone_wall_straight_4m.glb": {
+			"category": "walls",
+			"name": "walls/modular/stone_wall_straight_4m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/stone_wall_straight_4m.tscn": {
+			"category": "walls",
+			"name": "walls/modular/stone_wall_straight_4m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/stone_wall_straight_8m.glb": {
+			"category": "walls",
+			"name": "walls/modular/stone_wall_straight_8m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/stone_wall_straight_8m.tscn": {
+			"category": "walls",
+			"name": "walls/modular/stone_wall_straight_8m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/stone_wall_window_2m.glb": {
+			"category": "walls",
+			"name": "walls/modular/stone_wall_window_2m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/stone_wall_window_2m.tscn": {
+			"category": "walls",
+			"name": "walls/modular/stone_wall_window_2m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/stone_wall_window_4m.glb": {
+			"category": "walls",
+			"name": "walls/modular/stone_wall_window_4m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/stone_wall_window_4m.tscn": {
+			"category": "walls",
+			"name": "walls/modular/stone_wall_window_4m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/tudor_corner_inner_90.glb": {
+			"category": "walls",
+			"name": "walls/modular/tudor_corner_inner_90",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/tudor_corner_inner_90.tscn": {
+			"category": "walls",
+			"name": "walls/modular/tudor_corner_inner_90",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/tudor_corner_outer_90.glb": {
+			"category": "walls",
+			"name": "walls/modular/tudor_corner_outer_90",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/tudor_corner_outer_90.tscn": {
+			"category": "walls",
+			"name": "walls/modular/tudor_corner_outer_90",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/tudor_foundation_corner_inner.glb": {
+			"category": "walls",
+			"name": "walls/modular/tudor_foundation_corner_inner",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/tudor_foundation_corner_inner.tscn": {
+			"category": "walls",
+			"name": "walls/modular/tudor_foundation_corner_inner",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/tudor_foundation_corner_outer.glb": {
+			"category": "walls",
+			"name": "walls/modular/tudor_foundation_corner_outer",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/tudor_foundation_corner_outer.tscn": {
+			"category": "walls",
+			"name": "walls/modular/tudor_foundation_corner_outer",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/tudor_foundation_straight_4m.glb": {
+			"category": "walls",
+			"name": "walls/modular/tudor_foundation_straight_4m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/tudor_foundation_straight_4m.tscn": {
+			"category": "walls",
+			"name": "walls/modular/tudor_foundation_straight_4m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/tudor_foundation_straight_8m.glb": {
+			"category": "walls",
+			"name": "walls/modular/tudor_foundation_straight_8m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/tudor_foundation_straight_8m.tscn": {
+			"category": "walls",
+			"name": "walls/modular/tudor_foundation_straight_8m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/tudor_junction_t.glb": {
+			"category": "walls",
+			"name": "walls/modular/tudor_junction_t",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/tudor_junction_t.tscn": {
+			"category": "walls",
+			"name": "walls/modular/tudor_junction_t",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/tudor_junction_x.glb": {
+			"category": "walls",
+			"name": "walls/modular/tudor_junction_x",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/tudor_junction_x.tscn": {
+			"category": "walls",
+			"name": "walls/modular/tudor_junction_x",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/tudor_wall_arch_4m.glb": {
+			"category": "walls",
+			"name": "walls/modular/tudor_wall_arch_4m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/tudor_wall_arch_4m.tscn": {
+			"category": "walls",
+			"name": "walls/modular/tudor_wall_arch_4m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/tudor_wall_door_2m.glb": {
+			"category": "walls",
+			"name": "walls/modular/tudor_wall_door_2m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/tudor_wall_door_2m.tscn": {
+			"category": "walls",
+			"name": "walls/modular/tudor_wall_door_2m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/tudor_wall_door_4m.glb": {
+			"category": "walls",
+			"name": "walls/modular/tudor_wall_door_4m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/tudor_wall_door_4m.tscn": {
+			"category": "walls",
+			"name": "walls/modular/tudor_wall_door_4m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/tudor_wall_end_cap.glb": {
+			"category": "walls",
+			"name": "walls/modular/tudor_wall_end_cap",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/tudor_wall_end_cap.tscn": {
+			"category": "walls",
+			"name": "walls/modular/tudor_wall_end_cap",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/tudor_wall_header.glb": {
+			"category": "walls",
+			"name": "walls/modular/tudor_wall_header",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/tudor_wall_header.tscn": {
+			"category": "walls",
+			"name": "walls/modular/tudor_wall_header",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/tudor_wall_straight_1m.glb": {
+			"category": "walls",
+			"name": "walls/modular/tudor_wall_straight_1m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/tudor_wall_straight_1m.tscn": {
+			"category": "walls",
+			"name": "walls/modular/tudor_wall_straight_1m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/tudor_wall_straight_2m.glb": {
+			"category": "walls",
+			"name": "walls/modular/tudor_wall_straight_2m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/tudor_wall_straight_2m.tscn": {
+			"category": "walls",
+			"name": "walls/modular/tudor_wall_straight_2m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/tudor_wall_straight_4m.glb": {
+			"category": "walls",
+			"name": "walls/modular/tudor_wall_straight_4m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/tudor_wall_straight_4m.tscn": {
+			"category": "walls",
+			"name": "walls/modular/tudor_wall_straight_4m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/tudor_wall_straight_8m.glb": {
+			"category": "walls",
+			"name": "walls/modular/tudor_wall_straight_8m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/tudor_wall_straight_8m.tscn": {
+			"category": "walls",
+			"name": "walls/modular/tudor_wall_straight_8m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/tudor_wall_window_2m.glb": {
+			"category": "walls",
+			"name": "walls/modular/tudor_wall_window_2m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/tudor_wall_window_2m.tscn": {
+			"category": "walls",
+			"name": "walls/modular/tudor_wall_window_2m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/tudor_wall_window_4m.glb": {
+			"category": "walls",
+			"name": "walls/modular/tudor_wall_window_4m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/prefabs/walls/modular/tudor_wall_window_4m.tscn": {
+			"category": "walls",
+			"name": "walls/modular/tudor_wall_window_4m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
 		"res://assets/prefabs/walls/stone/cliff_blockSlopeHalfWalls_rock.tscn": {
 			"category": "walls",
 			"name": "walls/stone/cliff_blockSlopeHalfWalls_rock",

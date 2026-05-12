@@ -1,0 +1,8 @@
+[gd_scene format=3]
+
+[node name="tudor_wall_end_cap" type="Node3D" unique_id=638075779]
+metadata/piece_name = "wall_end_cap"
+metadata/piece_kind = "end_cap"
+metadata/wall_variant = "tudor"
+metadata/grid_snap_m = 0.5
+metadata/wall_height_m = 3.4
