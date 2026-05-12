@@ -1419,12 +1419,15 @@ func _instantiate_prefab_or_box(parent: Node3D, seg: WallSegment, key: String, p
 		if instance is Node3D:
 			var node := instance as Node3D
 			parent.add_child(node)
-			if opening.is_empty():
-				_apply_piece_materials(node, seg, piece_length, is_preview, tint)
+			if not _node_has_mesh(node):
+				node.queue_free()
 			else:
-				_apply_opening_materials(node, seg, piece_length, is_preview, tint, opening)
-			_apply_shadow_tuning(node)
-			return node
+				if opening.is_empty():
+					_apply_piece_materials(node, seg, piece_length, is_preview, tint)
+				else:
+					_apply_opening_materials(node, seg, piece_length, is_preview, tint, opening)
+				_apply_shadow_tuning(node)
+				return node
 		instance.queue_free()
 
 	var node_box := Node3D.new()
@@ -1435,24 +1438,19 @@ func _instantiate_prefab_or_box(parent: Node3D, seg: WallSegment, key: String, p
 	wall.mesh = mesh
 	node_box.add_child(wall)
 
-	if seg.wall_type == "tudor":
-		wall.material_override = _get_tudor_material(seg, piece_length, is_preview, tint)
-		if not is_preview:
-			wall.material_overlay = _build_ink_edge_overlay(false)
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED if is_preview else BaseMaterial3D.SHADING_MODE_PER_PIXEL
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA if is_preview else BaseMaterial3D.TRANSPARENCY_DISABLED
+	mat.albedo_color = tint if is_preview else Color(0.76, 0.76, 0.78, 1.0)
+	mat.roughness = 0.92
+	if is_preview:
+		mat.emission_enabled = true
+		mat.emission = Color(tint.r, tint.g, tint.b, 1.0)
+		mat.emission_energy_multiplier = 0.7
+		mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	else:
-		var mat := StandardMaterial3D.new()
-		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED if is_preview else BaseMaterial3D.SHADING_MODE_PER_PIXEL
-		mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA if is_preview else BaseMaterial3D.TRANSPARENCY_DISABLED
-		mat.albedo_color = tint if is_preview else Color(0.76, 0.76, 0.78, 1.0)
-		mat.roughness = 0.92
-		if is_preview:
-			mat.emission_enabled = true
-			mat.emission = Color(tint.r, tint.g, tint.b, 1.0)
-			mat.emission_energy_multiplier = 0.7
-			mat.cull_mode = BaseMaterial3D.CULL_DISABLED
-		else:
-			mat.next_pass = _build_outline_shell_pass()
-		wall.material_override = mat
+		mat.next_pass = _build_outline_shell_pass()
+	wall.material_override = mat
 
 	if not is_preview:
 		var static_body := StaticBody3D.new()
@@ -1466,6 +1464,16 @@ func _instantiate_prefab_or_box(parent: Node3D, seg: WallSegment, key: String, p
 		static_body.set_meta("wall_hit_type", "piece")
 		node_box.add_child(static_body)
 	return node_box
+
+func _node_has_mesh(node: Node) -> bool:
+	if node is MeshInstance3D:
+		var mi := node as MeshInstance3D
+		if mi.mesh != null:
+			return true
+	for child in node.get_children():
+		if _node_has_mesh(child):
+			return true
+	return false
 
 func _apply_piece_materials(node: Node, seg: WallSegment, piece_length: float, is_preview: bool, tint: Color) -> void:
 	if node is MeshInstance3D:
