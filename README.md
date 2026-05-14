@@ -99,3 +99,4 @@ If you use repository mirrors on external volumes (for example local bare remote
 
 Project license is currently not declared in a root license file.
 Add one before public distribution.
+
