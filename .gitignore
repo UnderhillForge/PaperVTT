@@ -1,3 +1,14 @@
 .godot/
 .DS_Store
 .vscode/
+
+# Keep asset folder structure, but ignore asset payloads
+assets/**
+!assets/**/
+!assets/**/*.md
+!assets/README.md
+!assets/**/.gitkeep
+
+# Local tooling / test content
+Godot/
+dd_testing/
