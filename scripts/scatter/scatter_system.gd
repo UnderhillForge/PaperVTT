@@ -77,6 +77,25 @@ func apply_brush(mode: String, world_pos: Vector3, radius: float, strength: floa
 	_records_by_asset[_active_asset_id] = records
 	_rebuild_pool(_active_asset_id)
 
+## Translate all stored scatter record positions by offset (XYZ).
+## Called by OriginShiftSystem on every world recentering.
+## The ScatterSystem node itself stays at origin; only the data is patched
+## so that future brush strokes continue to map correctly.
+func apply_origin_shift(offset: Vector3) -> void:
+	for asset_id in _records_by_asset.keys():
+		var records: Array = _records_by_asset[asset_id]
+		for d in records:
+			if d is not Dictionary:
+				continue
+			var p_arr: Array = d.get("p", [0.0, 0.0, 0.0])
+			if p_arr.size() >= 3:
+				d["p"] = [
+					float(p_arr[0]) + offset.x,
+					float(p_arr[1]) + offset.y,
+					float(p_arr[2]) + offset.z
+				]
+		_rebuild_pool(asset_id)
+
 func clear_all() -> void:
 	for key in _pools_by_asset.keys():
 		var node: Node = _pools_by_asset[key]

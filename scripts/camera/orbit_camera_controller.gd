@@ -12,8 +12,15 @@ extends Camera3D
 @export var third_person_pitch: float = 22.0
 @export var follow_smooth_speed: float = 10.0
 @export var follow_height_offset: float = 1.0
+## Horizontal right-shoulder offset (character-local X). Set 0 to disable.
+@export var shoulder_offset_x: float = 0.5
+## Additional height added on top of follow_height_offset for the orbit pivot.
+@export var shoulder_offset_y: float = 0.3
 @export var auto_follow_return_delay: float = 1.2
-@export var auto_follow_blend_speed: float = 4.0
+## How fast the camera yaw chases behind-character direction while moving.
+@export var auto_follow_blend_speed: float = 8.0
+## Multiplier applied to blend speed when the character is standing still (0–1).
+@export var auto_follow_idle_factor: float = 0.2
 
 var target_position: Vector3 = Vector3.ZERO
 var yaw_degrees: float = -45.0
@@ -52,8 +59,13 @@ func _enter_third_person() -> void:
 	distance = third_person_distance
 	pitch_degrees = third_person_pitch
 	if _follow_target != null:
-		target_position = _follow_target.global_position + Vector3(0, follow_height_offset, 0)
-		# Start with camera behind the character so the first frame is already right
+		var char_right: Vector3 = _follow_target.global_basis.x
+		char_right.y = 0.0
+		char_right = char_right.normalized() if char_right.length_squared() > 0.001 else Vector3.RIGHT
+		target_position = _follow_target.global_position \
+			+ char_right * shoulder_offset_x \
+			+ Vector3(0, follow_height_offset + shoulder_offset_y, 0)
+		# Start with camera already behind the character
 		yaw_degrees = _yaw_behind_node(_follow_target)
 	_update_camera_transform()
 
@@ -126,20 +138,26 @@ func _unhandled_input(event: InputEvent) -> void:
 func _process(delta: float) -> void:
 	# Third-person follow: smoothly track the character
 	if _is_third_person and _follow_target != null and is_instance_valid(_follow_target):
-		# Position tracking
-		var desired_pos := _follow_target.global_position + Vector3(0, follow_height_offset, 0)
+		# --- Shoulder-offset pivot: orbit around a point slightly to the right ---
+		var char_right: Vector3 = _follow_target.global_basis.x
+		char_right.y = 0.0
+		char_right = char_right.normalized() if char_right.length_squared() > 0.001 else Vector3.RIGHT
+		var desired_pos: Vector3 = _follow_target.global_position \
+			+ char_right * shoulder_offset_x \
+			+ Vector3(0, follow_height_offset + shoulder_offset_y, 0)
 		target_position = target_position.lerp(desired_pos, clampf(follow_smooth_speed * delta, 0.0, 1.0))
-		var zoom_t: float = clampf(delta * zoom_smoothing, 0.0, 1.0)
-		distance = lerpf(distance, _target_distance, zoom_t)
 
-		# Auto-follow yaw: chase character's facing direction when moving
+		var tp_zoom_t: float = clampf(delta * zoom_smoothing, 0.0, 1.0)
+		distance = lerpf(distance, _target_distance, tp_zoom_t)
+
+		# Determine whether the character is actively moving
 		var char_vel := Vector3.ZERO
 		if _follow_target is CharacterBody3D:
 			char_vel = (_follow_target as CharacterBody3D).velocity
 		var char_flat_speed := Vector2(char_vel.x, char_vel.z).length()
 		var char_is_moving := char_flat_speed > _CHAR_MOVING_THRESHOLD
 
-		# Keep manual look active while RMB held; start countdown on release
+		# Keep manual-look active while RMB held; start countdown on release
 		if _is_manual_looking:
 			if Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT):
 				_manual_look_timeout = auto_follow_return_delay
@@ -148,11 +166,14 @@ func _process(delta: float) -> void:
 				if _manual_look_timeout <= 0.0:
 					_is_manual_looking = false
 
-		# Smoothly blend yaw toward the direction behind the character while they move
-		if not _is_manual_looking and char_is_moving:
+		# Always blend yaw toward behind-character — fast while moving, slow drift
+		# while idle so a quick turn isn't left with a mis-aimed camera.
+		if not _is_manual_looking:
 			var target_yaw := _yaw_behind_node(_follow_target)
 			var yaw_diff := fmod(target_yaw - yaw_degrees + 540.0, 360.0) - 180.0
-			yaw_degrees += yaw_diff * clampf(auto_follow_blend_speed * delta, 0.0, 1.0)
+			var follow_speed: float = auto_follow_blend_speed \
+				if char_is_moving else auto_follow_blend_speed * auto_follow_idle_factor
+			yaw_degrees += yaw_diff * clampf(follow_speed * delta, 0.0, 1.0)
 
 		_update_camera_transform()
 		return

@@ -611,6 +611,32 @@ func _apply_window_materials_to_prefab(node: Node) -> void:
 			mesh_node.material_override = frame_mat
 	for child in node.get_children():
 		_apply_window_materials_to_prefab(child)
+## Translate all stored segment and foundation positions by offset.
+## Called by OriginShiftSystem on every world recentering.
+## The WallSystem node itself stays at origin; positions are patched in data
+## and geometry is rebuilt so walls remain visually correct.
+func apply_origin_shift(offset: Vector3) -> void:
+	for seg in segments:
+		if seg == null:
+			continue
+		seg.start += offset
+		seg.end += offset
+	for i in range(foundations.size()):
+		var f: Variant = foundations[i]
+		if f is not Dictionary:
+			continue
+		var d: Dictionary = f as Dictionary
+		if d.has("min_x"):
+			d["min_x"] = float(d["min_x"]) + offset.x
+			d["max_x"] = float(d["max_x"]) + offset.x
+		if d.has("min_z"):
+			d["min_z"] = float(d["min_z"]) + offset.z
+			d["max_z"] = float(d["max_z"]) + offset.z
+		if d.has("top_y"):
+			d["top_y"] = float(d["top_y"]) + offset.y
+		foundations[i] = d
+	rebuild_all()
+
 func save_data() -> Dictionary:
 	var items: Array[Dictionary] = []
 	for seg in segments:
