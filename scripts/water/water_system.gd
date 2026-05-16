@@ -74,7 +74,7 @@ const DEFAULT_PARAMETERS = {
 	river_step_length_divs = 3,  # More segments along curve = smoother bends
 	river_step_width_divs = 2,   # More points across width = less stretching
 	river_smoothness = 0.5,
-	river_width_default = 2.0,
+	river_width_default = 5.0,   # Doubled for more impressive rivers
 	shader_type = 0,  # 0=Water, 1=Custom
 	default_layer = 0,  # Ground Floor by default
 }
@@ -292,7 +292,7 @@ func shape_riverbed_for_river(river_id: int, depth_m: float = 0.75, width_multip
 		return
 
 	var widths: Array = river.get("widths", [])
-	var average_depth: float = float(river.get("average_depth", 7.5))
+	var average_depth: float = float(river.get("average_depth", 15.0))
 	var average_width: float = 2.0
 	if not widths.is_empty():
 		average_width = WaterHelperMethods.sum_array(widths) / float(widths.size())
@@ -380,8 +380,8 @@ func create_river(river_name: String = "", layer: int = -1) -> Node:
 		"layer": layer,
 		"mesh_instance": river_mesh_instance,
 		"curve": Curve3D.new(),
-		"widths": [2.0, 2.0],
-		"average_depth": 7.5,
+		"widths": [5.0, 5.0],  # Doubled for larger, more impressive rivers
+		"average_depth": 15.0,  # Doubled for deeper, more impressive water
 		"valid": false,
 	}
 	
@@ -505,7 +505,7 @@ func _regenerate_river_mesh(river_id: int) -> void:
 	
 	var average_width = WaterHelperMethods.sum_array(widths) / float(max(1, widths.size()))
 	var steps = int(max(1.0, round(curve.get_baked_length() / average_width)))
-	var depth_value: float = float(river.get("average_depth", 7.5))
+	var depth_value: float = float(river.get("average_depth", 15.0))
 	var surface_height_offset: float = clampf(-0.14 - depth_value * 0.004, -0.18, -0.12)
 	
 	var river_width_values = WaterHelperMethods.generate_river_width_values(
@@ -606,7 +606,7 @@ func serialize_rivers() -> Array:
 			"layer": river.get("layer", 0),
 			"curve_points": [],
 			"widths": river["widths"],
-			"average_depth": river.get("average_depth", 7.5),
+			"average_depth": river.get("average_depth", 15.0),
 		}
 		
 		# Serialize curve points
@@ -661,7 +661,7 @@ func deserialize_rivers(river_data_array: Array) -> void:
 		
 		# Restore widths
 		_rivers[river_id]["widths"] = river_data.get("widths", [2.0, 2.0])
-		_rivers[river_id]["average_depth"] = float(river_data.get("average_depth", 7.5))
+		_rivers[river_id]["average_depth"] = float(river_data.get("average_depth", 15.0))
 		_apply_river_material_settings(river_id)
 		
 		_regenerate_river_mesh(river_id)

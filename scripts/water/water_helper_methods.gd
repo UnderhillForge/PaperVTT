@@ -148,15 +148,17 @@ static func generate_river_mesh(curve: Curve3D, steps: int, step_length_divs: in
 	# Generate vertices
 	for step in range(total_segments + 1):
 		var progress: float = float(step) / float(total_segments)
-		var position: Vector3 = curve.sample_baked(progress * curve_length, false)
-		var tangent: Vector3 = _curve_tangent(curve, progress * curve_length)
+		var distance_along_curve: float = progress * curve_length
+		var position: Vector3 = curve.sample_baked(distance_along_curve, false)
+		var tangent: Vector3 = _curve_tangent(curve, distance_along_curve)
 		var right_vector: Vector3 = _safe_right_vector(tangent, prev_right_vector)
 		if prev_right_vector == Vector3.ZERO:
 			prev_right_vector = right_vector
 		else:
 			var bend_alignment: float = clampf(right_vector.dot(prev_right_vector), -1.0, 1.0)
-			if bend_alignment < 0.25:
-				var bend_smooth: float = clampf(0.20 + bend_alignment * 0.30, 0.14, 0.38)
+			# More aggressive smoothing at sharp bends to prevent kinks
+			if bend_alignment < 0.35:
+				var bend_smooth: float = clampf(0.25 + bend_alignment * 0.35, 0.18, 0.42)
 				right_vector = prev_right_vector.slerp(right_vector, bend_smooth).normalized()
 			prev_right_vector = right_vector
 		position.y += surface_height_offset
@@ -195,7 +197,9 @@ static func generate_river_mesh(curve: Curve3D, steps: int, step_length_divs: in
 		
 		for w_sub in range(step_width_divs + 1):
 			var uv_x: float = float(w_sub) / float(step_width_divs)
-			var uv_y: float = progress  # Smooth UV along curve
+			# UV based on actual distance along curve, not segment progress
+			# This prevents texture stretching when curves change density
+			var uv_y: float = distance_along_curve / curve_length
 			st.set_uv(Vector2(uv_x, uv_y))
 			var bank_t: float = float(w_sub) / float(step_width_divs)
 			var edge_offset: float = lerpf(left_scale, -right_scale, bank_t)

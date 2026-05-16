@@ -6,7 +6,7 @@ uniform vec3 deep_color : source_color = vec3(0.06, 0.25, 0.35);
 uniform vec3 water_color : source_color = vec3(0.18, 0.58, 0.62);
 uniform vec4 albedo_color : source_color = vec4(0.18, 0.58, 0.62, 1.0);
 
-uniform float flow_speed : hint_range(0.0, 2.0) = 0.18;
+uniform float flow_speed : hint_range(0.0, 2.0) = 0.58;  # Increased for more visible flow
 uniform float wave_strength : hint_range(0.0, 1.0) = 0.14;
 uniform float normal_scale : hint_range(0.1, 12.0) = 2.2;
 uniform float average_depth : hint_range(0.4, 18.0) = 7.5;

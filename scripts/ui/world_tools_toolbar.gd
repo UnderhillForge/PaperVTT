@@ -718,7 +718,7 @@ func get_settings() -> Dictionary:
 		"wall_jitter": _wall_jitter_check.button_pressed,
 		"river_width": _river_width_slider.value if _river_width_slider != null else 2.0,
 		"river_flow_speed": _river_flow_slider.value if _river_flow_slider != null else 1.0,
-		"river_average_depth": _river_depth_slider.value if _river_depth_slider != null else 7.5,
+		"river_average_depth": _river_depth_slider.value if _river_depth_slider != null else 15.0,
 		"water_color": _river_color_button.color if _river_color_button != null else Color(0.2, 0.5, 0.3, 1.0)
 	}
 
