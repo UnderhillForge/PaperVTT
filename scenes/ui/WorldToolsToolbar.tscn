@@ -1,394 +1,935 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/world_tools_toolbar.gd" id="1"]
+[ext_resource type="Texture2D" path="res://addons/terrain_3d/icons/terrain3d.svg" id="2"]
+[ext_resource type="Texture2D" path="res://addons/terrain_3d/icons/multimesh.svg" id="3"]
+[ext_resource type="Texture2D" path="res://addons/terrain_3d/icons/layers.svg" id="4"]
+[ext_resource type="Texture2D" path="res://addons/terrain_3d/icons/texture_paint.svg" id="5"]
+[ext_resource type="Texture2D" path="res://addons/terrain_3d/icons/height_slope.svg" id="6"]
 
 [node name="WorldToolsToolbar" type="PanelContainer"]
-custom_minimum_size = Vector2(260, 0)
+custom_minimum_size = Vector2(72, 0)
 size_flags_vertical = 3
+modulate = Color(1, 1, 1, 0.93)
 script = ExtResource("1")
 
-[node name="Margin" type="MarginContainer" parent="."]
+[node name="Root" type="HBoxContainer" parent="."]
+theme_override_constants/separation = 8
+
+[node name="RailPanel" type="PanelContainer" parent="Root"]
+custom_minimum_size = Vector2(68, 0)
+
+[node name="RailMargin" type="MarginContainer" parent="Root/RailPanel"]
+theme_override_constants/margin_left = 6
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 6
+theme_override_constants/margin_bottom = 8
+
+[node name="Rail" type="VBoxContainer" parent="Root/RailPanel/RailMargin"]
+unique_name_in_owner = true
+theme_override_constants/separation = 6
+
+[node name="ClearToolButton" type="Button" parent="Root/RailPanel/RailMargin/Rail"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 42)
+text = "CLR"
+tooltip_text = "Clear Tool (Esc)"
+
+[node name="GroupTerrain" type="Button" parent="Root/RailPanel/RailMargin/Rail"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 52)
+toggle_mode = true
+button_pressed = true
+icon = ExtResource("2")
+expand_icon = true
+tooltip_text = "Terrain"
+
+[node name="TerrainLabel" type="Label" parent="Root/RailPanel/RailMargin/Rail"]
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 10
+text = "Terrain"
+
+[node name="GroupFoliage" type="Button" parent="Root/RailPanel/RailMargin/Rail"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 52)
+toggle_mode = true
+icon = ExtResource("3")
+expand_icon = true
+tooltip_text = "Foliage"
+
+[node name="FoliageLabel" type="Label" parent="Root/RailPanel/RailMargin/Rail"]
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 10
+text = "Foliage"
+
+[node name="GroupStructures" type="Button" parent="Root/RailPanel/RailMargin/Rail"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 52)
+toggle_mode = true
+icon = ExtResource("4")
+expand_icon = true
+tooltip_text = "Structures"
+
+[node name="StructuresLabel" type="Label" parent="Root/RailPanel/RailMargin/Rail"]
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 10
+text = "Struct"
+
+[node name="GroupPaint" type="Button" parent="Root/RailPanel/RailMargin/Rail"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 52)
+toggle_mode = true
+icon = ExtResource("5")
+expand_icon = true
+tooltip_text = "Paint"
+
+[node name="PaintLabel" type="Label" parent="Root/RailPanel/RailMargin/Rail"]
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 10
+text = "Paint"
+
+[node name="GroupHorizon" type="Button" parent="Root/RailPanel/RailMargin/Rail"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 52)
+toggle_mode = true
+icon = ExtResource("6")
+expand_icon = true
+tooltip_text = "Horizon"
+
+[node name="HorizonLabel" type="Label" parent="Root/RailPanel/RailMargin/Rail"]
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 10
+text = "Horizon"
+
+[node name="ToolModeLabel" type="Label" parent="Root/RailPanel/RailMargin/Rail"]
+unique_name_in_owner = true
+size_flags_vertical = 10
+theme_override_font_sizes/font_size = 11
+horizontal_alignment = 1
+vertical_alignment = 2
+text = "MODE"
+
+[node name="PopoutPanel" type="PanelContainer" parent="Root"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(328, 0)
+size_flags_horizontal = 3
+
+[node name="PopoutMargin" type="MarginContainer" parent="Root/PopoutPanel"]
 theme_override_constants/margin_left = 10
 theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 10
 
-[node name="Root" type="VBoxContainer" parent="Margin"]
-theme_override_constants/separation = 10
+[node name="PopoutRoot" type="VBoxContainer" parent="Root/PopoutPanel/PopoutMargin"]
+theme_override_constants/separation = 8
 
-[node name="Title" type="Label" parent="Margin/Root"]
-theme_override_font_sizes/font_size = 18
-text = "World Tools"
-
-[node name="ToolModeLabel" type="Label" parent="Margin/Root"]
+[node name="PopoutTitle" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
 unique_name_in_owner = true
-theme_override_font_sizes/font_size = 13
-text = "MODE"
+theme_override_font_sizes/font_size = 16
+text = "Terrain"
 
-[node name="ClearToolButton" type="Button" parent="Margin/Root"]
+[node name="GroupPages" type="Control" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
+custom_minimum_size = Vector2(0, 130)
+
+[node name="TerrainPage" type="VBoxContainer" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/GroupPages"]
 unique_name_in_owner = true
-text = "Clear Tool (Esc)"
 
-[node name="ToolButtons" type="VBoxContainer" parent="Margin/Root"]
-theme_override_constants/separation = 6
+[node name="TerrainTools" type="GridContainer" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/GroupPages/TerrainPage"]
+columns = 2
+theme_override_constants/h_separation = 6
+theme_override_constants/v_separation = 6
 
-[node name="Select" type="Button" parent="Margin/Root/ToolButtons" groups=["tool_button"]]
+[node name="Select" type="Button" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/GroupPages/TerrainPage/TerrainTools" groups=["tool_button"]]
 toggle_mode = true
-text = "Select / None"
+text = "Select"
 
-[node name="ToolButtonSep" type="HSeparator" parent="Margin/Root/ToolButtons"]
-
-[node name="Raise" type="Button" parent="Margin/Root/ToolButtons" groups=["tool_button"]]
+[node name="Raise" type="Button" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/GroupPages/TerrainPage/TerrainTools" groups=["tool_button"]]
 toggle_mode = true
 text = "Raise Terrain"
 
-[node name="Lower" type="Button" parent="Margin/Root/ToolButtons" groups=["tool_button"]]
+[node name="Lower" type="Button" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/GroupPages/TerrainPage/TerrainTools" groups=["tool_button"]]
 toggle_mode = true
 text = "Lower Terrain"
 
-[node name="Smooth" type="Button" parent="Margin/Root/ToolButtons" groups=["tool_button"]]
+[node name="Smooth" type="Button" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/GroupPages/TerrainPage/TerrainTools" groups=["tool_button"]]
 toggle_mode = true
 text = "Smooth"
 
-[node name="Flatten" type="Button" parent="Margin/Root/ToolButtons" groups=["tool_button"]]
+[node name="Flatten" type="Button" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/GroupPages/TerrainPage/TerrainTools" groups=["tool_button"]]
 toggle_mode = true
 text = "Flatten"
 
-[node name="Paint" type="Button" parent="Margin/Root/ToolButtons" groups=["tool_button"]]
+[node name="Paint" type="Button" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/GroupPages/TerrainPage/TerrainTools" groups=["tool_button"]]
 toggle_mode = true
-text = "Paint"
+text = "Paint Terrain"
 
-[node name="Stamp" type="Button" parent="Margin/Root/ToolButtons" groups=["tool_button"]]
-toggle_mode = true
-button_pressed = true
-text = "Stamp Prefab"
+[node name="FoliagePage" type="VBoxContainer" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/GroupPages"]
+unique_name_in_owner = true
+visible = false
 
-[node name="Wall" type="Button" parent="Margin/Root/ToolButtons" groups=["tool_button"]]
-toggle_mode = true
-text = "Smart Wall"
+[node name="FoliageTools" type="GridContainer" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/GroupPages/FoliagePage"]
+columns = 2
+theme_override_constants/h_separation = 6
+theme_override_constants/v_separation = 6
 
-[node name="GrassSectionLabel" type="Label" parent="Margin/Root/ToolButtons"]
-theme_override_font_sizes/font_size = 11
-theme_override_colors/font_color = Color(0.6, 0.85, 0.5, 1)
-text = "- Grass -"
-
-[node name="GrassPaint" type="Button" parent="Margin/Root/ToolButtons" groups=["tool_button"]]
+[node name="GrassPaint" type="Button" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/GroupPages/FoliagePage/FoliageTools" groups=["tool_button"]]
 toggle_mode = true
 text = "Paint Grass"
 
-[node name="GrassErase" type="Button" parent="Margin/Root/ToolButtons" groups=["tool_button"]]
+[node name="GrassErase" type="Button" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/GroupPages/FoliagePage/FoliageTools" groups=["tool_button"]]
 toggle_mode = true
 text = "Erase Grass"
 
-[node name="ScatterSectionLabel" type="Label" parent="Margin/Root/ToolButtons"]
-theme_override_font_sizes/font_size = 11
-theme_override_colors/font_color = Color(0.65, 0.8, 0.95, 1)
-text = "- Scatter -"
+[node name="StructuresPage" type="VBoxContainer" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/GroupPages"]
+unique_name_in_owner = true
+visible = false
 
-[node name="ScatterPaint" type="Button" parent="Margin/Root/ToolButtons" groups=["tool_button"]]
+[node name="StructuresTools" type="GridContainer" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/GroupPages/StructuresPage"]
+columns = 2
+theme_override_constants/h_separation = 6
+theme_override_constants/v_separation = 6
+
+[node name="Wall" type="Button" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/GroupPages/StructuresPage/StructuresTools" groups=["tool_button"]]
 toggle_mode = true
-text = "Paint Scatter"
+text = "Smart Wall"
 
-[node name="ScatterErase" type="Button" parent="Margin/Root/ToolButtons" groups=["tool_button"]]
+[node name="Stamp" type="Button" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/GroupPages/StructuresPage/StructuresTools" groups=["tool_button"]]
 toggle_mode = true
-text = "Erase Scatter"
+text = "Stamp Prefab"
 
-[node name="Separator1" type="HSeparator" parent="Margin/Root"]
+[node name="RiverDraw" type="Button" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/GroupPages/StructuresPage/StructuresTools" groups=["tool_button"]]
+toggle_mode = true
+text = "Draw River"
 
-[node name="BrushLabel" type="Label" parent="Margin/Root"]
+[node name="PaintPage" type="VBoxContainer" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/GroupPages"]
+unique_name_in_owner = true
+visible = false
+
+[node name="PaintTools" type="GridContainer" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/GroupPages/PaintPage"]
+columns = 2
+theme_override_constants/h_separation = 6
+theme_override_constants/v_separation = 6
+
+[node name="TexturePaint" type="Button" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/GroupPages/PaintPage/PaintTools" groups=["tool_button"]]
+toggle_mode = true
+text = "Paint Texture"
+
+[node name="TextureErase" type="Button" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/GroupPages/PaintPage/PaintTools" groups=["tool_button"]]
+toggle_mode = true
+text = "Erase Texture"
+
+[node name="HorizonPage" type="VBoxContainer" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/GroupPages"]
+unique_name_in_owner = true
+visible = false
+
+[node name="HorizonTools" type="GridContainer" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/GroupPages/HorizonPage"]
+columns = 1
+
+[node name="HorizonMountain" type="Button" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/GroupPages/HorizonPage/HorizonTools" groups=["tool_button"]]
+toggle_mode = true
+text = "Place Distant Mountain"
+
+[node name="Separator1" type="HSeparator" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
+
+[node name="BrushLabel" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
+unique_name_in_owner = true
 theme_override_font_sizes/font_size = 13
 text = "BRUSH"
 
-[node name="BrushSizeRow" type="HBoxContainer" parent="Margin/Root"]
+[node name="BrushSizeRow" type="HBoxContainer" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
+unique_name_in_owner = true
 
-[node name="BrushSizeLabel" type="Label" parent="Margin/Root/BrushSizeRow"]
+[node name="BrushSizeLabel" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/BrushSizeRow"]
 text = "Radius"
 
-[node name="BrushSizeValue" type="Label" parent="Margin/Root/BrushSizeRow"]
+[node name="BrushSizeValue" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/BrushSizeRow"]
 unique_name_in_owner = true
 size_flags_horizontal = 10
 horizontal_alignment = 2
 text = "10.0"
 
-[node name="BrushSizeSlider" type="HSlider" parent="Margin/Root"]
+[node name="BrushSizeSlider" type="HSlider" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
 unique_name_in_owner = true
 min_value = 1.0
 max_value = 36.0
 step = 0.5
 value = 10.0
 
-[node name="BrushStrengthRow" type="HBoxContainer" parent="Margin/Root"]
+[node name="BrushStrengthRow" type="HBoxContainer" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
+unique_name_in_owner = true
 
-[node name="BrushStrengthLabel" type="Label" parent="Margin/Root/BrushStrengthRow"]
+[node name="BrushStrengthLabel" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/BrushStrengthRow"]
 text = "Strength"
 
-[node name="BrushStrengthValue" type="Label" parent="Margin/Root/BrushStrengthRow"]
+[node name="BrushStrengthValue" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/BrushStrengthRow"]
 unique_name_in_owner = true
 size_flags_horizontal = 10
 horizontal_alignment = 2
 text = "0.25"
 
-[node name="BrushStrengthSlider" type="HSlider" parent="Margin/Root"]
+[node name="BrushStrengthSlider" type="HSlider" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
 unique_name_in_owner = true
 min_value = 0.05
 max_value = 1.0
 step = 0.05
 value = 0.25
 
-[node name="FlattenHeightRow" type="HBoxContainer" parent="Margin/Root"]
+[node name="FlattenHeightRow" type="HBoxContainer" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
+unique_name_in_owner = true
 
-[node name="FlattenHeightLabel" type="Label" parent="Margin/Root/FlattenHeightRow"]
+[node name="FlattenHeightLabel" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/FlattenHeightRow"]
 text = "Flatten Y"
 
-[node name="FlattenHeightValue" type="Label" parent="Margin/Root/FlattenHeightRow"]
+[node name="FlattenHeightValue" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/FlattenHeightRow"]
 unique_name_in_owner = true
 size_flags_horizontal = 10
 horizontal_alignment = 2
 text = "0.0"
 
-[node name="FlattenHeightSlider" type="HSlider" parent="Margin/Root"]
+[node name="FlattenHeightSlider" type="HSlider" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
 unique_name_in_owner = true
 min_value = -8.0
 max_value = 32.0
 step = 0.25
 value = 0.0
 
-[node name="Separator2" type="HSeparator" parent="Margin/Root"]
+[node name="CliffModeCheck" type="CheckBox" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
+unique_name_in_owner = true
+text = "Cliff Mode"
 
-[node name="GrassSettingsLabel" type="Label" parent="Margin/Root"]
+[node name="OverhangAmountRow" type="HBoxContainer" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
+unique_name_in_owner = true
+visible = false
+
+[node name="OverhangAmountLabel" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/OverhangAmountRow"]
+text = "Overhang"
+
+[node name="OverhangAmountValue" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/OverhangAmountRow"]
+unique_name_in_owner = true
+size_flags_horizontal = 10
+horizontal_alignment = 2
+text = "0.30"
+
+[node name="OverhangAmountSlider" type="HSlider" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
+unique_name_in_owner = true
+visible = false
+min_value = 0.0
+max_value = 1.0
+step = 0.05
+value = 0.3
+
+[node name="Separator2" type="HSeparator" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
+unique_name_in_owner = true
+
+[node name="GrassSettingsLabel" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
+unique_name_in_owner = true
 theme_override_font_sizes/font_size = 13
 theme_override_colors/font_color = Color(0.6, 0.85, 0.5, 1)
 text = "GRASS SETTINGS"
 
-[node name="GrassDensityRow" type="HBoxContainer" parent="Margin/Root"]
+[node name="GrassDensityRow" type="HBoxContainer" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
+unique_name_in_owner = true
 
-[node name="GrassDensityLabel" type="Label" parent="Margin/Root/GrassDensityRow"]
+[node name="GrassDensityLabel" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/GrassDensityRow"]
 text = "Density"
 
-[node name="GrassDensityValue" type="Label" parent="Margin/Root/GrassDensityRow"]
+[node name="GrassDensityValue" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/GrassDensityRow"]
 unique_name_in_owner = true
 size_flags_horizontal = 10
 horizontal_alignment = 2
 text = "2.20"
 
-[node name="GrassDensitySlider" type="HSlider" parent="Margin/Root"]
+[node name="GrassDensitySlider" type="HSlider" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
 unique_name_in_owner = true
 min_value = 0.4
 max_value = 4.0
 step = 0.1
 value = 2.2
 
-[node name="GrassWindRow" type="HBoxContainer" parent="Margin/Root"]
+[node name="GrassWindRow" type="HBoxContainer" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
+unique_name_in_owner = true
 
-[node name="GrassWindLabel" type="Label" parent="Margin/Root/GrassWindRow"]
+[node name="GrassWindLabel" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/GrassWindRow"]
 text = "Wind Str"
 
-[node name="GrassWindValue" type="Label" parent="Margin/Root/GrassWindRow"]
+[node name="GrassWindValue" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/GrassWindRow"]
 unique_name_in_owner = true
 size_flags_horizontal = 10
 horizontal_alignment = 2
 text = "0.50"
 
-[node name="GrassWindSlider" type="HSlider" parent="Margin/Root"]
+[node name="GrassWindSlider" type="HSlider" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
 unique_name_in_owner = true
 min_value = 0.0
 max_value = 2.0
 step = 0.05
 value = 0.5
 
-[node name="GrassWindDirRow" type="HBoxContainer" parent="Margin/Root"]
+[node name="GrassWindDirRow" type="HBoxContainer" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
+unique_name_in_owner = true
 
-[node name="GrassWindDirLabel" type="Label" parent="Margin/Root/GrassWindDirRow"]
+[node name="GrassWindDirLabel" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/GrassWindDirRow"]
 text = "Wind Dir"
 
-[node name="GrassWindDirValue" type="Label" parent="Margin/Root/GrassWindDirRow"]
+[node name="GrassWindDirValue" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/GrassWindDirRow"]
 unique_name_in_owner = true
 size_flags_horizontal = 10
 horizontal_alignment = 2
 text = "35 deg"
 
-[node name="GrassWindDirSlider" type="HSlider" parent="Margin/Root"]
+[node name="GrassWindDirSlider" type="HSlider" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
 unique_name_in_owner = true
 min_value = 0.0
 max_value = 359.0
 step = 1.0
 value = 35.0
 
-[node name="GrassHeightRow" type="HBoxContainer" parent="Margin/Root"]
+[node name="GrassHeightRow" type="HBoxContainer" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
+unique_name_in_owner = true
 
-[node name="GrassHeightLabel" type="Label" parent="Margin/Root/GrassHeightRow"]
+[node name="GrassHeightLabel" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/GrassHeightRow"]
 text = "Max Height"
 
-[node name="GrassHeightValue" type="Label" parent="Margin/Root/GrassHeightRow"]
+[node name="GrassHeightValue" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/GrassHeightRow"]
 unique_name_in_owner = true
 size_flags_horizontal = 10
 horizontal_alignment = 2
 text = "0.65"
 
-[node name="GrassHeightSlider" type="HSlider" parent="Margin/Root"]
+[node name="GrassHeightSlider" type="HSlider" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
 unique_name_in_owner = true
 min_value = 0.2
 max_value = 2.5
 step = 0.05
 value = 0.65
 
-[node name="ScatterSettingsLabel" type="Label" parent="Margin/Root"]
+[node name="GrassColorRow" type="HBoxContainer" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+
+[node name="GrassBaseColorLabel" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/GrassColorRow"]
+text = "Base Color"
+size_flags_vertical = 1
+
+[node name="GrassBaseColorButton" type="ColorPickerButton" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/GrassColorRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(60, 32)
+color = Color(0.15, 0.28, 0.12, 1)
+size_flags_horizontal = 10
+size_flags_vertical = 1
+
+[node name="GrassTipColorLabel" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/GrassColorRow"]
+text = "Tip Color"
+size_flags_vertical = 1
+
+[node name="GrassTipColorButton" type="ColorPickerButton" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/GrassColorRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(60, 32)
+color = Color(0.55, 0.68, 0.35, 1)
+size_flags_horizontal = 10
+size_flags_vertical = 1
+
+[node name="GrassStrokeColorRow" type="HBoxContainer" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+
+[node name="GrassStrokeColorLabel" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/GrassStrokeColorRow"]
+text = "Paint Color"
+size_flags_vertical = 1
+
+[node name="GrassStrokeColorButton" type="ColorPickerButton" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/GrassStrokeColorRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(100, 32)
+color = Color(0.2, 0.5, 0.1, 1)
+size_flags_horizontal = 10
+size_flags_vertical = 1
+
+[node name="GrassPresetsRow" type="HBoxContainer" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 36)
+
+[node name="GrassPresetsLabel" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/GrassPresetsRow"]
+text = "Presets"
+size_flags_vertical = 1
+
+[node name="SpringGreenPreset" type="Button" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/GrassPresetsRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(28, 28)
+tooltip_text = "Spring Green"
+modulate = Color(0.2, 0.5, 0.1, 1)
+size_flags_horizontal = 0
+size_flags_vertical = 1
+
+[node name="MossyPreset" type="Button" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/GrassPresetsRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(28, 28)
+tooltip_text = "Mossy Shade"
+modulate = Color(0.1, 0.3, 0.08, 1)
+size_flags_horizontal = 0
+size_flags_vertical = 1
+
+[node name="DeadGrassPreset" type="Button" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/GrassPresetsRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(28, 28)
+tooltip_text = "Dead/Dry Grass"
+modulate = Color(0.35, 0.3, 0.1, 1)
+size_flags_horizontal = 0
+size_flags_vertical = 1
+
+[node name="PaleGrassPreset" type="Button" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/GrassPresetsRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(28, 28)
+tooltip_text = "Pale Washed Green"
+modulate = Color(0.4, 0.5, 0.2, 1)
+size_flags_horizontal = 0
+size_flags_vertical = 1
+
+[node name="ForestGreenPreset" type="Button" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/GrassPresetsRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(28, 28)
+tooltip_text = "Deep Forest Green"
+modulate = Color(0.15, 0.25, 0.1, 1)
+size_flags_horizontal = 0
+size_flags_vertical = 1
+
+[node name="ScatterSettingsLabel" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
+unique_name_in_owner = true
 theme_override_font_sizes/font_size = 13
 theme_override_colors/font_color = Color(0.65, 0.8, 0.95, 1)
 text = "SCATTER SETTINGS"
 
-[node name="ScatterDensityRow" type="HBoxContainer" parent="Margin/Root"]
+[node name="ScatterDensityRow" type="HBoxContainer" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
+unique_name_in_owner = true
 
-[node name="ScatterDensityLabel" type="Label" parent="Margin/Root/ScatterDensityRow"]
-text = "Density / m²"
+[node name="ScatterDensityLabel" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/ScatterDensityRow"]
+text = "Density / m2"
 
-[node name="ScatterDensityValue" type="Label" parent="Margin/Root/ScatterDensityRow"]
+[node name="ScatterDensityValue" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/ScatterDensityRow"]
 unique_name_in_owner = true
 size_flags_horizontal = 10
 horizontal_alignment = 2
 text = "1.20"
 
-[node name="ScatterDensitySlider" type="HSlider" parent="Margin/Root"]
+[node name="ScatterDensitySlider" type="HSlider" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
 unique_name_in_owner = true
 min_value = 0.1
 max_value = 8.0
 step = 0.1
 value = 1.2
 
-[node name="ScatterScaleMinRow" type="HBoxContainer" parent="Margin/Root"]
+[node name="ScatterScaleMinRow" type="HBoxContainer" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
+unique_name_in_owner = true
 
-[node name="ScatterScaleMinLabel" type="Label" parent="Margin/Root/ScatterScaleMinRow"]
+[node name="ScatterScaleMinLabel" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/ScatterScaleMinRow"]
 text = "Scale Min"
 
-[node name="ScatterScaleMinValue" type="Label" parent="Margin/Root/ScatterScaleMinRow"]
+[node name="ScatterScaleMinValue" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/ScatterScaleMinRow"]
 unique_name_in_owner = true
 size_flags_horizontal = 10
 horizontal_alignment = 2
 text = "0.85"
 
-[node name="ScatterScaleMinSlider" type="HSlider" parent="Margin/Root"]
+[node name="ScatterScaleMinSlider" type="HSlider" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
 unique_name_in_owner = true
 min_value = 0.1
 max_value = 3.0
 step = 0.05
 value = 0.85
 
-[node name="ScatterScaleMaxRow" type="HBoxContainer" parent="Margin/Root"]
+[node name="ScatterScaleMaxRow" type="HBoxContainer" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
+unique_name_in_owner = true
 
-[node name="ScatterScaleMaxLabel" type="Label" parent="Margin/Root/ScatterScaleMaxRow"]
+[node name="ScatterScaleMaxLabel" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/ScatterScaleMaxRow"]
 text = "Scale Max"
 
-[node name="ScatterScaleMaxValue" type="Label" parent="Margin/Root/ScatterScaleMaxRow"]
+[node name="ScatterScaleMaxValue" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/ScatterScaleMaxRow"]
 unique_name_in_owner = true
 size_flags_horizontal = 10
 horizontal_alignment = 2
 text = "1.35"
 
-[node name="ScatterScaleMaxSlider" type="HSlider" parent="Margin/Root"]
+[node name="ScatterScaleMaxSlider" type="HSlider" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
 unique_name_in_owner = true
 min_value = 0.1
 max_value = 3.0
 step = 0.05
 value = 1.35
 
-[node name="ScatterRotationRow" type="HBoxContainer" parent="Margin/Root"]
+[node name="ScatterRotationRow" type="HBoxContainer" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
+unique_name_in_owner = true
 
-[node name="ScatterRotationLabel" type="Label" parent="Margin/Root/ScatterRotationRow"]
+[node name="ScatterRotationLabel" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/ScatterRotationRow"]
 text = "Y Random"
 
-[node name="ScatterRotationValue" type="Label" parent="Margin/Root/ScatterRotationRow"]
+[node name="ScatterRotationValue" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/ScatterRotationRow"]
 unique_name_in_owner = true
 size_flags_horizontal = 10
 horizontal_alignment = 2
-text = "180°"
+text = "180 deg"
 
-[node name="ScatterRotationSlider" type="HSlider" parent="Margin/Root"]
+[node name="ScatterRotationSlider" type="HSlider" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
 unique_name_in_owner = true
 min_value = 0.0
 max_value = 360.0
 step = 1.0
 value = 180.0
 
-[node name="ScatterTiltRow" type="HBoxContainer" parent="Margin/Root"]
+[node name="ScatterTiltRow" type="HBoxContainer" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
+unique_name_in_owner = true
 
-[node name="ScatterTiltLabel" type="Label" parent="Margin/Root/ScatterTiltRow"]
+[node name="ScatterTiltLabel" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/ScatterTiltRow"]
 text = "Tilt"
 
-[node name="ScatterTiltValue" type="Label" parent="Margin/Root/ScatterTiltRow"]
+[node name="ScatterTiltValue" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/ScatterTiltRow"]
 unique_name_in_owner = true
 size_flags_horizontal = 10
 horizontal_alignment = 2
-text = "8°"
+text = "8 deg"
 
-[node name="ScatterTiltSlider" type="HSlider" parent="Margin/Root"]
+[node name="ScatterTiltSlider" type="HSlider" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
 unique_name_in_owner = true
 min_value = 0.0
 max_value = 45.0
 step = 1.0
 value = 8.0
 
-[node name="Separator3" type="HSeparator" parent="Margin/Root"]
+[node name="Separator3" type="HSeparator" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
+unique_name_in_owner = true
 
-[node name="WallHeightRow" type="HBoxContainer" parent="Margin/Root"]
+[node name="TexturePaintPanel" type="VBoxContainer" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
+unique_name_in_owner = true
+visible = false
+theme_override_constants/separation = 8
 
-[node name="WallHeightLabel" type="Label" parent="Margin/Root/WallHeightRow"]
+[node name="TexturePaintLabel" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/TexturePaintPanel"]
+theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(0.95, 0.80, 0.50, 1)
+text = "TEXTURE LIBRARY"
+
+[node name="SelectedTextureName" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/TexturePaintPanel"]
+unique_name_in_owner = true
+theme_override_font_sizes/font_size = 12
+text = "Selected: none"
+
+[node name="SelectedTexturePreview" type="TextureRect" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/TexturePaintPanel"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 76)
+stretch_mode = 6
+expand_mode = 1
+
+[node name="TexturePickerScroll" type="ScrollContainer" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/TexturePaintPanel"]
+custom_minimum_size = Vector2(0, 160)
+
+[node name="TextureGrid" type="GridContainer" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/TexturePaintPanel/TexturePickerScroll"]
+unique_name_in_owner = true
+columns = 2
+theme_override_constants/h_separation = 4
+theme_override_constants/v_separation = 4
+
+[node name="TextureTileSizeRow" type="HBoxContainer" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/TexturePaintPanel"]
+unique_name_in_owner = true
+
+[node name="TextureTileSizeLabel" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/TexturePaintPanel/TextureTileSizeRow"]
+text = "Tile Size"
+
+[node name="TextureTileSizeValue" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/TexturePaintPanel/TextureTileSizeRow"]
+unique_name_in_owner = true
+size_flags_horizontal = 10
+horizontal_alignment = 2
+text = "4.0"
+
+[node name="TextureTileSizeSlider" type="HSlider" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/TexturePaintPanel"]
+unique_name_in_owner = true
+min_value = 0.5
+max_value = 16.0
+step = 0.5
+value = 4.0
+
+[node name="TextureDensityRow" type="HBoxContainer" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/TexturePaintPanel"]
+unique_name_in_owner = true
+
+[node name="TextureDensityLabel" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/TexturePaintPanel/TextureDensityRow"]
+text = "Density"
+
+[node name="TextureDensityValue" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/TexturePaintPanel/TextureDensityRow"]
+unique_name_in_owner = true
+size_flags_horizontal = 10
+horizontal_alignment = 2
+text = "0.75"
+
+[node name="TextureDensitySlider" type="HSlider" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/TexturePaintPanel"]
+unique_name_in_owner = true
+min_value = 0.1
+max_value = 1.5
+step = 0.05
+value = 0.75
+
+[node name="TexturePerfModeCheck" type="CheckBox" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/TexturePaintPanel"]
+unique_name_in_owner = true
+button_pressed = true
+text = "Performance Mode"
+
+[node name="TextureShapeModeRow" type="HBoxContainer" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/TexturePaintPanel"]
+unique_name_in_owner = true
+
+[node name="TextureShapeModeLabel" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/TexturePaintPanel/TextureShapeModeRow"]
+text = "Brush Shape"
+
+[node name="TextureShapeModeOption" type="OptionButton" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/TexturePaintPanel/TextureShapeModeRow"]
+unique_name_in_owner = true
+size_flags_horizontal = 3
+
+[node name="TextureShapeVariationRow" type="HBoxContainer" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/TexturePaintPanel"]
+unique_name_in_owner = true
+
+[node name="TextureShapeVariationLabel" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/TexturePaintPanel/TextureShapeVariationRow"]
+text = "Shape Var"
+
+[node name="TextureShapeVariationValue" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/TexturePaintPanel/TextureShapeVariationRow"]
+unique_name_in_owner = true
+size_flags_horizontal = 10
+horizontal_alignment = 2
+text = "35%"
+
+[node name="TextureShapeVariationSlider" type="HSlider" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/TexturePaintPanel"]
+unique_name_in_owner = true
+min_value = 0.0
+max_value = 1.0
+step = 0.01
+value = 0.35
+
+[node name="TextureEdgeSoftnessRow" type="HBoxContainer" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/TexturePaintPanel"]
+unique_name_in_owner = true
+
+[node name="TextureEdgeSoftnessLabel" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/TexturePaintPanel/TextureEdgeSoftnessRow"]
+text = "Edge Soft"
+
+[node name="TextureEdgeSoftnessValue" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/TexturePaintPanel/TextureEdgeSoftnessRow"]
+unique_name_in_owner = true
+size_flags_horizontal = 10
+horizontal_alignment = 2
+text = "0.78"
+
+[node name="TextureEdgeSoftnessSlider" type="HSlider" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/TexturePaintPanel"]
+unique_name_in_owner = true
+min_value = 0.0
+max_value = 1.0
+step = 0.01
+value = 0.78
+
+[node name="TextureCoverageRow" type="HBoxContainer" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/TexturePaintPanel"]
+unique_name_in_owner = true
+
+[node name="TextureCoverageLabel" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/TexturePaintPanel/TextureCoverageRow"]
+text = "Coverage"
+
+[node name="TextureCoverageValue" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/TexturePaintPanel/TextureCoverageRow"]
+unique_name_in_owner = true
+size_flags_horizontal = 10
+horizontal_alignment = 2
+text = "0.75"
+
+[node name="TextureCoverageSlider" type="HSlider" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/TexturePaintPanel"]
+unique_name_in_owner = true
+min_value = 0.2
+max_value = 1.0
+step = 0.05
+value = 0.75
+
+[node name="TextureRotationRow" type="HBoxContainer" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/TexturePaintPanel"]
+unique_name_in_owner = true
+
+[node name="TextureRotationLabel" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/TexturePaintPanel/TextureRotationRow"]
+text = "Rand Rot"
+
+[node name="TextureRotationValue" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/TexturePaintPanel/TextureRotationRow"]
+unique_name_in_owner = true
+size_flags_horizontal = 10
+horizontal_alignment = 2
+text = "30 deg"
+
+[node name="TextureRotationSlider" type="HSlider" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/TexturePaintPanel"]
+unique_name_in_owner = true
+min_value = 0.0
+max_value = 180.0
+step = 1.0
+value = 30.0
+
+[node name="TextureScaleVariationRow" type="HBoxContainer" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/TexturePaintPanel"]
+unique_name_in_owner = true
+
+[node name="TextureScaleVariationLabel" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/TexturePaintPanel/TextureScaleVariationRow"]
+text = "Scale Var"
+
+[node name="TextureScaleVariationValue" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/TexturePaintPanel/TextureScaleVariationRow"]
+unique_name_in_owner = true
+size_flags_horizontal = 10
+horizontal_alignment = 2
+text = "0.15"
+
+[node name="TextureScaleVariationSlider" type="HSlider" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/TexturePaintPanel"]
+unique_name_in_owner = true
+min_value = 0.0
+max_value = 0.6
+step = 0.01
+value = 0.15
+
+[node name="TextureExposureRow" type="HBoxContainer" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/TexturePaintPanel"]
+unique_name_in_owner = true
+
+[node name="TextureExposureLabel" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/TexturePaintPanel/TextureExposureRow"]
+text = "Exposure"
+
+[node name="TextureExposureValue" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/TexturePaintPanel/TextureExposureRow"]
+unique_name_in_owner = true
+size_flags_horizontal = 10
+horizontal_alignment = 2
+text = "0.95"
+
+[node name="TextureExposureSlider" type="HSlider" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/TexturePaintPanel"]
+unique_name_in_owner = true
+min_value = 0.5
+max_value = 1.4
+step = 0.01
+value = 0.95
+
+[node name="WallHeightRow" type="HBoxContainer" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
+unique_name_in_owner = true
+
+[node name="WallHeightLabel" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/WallHeightRow"]
 text = "Wall Height"
 
-[node name="WallHeightValue" type="Label" parent="Margin/Root/WallHeightRow"]
+[node name="WallHeightValue" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/WallHeightRow"]
 unique_name_in_owner = true
 size_flags_horizontal = 10
 horizontal_alignment = 2
 text = "3.4"
 
-[node name="WallHeightSlider" type="HSlider" parent="Margin/Root"]
+[node name="WallHeightSlider" type="HSlider" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
 unique_name_in_owner = true
 min_value = 1.8
 max_value = 8.0
 step = 0.1
 value = 3.4
 
-[node name="WallTypeRow" type="HBoxContainer" parent="Margin/Root"]
+[node name="WallTypeRow" type="HBoxContainer" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
+unique_name_in_owner = true
 
-[node name="WallTypeLabel" type="Label" parent="Margin/Root/WallTypeRow"]
+[node name="WallTypeLabel" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/WallTypeRow"]
 text = "Wall Type"
 
-[node name="WallTypeOption" type="OptionButton" parent="Margin/Root/WallTypeRow"]
+[node name="WallTypeOption" type="OptionButton" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/WallTypeRow"]
 unique_name_in_owner = true
 size_flags_horizontal = 3
 
-[node name="WallRectModeCheck" type="CheckBox" parent="Margin/Root"]
+[node name="WallRectModeCheck" type="CheckBox" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
 unique_name_in_owner = true
 text = "Rect Mode Toggle"
 
-[node name="WallMatchHeightsCheck" type="CheckBox" parent="Margin/Root"]
+[node name="WallMatchHeightsCheck" type="CheckBox" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
 unique_name_in_owner = true
 button_pressed = true
 text = "Match Connected Heights"
 
-[node name="WallFoundationCheck" type="CheckBox" parent="Margin/Root"]
+[node name="WallFoundationCheck" type="CheckBox" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
 unique_name_in_owner = true
 button_pressed = true
 text = "Add Foundation (Rect)"
 
-[node name="WallOpeningHeightSnapCheck" type="CheckBox" parent="Margin/Root"]
+[node name="WallOpeningHeightSnapCheck" type="CheckBox" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
 unique_name_in_owner = true
 button_pressed = true
 text = "Snap to Standard Heights"
 
-[node name="WallJitterCheck" type="CheckBox" parent="Margin/Root"]
+[node name="WallJitterCheck" type="CheckBox" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
 unique_name_in_owner = true
 button_pressed = true
 text = "Hand-Drawn Jitter"
 
-[node name="GridSnapCheck" type="CheckBox" parent="Margin/Root"]
+[node name="RiverSettingsLabel" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
+unique_name_in_owner = true
+theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(0.45, 0.8, 0.95, 1)
+text = "RIVER SETTINGS"
+
+[node name="RiverWidthRow" type="HBoxContainer" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
+unique_name_in_owner = true
+
+[node name="RiverWidthLabel" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/RiverWidthRow"]
+text = "Width"
+
+[node name="RiverWidthValue" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/RiverWidthRow"]
+unique_name_in_owner = true
+size_flags_horizontal = 10
+horizontal_alignment = 2
+text = "2.0"
+
+[node name="RiverWidthSlider" type="HSlider" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
+unique_name_in_owner = true
+min_value = 0.5
+max_value = 12.0
+step = 0.1
+value = 2.0
+
+[node name="RiverFlowRow" type="HBoxContainer" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
+unique_name_in_owner = true
+
+[node name="RiverFlowLabel" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/RiverFlowRow"]
+text = "Flow Speed"
+
+[node name="RiverFlowValue" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/RiverFlowRow"]
+unique_name_in_owner = true
+size_flags_horizontal = 10
+horizontal_alignment = 2
+text = "1.00"
+
+[node name="RiverFlowSlider" type="HSlider" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
+unique_name_in_owner = true
+min_value = 0.0
+max_value = 4.0
+step = 0.05
+value = 1.0
+
+[node name="RiverDepthRow" type="HBoxContainer" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
+unique_name_in_owner = true
+
+[node name="RiverDepthLabel" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/RiverDepthRow"]
+text = "Avg Depth"
+
+[node name="RiverDepthValue" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/RiverDepthRow"]
+unique_name_in_owner = true
+size_flags_horizontal = 10
+horizontal_alignment = 2
+text = "7.5"
+
+[node name="RiverDepthSlider" type="HSlider" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
+unique_name_in_owner = true
+min_value = 0.4
+max_value = 18.0
+step = 0.1
+value = 7.5
+
+[node name="RiverColorRow" type="HBoxContainer" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
+unique_name_in_owner = true
+
+[node name="RiverColorLabel" type="Label" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/RiverColorRow"]
+text = "Water Color"
+
+[node name="RiverColorButton" type="ColorPickerButton" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot/RiverColorRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(120, 28)
+size_flags_horizontal = 10
+color = Color(0.2, 0.5, 0.3, 1)
+
+[node name="GridSnapCheck" type="CheckBox" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
 unique_name_in_owner = true
 button_pressed = true
 text = "Grid Snap"
 
-[node name="ToolHint" type="RichTextLabel" parent="Margin/Root"]
+[node name="ToolHint" type="RichTextLabel" parent="Root/PopoutPanel/PopoutMargin/PopoutRoot"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 110)
 bbcode_enabled = true
 fit_content = true
 scroll_active = false
-text = "[b]Stamp:[/b] LMB place, RMB/Q/E rotate\n[b]Sculpt:[/b] Hold LMB and drag\nMouse wheel zoom, MMB pan, RMB orbit"
+text = "[b]Select:[/b] choose a tool group and tool"

@@ -1,6 +1,10 @@
 extends Node3D
 
 const TerrainRuntimeEditor = preload("res://scripts/services/terrain_runtime_editor.gd")
+const OriginShiftSystemScript: Script = preload("res://scripts/world/origin_shift_system.gd")
+const DistantHorizonSystemScript: Script = preload("res://scripts/world/distant_horizon_system.gd")
+const TerrainTexturePainterClass = preload("res://scripts/terrain/terrain_texture_painter.gd")
+const WaterSystemScript: Script = preload("res://scripts/water/water_system.gd")
 
 @onready var terrain_placeholder: Node3D = $Terrain
 @onready var camera: Camera3D = $Camera3D
@@ -27,6 +31,39 @@ var _is_tool_dragging: bool = false
 var _terrain_node: Node = null
 var _grass_system: Node3D = null
 var _scatter_system: Node3D = null
+var _water_system: Node = null
+var _active_river_id: int = -1
+var _river_width: float = 2.0
+var _river_flow_speed: float = 1.0
+var _river_average_depth: float = 7.5
+var _water_color: Color = Color(0.2, 0.5, 0.3, 1.0)
+var _river_handle_root: Node3D = null
+var _river_point_handles: Array[Dictionary] = []
+var _dragging_river_handle: bool = false
+var _drag_river_id: int = -1
+var _drag_point_index: int = -1
+var _selected_river_id: int = -1
+var _selected_river_point_index: int = -1
+var _river_preview_node: MeshInstance3D = null
+var _texture_painter: RefCounted = null
+var _selected_texture_id: String = ""
+var _texture_tile_size: float = 4.0
+var _texture_density: float = 0.75
+var _texture_perf_mode: bool = true
+var _texture_brush_shape_mode: String = "circle"
+var _texture_shape_variation: float = 0.35
+var _texture_edge_softness: float = 0.78
+var _texture_coverage_limit: float = 0.75
+var _texture_random_rotation: float = 30.0
+var _texture_scale_variation: float = 0.15
+var _texture_exposure: float = 0.95
+var _texture_stroke_offset: Vector2 = Vector2.ZERO
+var _texture_stroke_rotation: float = 0.0
+var _texture_stroke_scale: float = 1.0
+var _texture_stroke_seed: float = 0.0
+var _texture_stroke_shape_variant: int = 0
+var _cliff_mode: bool = false
+var _overhang_amount: float = 0.3
 var _scatter_density: float = 1.2
 var _scatter_scale_min: float = 0.85
 var _scatter_scale_max: float = 1.35
@@ -51,7 +88,11 @@ var _lightweight_editor_mode: bool = false
 var _is_editor_runtime: bool = OS.has_feature("editor")
 
 const STROKE_INTERVAL_SEC: float = 1.0 / 90.0
+const TEXTURE_STROKE_INTERVAL_SEC: float = 1.0 / 55.0
+const TEXTURE_STROKE_INTERVAL_PERF_SEC: float = 1.0 / 34.0
 const STAMP_DRAG_INTERVAL_SEC: float = 1.0 / 16.0
+## Distance (meters) in front of the camera at which Distant Mountains are placed.
+const HORIZON_MOUNTAIN_PLACE_DISTANCE: float = 3000.0
 const MENU_BAR_SCRIPT: Script = preload("res://scripts/ui/main_menu_bar.gd")
 const TOOLBAR_SCENE: PackedScene = preload("res://scenes/ui/WorldToolsToolbar.tscn")
 const ASSET_BROWSER_SCENE: PackedScene = preload("res://scenes/ui/AssetBrowser.tscn")
@@ -95,6 +136,10 @@ var _dd_import_settings := {
 }
 var _current_map_path: String = DEFAULT_MAP_SAVE_PATH
 
+## Large-world systems
+var _origin_shift_system: Node = null
+var _horizon_system: Node3D = null
+
 func _ready() -> void:
 	_ensure_editor_ui_layout()
 	if menu_bar != null:
@@ -130,7 +175,7 @@ func _ready() -> void:
 	_grass_system.name = "GrassSystem"
 	_grass_system.set_script(GRASS_SYSTEM_SCRIPT)
 	terrain_placeholder.add_child(_grass_system)
-	_grass_system.call("initialize", _terrain_node, camera, 256.0)
+	_grass_system.call("initialize", Vector2(256.0, 256.0))
 
 	_scatter_system = Node3D.new()
 	_scatter_system.name = "ScatterSystem"
@@ -138,7 +183,46 @@ func _ready() -> void:
 	add_child(_scatter_system)
 	if _scatter_system.has_method("initialize"):
 		_scatter_system.call("initialize", _terrain_node, 256.0)
+	
+	# Water System — manages rivers and water bodies
+	_water_system = Node.new()
+	_water_system.name = "WaterSystem"
+	_water_system.set_script(WaterSystemScript)
+	add_child(_water_system)
+	if _water_system.has_method("initialize"):
+		_water_system.call("initialize", self, _terrain_node)
+	
+	# Texture Painter — discovers available textures for painting
+	_texture_painter = TerrainTexturePainterClass.new()
+	if world_tools != null and world_tools.has_method("populate_texture_buttons"):
+		world_tools.call("populate_texture_buttons", _texture_painter)
+	
 	_ensure_character_setup()
+
+	# --- Large-world systems --------------------------------------------------
+	# Extend the camera far plane so distant mountains (thousands of meters
+	# away) are always visible.
+	camera.far = 100000.0
+
+	# Distant Horizon System — holds procedural low-poly mountain landmarks.
+	_horizon_system = Node3D.new()
+	_horizon_system.name = "DistantHorizonSystem"
+	_horizon_system.set_script(DistantHorizonSystemScript)
+	add_child(_horizon_system)
+
+	# Origin Shift System — recenters the world when the camera drifts far.
+	_origin_shift_system = Node.new()
+	_origin_shift_system.name = "OriginShiftSystem"
+	_origin_shift_system.set_script(OriginShiftSystemScript)
+	add_child(_origin_shift_system)
+	_origin_shift_system.call("setup",
+		camera,
+		terrain_placeholder,
+		stamp_root,
+		_scatter_system,
+		Callable(self, "_get_or_create_wall_system"),
+		_horizon_system)
+	# -------------------------------------------------------------------------
 
 	if AUTO_DEBUG_SCREENSHOTS:
 		call_deferred("_capture_full_editor_screenshot", "startup")
@@ -155,6 +239,8 @@ func _exit_tree() -> void:
 		_stamp_preview.queue_free()
 	if _brush_preview != null:
 		_brush_preview.queue_free()
+	if _river_preview_node != null:
+		_river_preview_node.queue_free()
 
 func _process(delta: float) -> void:
 	_perf_overlay_accum += delta
@@ -164,8 +250,11 @@ func _process(delta: float) -> void:
 	_update_live_previews()
 	if _is_tool_dragging and _current_tool != "stamp":
 		_stroke_interval_accum += delta
-		while _stroke_interval_accum >= STROKE_INTERVAL_SEC:
-			_stroke_interval_accum -= STROKE_INTERVAL_SEC
+		var stroke_interval: float = STROKE_INTERVAL_SEC
+		if _current_tool == "texturepaint" or _current_tool == "textureerase":
+			stroke_interval = TEXTURE_STROKE_INTERVAL_PERF_SEC if _texture_perf_mode else TEXTURE_STROKE_INTERVAL_SEC
+		while _stroke_interval_accum >= stroke_interval:
+			_stroke_interval_accum -= stroke_interval
 			_continue_tool_stroke()
 	if _is_stamp_dragging and _current_tool == "stamp":
 		_stamp_drag_interval_accum += delta
@@ -174,6 +263,9 @@ func _process(delta: float) -> void:
 			_stamp_at_mouse(true)
 	if _current_tool == "wall" and _wall_tool != null and _wall_tool.has_method("update_preview"):
 		_wall_tool.call("update_preview")
+	if _current_tool == "riverdraw":
+		_update_river_handle_positions()
+		_update_river_live_preview()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if _current_tool != "wall" and _route_input_to_characters(event):
@@ -188,6 +280,13 @@ func _unhandled_input(event: InputEvent) -> void:
 					get_viewport().set_input_as_handled()
 					return
 		match event.keycode:
+			KEY_R:
+				if _has_active_character():
+					_deselect_all_characters()
+				_switch_tool("select")
+				_set_status("Released character control; back to editing mode")
+				get_viewport().set_input_as_handled()
+				return
 			KEY_ESCAPE:
 				if _current_tool == "wall" and _wall_tool != null and _wall_tool.has_method("cancel_chain"):
 					if bool(_wall_tool.call("cancel_chain")):
@@ -232,10 +331,6 @@ func _unhandled_input(event: InputEvent) -> void:
 				_switch_tool("wall")
 				get_viewport().set_input_as_handled()
 				return
-			KEY_0:
-				_switch_tool("scatterpaint")
-				get_viewport().set_input_as_handled()
-				return
 
 	if get_viewport().gui_get_hovered_control() != null:
 		return
@@ -247,6 +342,41 @@ func _unhandled_input(event: InputEvent) -> void:
 				get_viewport().set_input_as_handled()
 		return
 
+	if _current_tool == "riverdraw":
+		if event is InputEventMouseButton:
+			var mb_event: InputEventMouseButton = event as InputEventMouseButton
+			if mb_event.button_index == MOUSE_BUTTON_LEFT and mb_event.pressed:
+				var picked: Dictionary = _pick_river_handle(get_viewport().get_mouse_position())
+				if not picked.is_empty():
+					_dragging_river_handle = true
+					_drag_river_id = int(picked.get("river_id", -1))
+					_drag_point_index = int(picked.get("point_index", -1))
+					_selected_river_id = _drag_river_id
+					_selected_river_point_index = _drag_point_index
+					_active_river_id = _selected_river_id
+					_update_river_handle_visuals()
+					_set_status("Dragging river point %d" % _drag_point_index)
+				else:
+					_handle_river_draw_click()
+				get_viewport().set_input_as_handled()
+				return
+			if mb_event.button_index == MOUSE_BUTTON_LEFT and not mb_event.pressed:
+				if _dragging_river_handle:
+					_dragging_river_handle = false
+					_drag_river_id = -1
+					_drag_point_index = -1
+					_refresh_river_handles()
+					get_viewport().set_input_as_handled()
+					return
+			if mb_event.button_index == MOUSE_BUTTON_RIGHT and mb_event.pressed:
+				_finish_river_draw()
+				get_viewport().set_input_as_handled()
+				return
+		if event is InputEventMouseMotion and _dragging_river_handle:
+			_drag_active_river_handle_to_mouse()
+			get_viewport().set_input_as_handled()
+			return
+
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed:
 			if _current_tool == "select":
@@ -254,6 +384,10 @@ func _unhandled_input(event: InputEvent) -> void:
 					_deselect_all_characters()
 					_set_status("Cleared selection")
 					get_viewport().set_input_as_handled()
+				return
+			if _current_tool == "horizonmountain":
+				_place_horizon_mountain_at_mouse()
+				get_viewport().set_input_as_handled()
 				return
 			if _current_tool == "stamp":
 				_stamp_at_mouse(false)
@@ -265,6 +399,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			_is_stamp_dragging = false
 			if _is_tool_dragging:
 				_is_tool_dragging = false
+				if _terrain_node != null and (_current_tool == "texturepaint" or _current_tool == "textureerase") and _terrain_node.has_method("end_texture_stroke"):
+					_terrain_node.call("end_texture_stroke")
 				if not _current_tool.begins_with("grass") and not _current_tool.begins_with("scatter"):
 					_runtime_terrain_editor.end_stroke()
 
@@ -289,6 +425,14 @@ func _unhandled_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 		elif event.keycode == KEY_E:
 			_rotate_stamp_preview(45.0)
+			get_viewport().set_input_as_handled()
+
+	if event is InputEventKey and event.pressed and not event.echo and _current_tool == "riverdraw":
+		if event.keycode == KEY_ESCAPE:
+			_finish_river_draw()
+			get_viewport().set_input_as_handled()
+		elif event.keycode == KEY_DELETE or event.keycode == KEY_BACKSPACE:
+			_delete_selected_river_point()
 			get_viewport().set_input_as_handled()
 
 func _on_menu_action_requested(action: String) -> void:
@@ -341,9 +485,18 @@ func _on_menu_action_requested(action: String) -> void:
 			_show_about_dialog()
 
 func _on_tool_changed(tool_name: String) -> void:
+	if _current_tool == "riverdraw" and tool_name != "riverdraw":
+		_finish_river_draw()
 	if _current_tool != tool_name:
 		_cancel_active_interactions()
 	_current_tool = tool_name
+	if _current_tool == "riverdraw":
+		_refresh_river_handles()
+		_set_river_handles_visible(true)
+		_set_river_preview_visible(_active_river_id >= 0)
+	else:
+		_set_river_handles_visible(false)
+		_set_river_preview_visible(false)
 	if _current_tool == "wall":
 		_activate_wall_tool()
 	else:
@@ -378,6 +531,21 @@ func _on_tool_setting_changed(setting_name: String, value: Variant) -> void:
 		"grass_height":
 			if _grass_system != null and _grass_system.has_method("set_grass_height"):
 				_grass_system.call("set_grass_height", float(value))
+		"grass_sway":
+			if _grass_system != null and _grass_system.has_method("set_sway_amount"):
+				_grass_system.call("set_sway_amount", float(value))
+		"grass_base_color":
+			if _grass_system != null and _grass_system.has_method("set_base_color"):
+				_grass_system.call("set_base_color", value as Color)
+		"grass_tip_color":
+			if _grass_system != null and _grass_system.has_method("set_tip_color"):
+				_grass_system.call("set_tip_color", value as Color)
+		"grass_stroke_color":
+			if _grass_system != null and _grass_system.has_method("set_stroke_color"):
+				_grass_system.call("set_stroke_color", value as Color)
+		"grass_noise_strength":
+			if _grass_system != null and _grass_system.has_method("set_noise_strength"):
+				_grass_system.call("set_noise_strength", float(value))
 		"scatter_density":
 			_scatter_density = float(value)
 		"scatter_scale_min":
@@ -388,6 +556,36 @@ func _on_tool_setting_changed(setting_name: String, value: Variant) -> void:
 			_scatter_rotation_randomness = float(value)
 		"scatter_tilt":
 			_scatter_tilt = float(value)
+		"texture_tile_size":
+			_texture_tile_size = float(value)
+		"texture_density":
+			_texture_density = float(value)
+		"texture_perf_mode":
+			_texture_perf_mode = bool(value)
+			if _terrain_node != null and _terrain_node.has_method("set_texture_paint_performance_mode"):
+				_terrain_node.call("set_texture_paint_performance_mode", _texture_perf_mode)
+		"texture_brush_shape_mode":
+			_texture_brush_shape_mode = String(value)
+		"texture_shape_variation":
+			_texture_shape_variation = float(value)
+		"texture_edge_softness":
+			_texture_edge_softness = float(value)
+		"texture_coverage_limit":
+			_texture_coverage_limit = float(value)
+		"texture_random_rotation":
+			_texture_random_rotation = float(value)
+		"texture_scale_variation":
+			_texture_scale_variation = float(value)
+		"texture_exposure":
+			_texture_exposure = float(value)
+		"selected_texture_id":
+			_selected_texture_id = String(value)
+			if _texture_painter != null:
+				_texture_painter.selected_texture_id = String(value)
+		"cliff_mode":
+			_cliff_mode = bool(value)
+		"overhang_amount":
+			_overhang_amount = float(value)
 		"wall_height":
 			if _wall_tool != null and _wall_tool.has_method("set_segment_height"):
 				_wall_tool.call("set_segment_height", float(value))
@@ -409,6 +607,26 @@ func _on_tool_setting_changed(setting_name: String, value: Variant) -> void:
 		"wall_jitter":
 			if _wall_tool != null and _wall_tool.has_method("set_jitter_enabled"):
 				_wall_tool.call("set_jitter_enabled", bool(value))
+		"river_width":
+			_river_width = float(value)
+			var target_river_id: int = _selected_river_id if _selected_river_id >= 0 else _active_river_id
+			if target_river_id >= 0 and _water_system != null and _water_system.has_method("set_river_width_all"):
+				_water_system.call("set_river_width_all", target_river_id, _river_width)
+		"river_flow_speed":
+			if _water_system != null:
+				_river_flow_speed = float(value)
+				if _water_system.has_method("set_flow_speed"):
+					_water_system.call("set_flow_speed", _river_flow_speed)
+		"river_average_depth":
+			_river_average_depth = float(value)
+			var target_depth_river_id: int = _selected_river_id if _selected_river_id >= 0 else _active_river_id
+			if target_depth_river_id >= 0 and _water_system != null and _water_system.has_method("set_river_average_depth"):
+				_water_system.call("set_river_average_depth", target_depth_river_id, _river_average_depth)
+		"water_color":
+			if _water_system != null:
+				_water_color = value as Color
+				if _water_system.has_method("set_water_color"):
+					_water_system.call("set_water_color", _water_color)
 
 func _on_prefab_selected(prefab_path: String) -> void:
 	_selected_prefab = prefab_path
@@ -430,7 +648,7 @@ func _on_prefab_activated(prefab_path: String) -> void:
 func _on_optimize_button_pressed() -> void:
 	_apply_editor_optimization_preset(true)
 
-func _create_new_flat_map(include_seed_content: bool = true) -> void:
+func _create_new_flat_map(_include_seed_content: bool = true) -> void:
 	for child in stamp_root.get_children():
 		child.queue_free()
 	var wall_system: Node = get_node_or_null("WallSystem")
@@ -455,20 +673,318 @@ func _create_new_flat_map(include_seed_content: bool = true) -> void:
 
 	if _grass_system != null and _grass_system.has_method("clear_all"):
 		_grass_system.call("clear_all")
+	if _water_system != null and _water_system.has_method("clear_all"):
+		_water_system.call("clear_all")
+	_active_river_id = -1
+	if _horizon_system != null and is_instance_valid(_horizon_system) and _horizon_system.has_method("clear_all"):
+		_horizon_system.call("clear_all")
 	_reset_characters_on_new_map()
-
-	if include_seed_content:
-		_seed_default_prefabs()
-		_focus_camera_on_seed_content()
 
 	if camera_manager != null and camera_manager.has_method("recenter"):
 		camera_manager.call("recenter")
 	if camera_manager != null and camera_manager.has_method("set_top_down_default"):
 		camera_manager.call("set_top_down_default")
 
-	_set_status("New map ready: flat editable heightmap terrain and starter props")
+	_set_status("New map ready: blank flat terrain. Add terrain and assets with tools.")
 	if AUTO_DEBUG_SCREENSHOTS:
 		call_deferred("_capture_full_editor_screenshot", "new_map")
+
+
+func _handle_river_draw_click() -> void:
+	if _water_system == null:
+		_set_status("Water system unavailable")
+		return
+
+	var hit: Variant = _get_mouse_world_position()
+	if not (hit is Vector3):
+		return
+
+	var world_pos: Vector3 = hit as Vector3
+	if _active_river_id < 0:
+		if _selected_river_id >= 0 and _water_system.has_method("get_river"):
+			var selected_river_var: Variant = _water_system.call("get_river", _selected_river_id)
+			if selected_river_var is Dictionary and not (selected_river_var as Dictionary).is_empty():
+				_active_river_id = _selected_river_id
+				if _water_system.has_method("add_river_point"):
+					_water_system.call("add_river_point", _active_river_id, world_pos)
+				if _water_system.has_method("set_river_width_all"):
+					_water_system.call("set_river_width_all", _active_river_id, _river_width)
+				_refresh_river_handles()
+				_set_status("River #%d: extended" % _active_river_id)
+				return
+
+		if not _water_system.has_method("create_river"):
+			_set_status("Water system missing create_river")
+			return
+		var river_node: Variant = _water_system.call("create_river", "")
+		if river_node is MeshInstance3D and (river_node as MeshInstance3D).has_meta("river_id"):
+			_active_river_id = int((river_node as MeshInstance3D).get_meta("river_id"))
+		if _active_river_id < 0:
+			_set_status("Failed to start river")
+			return
+		_selected_river_id = _active_river_id
+		_selected_river_point_index = 1
+		if _water_system.has_method("set_river_point_position"):
+			_water_system.call("set_river_point_position", _active_river_id, 0, world_pos)
+			_water_system.call("set_river_point_position", _active_river_id, 1, world_pos + Vector3(0.2, 0.0, 0.2))
+		if _water_system.has_method("set_river_width_all"):
+			_water_system.call("set_river_width_all", _active_river_id, _river_width)
+		if _water_system.has_method("set_river_average_depth"):
+			_water_system.call("set_river_average_depth", _active_river_id, _river_average_depth)
+		_set_river_preview_visible(true)
+		_set_status("Started river #%d (LMB add points, RMB/Esc finish)" % _active_river_id)
+		return
+
+	if _water_system.has_method("add_river_point"):
+		_water_system.call("add_river_point", _active_river_id, world_pos)
+	if _water_system.has_method("set_river_width_all"):
+		_water_system.call("set_river_width_all", _active_river_id, _river_width)
+	if _water_system.has_method("set_river_average_depth"):
+		_water_system.call("set_river_average_depth", _active_river_id, _river_average_depth)
+	if _water_system.has_method("get_river"):
+		var river_var: Variant = _water_system.call("get_river", _active_river_id)
+		if river_var is Dictionary:
+			var curve: Curve3D = (river_var as Dictionary).get("curve", null)
+			if curve != null:
+				_selected_river_point_index = max(0, curve.get_point_count() - 1)
+	_selected_river_id = _active_river_id
+	_refresh_river_handles()
+	_set_status("River #%d: point added" % _active_river_id)
+
+
+func _finish_river_draw() -> void:
+	var finished_river_id: int = _active_river_id
+	if _active_river_id >= 0:
+		_set_status("River #%d finished" % _active_river_id)
+	_active_river_id = -1
+	if finished_river_id >= 0 and _water_system != null and _water_system.has_method("shape_riverbed_for_river"):
+		_water_system.call("shape_riverbed_for_river", finished_river_id)
+	_selected_river_point_index = -1
+	_refresh_river_handles()
+	_set_river_preview_visible(false)
+	_update_river_handle_visuals()
+
+
+func _ensure_river_handle_root() -> void:
+	if _river_handle_root != null and is_instance_valid(_river_handle_root):
+		return
+	_river_handle_root = Node3D.new()
+	_river_handle_root.name = "RiverHandles"
+	add_child(_river_handle_root)
+
+
+func _set_river_handles_visible(show_handles: bool) -> void:
+	_ensure_river_handle_root()
+	_river_handle_root.visible = show_handles
+
+
+func _ensure_river_preview_node() -> void:
+	if _river_preview_node != null and is_instance_valid(_river_preview_node):
+		return
+	_river_preview_node = MeshInstance3D.new()
+	_river_preview_node.name = "RiverPreviewSegment"
+	_river_preview_node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var box := BoxMesh.new()
+	box.size = Vector3(1.0, 0.04, 1.0)
+	_river_preview_node.mesh = box
+	var mat := StandardMaterial3D.new()
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.albedo_color = Color(0.15, 0.9, 1.0, 0.38)
+	mat.emission_enabled = true
+	mat.emission = Color(0.08, 0.55, 0.65)
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	_river_preview_node.material_override = mat
+	add_child(_river_preview_node)
+	_river_preview_node.visible = false
+
+
+func _set_river_preview_visible(show_preview: bool) -> void:
+	if not show_preview:
+		if _river_preview_node != null and is_instance_valid(_river_preview_node):
+			_river_preview_node.visible = false
+		return
+	_ensure_river_preview_node()
+	_river_preview_node.visible = true
+
+
+func _update_river_live_preview() -> void:
+	if _current_tool != "riverdraw" or _active_river_id < 0 or _dragging_river_handle:
+		_set_river_preview_visible(false)
+		return
+	if _water_system == null or not _water_system.has_method("get_river"):
+		_set_river_preview_visible(false)
+		return
+	var hit: Variant = _get_mouse_world_position()
+	if not (hit is Vector3):
+		_set_river_preview_visible(false)
+		return
+	var river_var: Variant = _water_system.call("get_river", _active_river_id)
+	if not (river_var is Dictionary):
+		_set_river_preview_visible(false)
+		return
+	var river: Dictionary = river_var as Dictionary
+	var curve: Curve3D = river.get("curve", null)
+	if curve == null or curve.get_point_count() <= 0:
+		_set_river_preview_visible(false)
+		return
+
+	var last_point: Vector3 = curve.get_point_position(curve.get_point_count() - 1)
+	var mouse_point: Vector3 = hit as Vector3
+	var segment: Vector3 = mouse_point - last_point
+	var segment_length: float = segment.length()
+	if segment_length < 0.05:
+		_set_river_preview_visible(false)
+		return
+
+	_ensure_river_preview_node()
+	_set_river_preview_visible(true)
+	var box_mesh: BoxMesh = _river_preview_node.mesh as BoxMesh
+	if box_mesh != null:
+		box_mesh.size = Vector3(maxf(0.1, _river_width * 2.0), 0.04, maxf(0.1, segment_length))
+
+	var mid_point: Vector3 = (last_point + mouse_point) * 0.5 + Vector3(0.0, 0.03, 0.0)
+	var dir: Vector3 = segment.normalized()
+	var preview_basis: Basis = Basis.looking_at(dir, Vector3.UP)
+	_river_preview_node.global_transform = Transform3D(preview_basis, mid_point)
+
+
+func _clear_river_handles() -> void:
+	_ensure_river_handle_root()
+	for child in _river_handle_root.get_children():
+		child.queue_free()
+	_river_point_handles.clear()
+
+
+func _create_river_handle_node() -> MeshInstance3D:
+	var handle := MeshInstance3D.new()
+	handle.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var mesh := SphereMesh.new()
+	mesh.radius = 0.2
+	mesh.height = 0.4
+	handle.mesh = mesh
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(0.1, 0.9, 1.0, 0.9)
+	mat.emission_enabled = true
+	mat.emission = Color(0.12, 0.85, 1.0)
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	handle.material_override = mat
+	return handle
+
+
+func _update_river_handle_visuals() -> void:
+	for item in _river_point_handles:
+		var node: MeshInstance3D = item.get("node", null)
+		if node == null or not is_instance_valid(node):
+			continue
+		if not (node.material_override is StandardMaterial3D):
+			continue
+		var mat: StandardMaterial3D = node.material_override as StandardMaterial3D
+		var river_id: int = int(item.get("river_id", -1))
+		var point_index: int = int(item.get("point_index", -1))
+		var is_selected_river: bool = river_id == _selected_river_id
+		var is_selected_point: bool = is_selected_river and point_index == _selected_river_point_index
+		if is_selected_point:
+			mat.albedo_color = Color(1.0, 0.82, 0.2, 0.95)
+			mat.emission = Color(0.95, 0.62, 0.08)
+		elif is_selected_river:
+			mat.albedo_color = Color(0.2, 1.0, 0.55, 0.9)
+			mat.emission = Color(0.1, 0.8, 0.35)
+		else:
+			mat.albedo_color = Color(0.1, 0.9, 1.0, 0.9)
+			mat.emission = Color(0.12, 0.85, 1.0)
+
+
+func _refresh_river_handles() -> void:
+	if _water_system == null or not _water_system.has_method("get_rivers"):
+		return
+	_clear_river_handles()
+	var rivers_variant: Variant = _water_system.call("get_rivers")
+	if not (rivers_variant is Dictionary):
+		return
+	var rivers: Dictionary = rivers_variant as Dictionary
+	for river_id_variant in rivers.keys():
+		var river_id: int = int(river_id_variant)
+		var river: Dictionary = rivers[river_id]
+		var curve: Curve3D = river.get("curve", null)
+		if curve == null:
+			continue
+		for i in range(curve.get_point_count()):
+			var handle: MeshInstance3D = _create_river_handle_node()
+			_river_handle_root.add_child(handle)
+			handle.position = curve.get_point_position(i) + Vector3(0.0, 0.08, 0.0)
+			_river_point_handles.append({
+				"river_id": river_id,
+				"point_index": i,
+				"node": handle,
+			})
+	_update_river_handle_visuals()
+
+
+func _delete_selected_river_point() -> void:
+	if _selected_river_id < 0 or _selected_river_point_index < 0:
+		return
+	if _water_system == null or not _water_system.has_method("remove_river_point"):
+		return
+	_water_system.call("remove_river_point", _selected_river_id, _selected_river_point_index)
+	_selected_river_point_index = -1
+	_refresh_river_handles()
+	_set_status("Deleted selected river point")
+
+
+func _update_river_handle_positions() -> void:
+	if _water_system == null or _river_point_handles.is_empty():
+		return
+	for item in _river_point_handles:
+		var river_id: int = int(item.get("river_id", -1))
+		var point_index: int = int(item.get("point_index", -1))
+		var node: MeshInstance3D = item.get("node", null)
+		if node == null or not is_instance_valid(node):
+			continue
+		if not node.is_inside_tree():
+			continue
+		if not _water_system.has_method("get_river"):
+			continue
+		var river_var: Variant = _water_system.call("get_river", river_id)
+		if not (river_var is Dictionary):
+			continue
+		var river: Dictionary = river_var as Dictionary
+		var curve: Curve3D = river.get("curve", null)
+		if curve == null or point_index < 0 or point_index >= curve.get_point_count():
+			continue
+		node.position = curve.get_point_position(point_index) + Vector3(0.0, 0.08, 0.0)
+
+
+func _pick_river_handle(mouse_pos: Vector2) -> Dictionary:
+	if _river_point_handles.is_empty() or camera == null:
+		return {}
+	var best_distance: float = 16.0
+	var best: Dictionary = {}
+	for item in _river_point_handles:
+		var node: MeshInstance3D = item.get("node", null)
+		if node == null or not is_instance_valid(node):
+			continue
+		if not node.is_inside_tree():
+			continue
+		if camera.is_position_behind(node.global_position):
+			continue
+		var screen_pos: Vector2 = camera.unproject_position(node.global_position)
+		var d: float = mouse_pos.distance_to(screen_pos)
+		if d < best_distance:
+			best_distance = d
+			best = item
+	return best
+
+
+func _drag_active_river_handle_to_mouse() -> void:
+	if _drag_river_id < 0 or _drag_point_index < 0:
+		return
+	if _water_system == null or not _water_system.has_method("set_river_point_position"):
+		return
+	var hit: Variant = _get_mouse_world_position()
+	if not (hit is Vector3):
+		return
+	var world_pos: Vector3 = hit as Vector3
+	_water_system.call("set_river_point_position", _drag_river_id, _drag_point_index, world_pos)
 
 func _setup_dungeondraft_import() -> void:
 	_dungeondraft_importer = DUNGEONDRAFT_IMPORTER_SCRIPT.new()
@@ -828,10 +1344,15 @@ func _clear_active_tool(reason: String) -> void:
 func _cancel_active_interactions() -> void:
 	_is_tool_dragging = false
 	_is_stamp_dragging = false
+	_dragging_river_handle = false
+	_drag_river_id = -1
+	_drag_point_index = -1
 	_stroke_interval_accum = 0.0
 	_stamp_drag_interval_accum = 0.0
 	_last_stamp_grid_key = Vector2i(999999, 999999)
 	_runtime_terrain_editor.end_stroke()
+	_set_river_handles_visible(false)
+	_set_river_preview_visible(false)
 
 func _route_input_to_characters(event: InputEvent) -> bool:
 	if event is not InputEventMouseButton:
@@ -1100,6 +1621,14 @@ func _update_active_tool_feedback() -> void:
 			viewport_hint.text = "Mode: %s | Hold LMB to paint | Radius %.1f | Density %.2f | Esc clears tool" % [_format_tool_name(_current_tool), _brush_size, _brush_strength]
 		"scatterpaint", "scattererase":
 			viewport_hint.text = "Mode: %s | Hold LMB to spray/erase | Radius %.1f | Density %.2f | Scale %.2f-%.2f" % [_format_tool_name(_current_tool), _brush_size, _scatter_density, _scatter_scale_min, _scatter_scale_max]
+		"texturepaint":
+			viewport_hint.text = "Mode: Texture Paint | Radius %.1f | Strength %.2f | Density %.2f | Shape %s | Var %d%% | Soft %.2f" % [_brush_size, _brush_strength, _texture_density, _texture_brush_shape_mode.capitalize(), int(round(_texture_shape_variation * 100.0)), _texture_edge_softness]
+		"textureerase":
+			viewport_hint.text = "Mode: Texture Erase | Radius %.1f | Strength %.2f" % [_brush_size, _brush_strength]
+		"horizonmountain":
+			viewport_hint.text = "Mode: Distant Mountain | LMB: click to place %dm away in that direction | Esc clears tool" % [int(HORIZON_MOUNTAIN_PLACE_DISTANCE)]
+		"riverdraw":
+			viewport_hint.text = "Mode: Draw River | LMB add points | RMB/Esc finish river | Width %.1f | Flow %.2f | Depth %.1f" % [_river_width, _river_flow_speed, _river_average_depth]
 		_:
 			viewport_hint.text = "Mode: %s" % _format_tool_name(_current_tool)
 
@@ -1115,10 +1644,30 @@ func _format_tool_name(tool_name: String) -> String:
 			return "Scatter Erase"
 		"wall":
 			return "Smart Wall"
+		"riverdraw":
+			return "Draw River"
 		"select":
 			return "Select / None"
 		_:
 			return tool_name.capitalize()
+
+## Place a distant mountain landmark in the direction the camera is pointing.
+## The mountain is always placed DEFAULT_PLACE_DISTANCE meters along the
+## mouse-ray direction so the GM can aim at the horizon and click.
+func _place_horizon_mountain_at_mouse() -> void:
+	if _horizon_system == null or not is_instance_valid(_horizon_system):
+		_set_status("Horizon system not initialised")
+		return
+	var mouse_pos: Vector2 = get_viewport().get_mouse_position()
+	var ray_origin: Vector3 = camera.project_ray_origin(mouse_pos)
+	var ray_dir: Vector3 = camera.project_ray_normal(mouse_pos)
+	var dist: float = HORIZON_MOUNTAIN_PLACE_DISTANCE
+	var world_pos: Vector3 = ray_origin + ray_dir * dist
+	world_pos.y = 0.0  # anchor mountains at ground level
+	var id: int = _horizon_system.call("add_mountain", world_pos)
+	var range_m: int = int(Vector2(world_pos.x, world_pos.z).length())
+	_set_status("Placed distant mountain #%d at (%.0f, %.0f) — %dm from origin" % [
+		id, world_pos.x, world_pos.z, range_m])
 
 func _stamp_at_mouse(is_drag_pass: bool) -> void:
 	if _selected_prefab == "":
@@ -1177,7 +1726,29 @@ func _begin_tool_stroke() -> void:
 		if _grass_system != null and _grass_system.has_method("apply_brush"):
 			_grass_system.call("apply_brush", _current_tool, hit as Vector3, _brush_size, _brush_strength)
 		return
-	_runtime_terrain_editor.set_tool(_current_tool, _brush_size, _brush_strength, _flatten_height)
+	if _current_tool == "texturepaint":
+		if _terrain_node != null and _texture_painter != null:
+			if _terrain_node.has_method("begin_texture_stroke"):
+				_terrain_node.call("begin_texture_stroke", _texture_perf_mode, _brush_size)
+			var max_off: float = _texture_tile_size * 0.65
+			_texture_stroke_offset = Vector2(randf_range(-max_off, max_off), randf_range(-max_off, max_off))
+			_texture_stroke_rotation = randf_range(-_texture_random_rotation, _texture_random_rotation)
+			_texture_stroke_scale = 1.0 + randf_range(-_texture_scale_variation, _texture_scale_variation)
+			_texture_stroke_seed = randf() * 4096.0
+			if _texture_brush_shape_mode == "varied":
+				_texture_stroke_shape_variant = randi_range(0, 2)
+			else:
+				_texture_stroke_shape_variant = 0
+			var tex_id = _texture_painter.selected_texture_id
+			var maps: Dictionary = _texture_painter.call("get_pbr_maps", tex_id, 1024)
+			if not maps.is_empty() and maps.has("albedo"):
+				_terrain_node.call("apply_texture_brush", hit as Vector3, maps.get("albedo", null), maps.get("normal", null), maps.get("roughness", null), maps.get("height", null), maps.get("ao", null), _brush_size, _brush_strength, _texture_tile_size, _texture_density, _texture_edge_softness, _texture_coverage_limit, _texture_stroke_offset, _texture_stroke_rotation, _texture_stroke_scale, _texture_exposure, _texture_brush_shape_mode, _texture_shape_variation, _texture_stroke_seed, _texture_stroke_shape_variant)
+		return
+	if _current_tool == "textureerase":
+		if _terrain_node != null:
+			_terrain_node.call("apply_texture_erase_brush", hit as Vector3, _brush_size, _brush_strength, _texture_edge_softness)
+		return
+	_runtime_terrain_editor.set_tool(_current_tool, _brush_size, _brush_strength, _flatten_height, _cliff_mode, _overhang_amount)
 	_runtime_terrain_editor.begin_stroke(hit as Vector3)
 
 func _continue_tool_stroke() -> void:
@@ -1191,6 +1762,17 @@ func _continue_tool_stroke() -> void:
 	if _current_tool.begins_with("grass"):
 		if _grass_system != null and _grass_system.has_method("apply_brush"):
 			_grass_system.call("apply_brush", _current_tool, hit as Vector3, _brush_size, _brush_strength)
+		return
+	if _current_tool == "texturepaint":
+		if _terrain_node != null and _texture_painter != null:
+			var tex_id = _texture_painter.selected_texture_id
+			var maps: Dictionary = _texture_painter.call("get_pbr_maps", tex_id, 1024)
+			if not maps.is_empty() and maps.has("albedo"):
+				_terrain_node.call("apply_texture_brush", hit as Vector3, maps.get("albedo", null), maps.get("normal", null), maps.get("roughness", null), maps.get("height", null), maps.get("ao", null), _brush_size, _brush_strength, _texture_tile_size, _texture_density, _texture_edge_softness, _texture_coverage_limit, _texture_stroke_offset, _texture_stroke_rotation, _texture_stroke_scale, _texture_exposure, _texture_brush_shape_mode, _texture_shape_variation, _texture_stroke_seed, _texture_stroke_shape_variant)
+		return
+	if _current_tool == "textureerase":
+		if _terrain_node != null:
+			_terrain_node.call("apply_texture_erase_brush", hit as Vector3, _brush_size, _brush_strength, _texture_edge_softness)
 		return
 	_runtime_terrain_editor.continue_stroke(hit as Vector3, camera.rotation.y)
 
@@ -1248,22 +1830,28 @@ func _setup_preview_nodes() -> void:
 
 	_brush_preview = MeshInstance3D.new()
 	_brush_preview.name = "BrushPreview"
-	var ring := CylinderMesh.new()
-	ring.top_radius = 1.0
-	ring.bottom_radius = 1.0
-	ring.height = 0.04
-	ring.radial_segments = 32
-	ring.rings = 1
-	_brush_preview.mesh = ring
-	var mat := StandardMaterial3D.new()
-	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	mat.albedo_color = Color(0.15, 0.8, 1.0, 0.22)
-	mat.emission_enabled = true
-	mat.emission = Color(0.15, 0.8, 1.0, 1.0)
-	mat.emission_energy_multiplier = 0.55
-	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
-	_brush_preview.material_override = mat
+	var disc := QuadMesh.new()
+	disc.size = Vector2(2.0, 2.0)
+	_brush_preview.mesh = disc
+	var preview_shader := Shader.new()
+	preview_shader.code = """
+		shader_type spatial;
+		render_mode unshaded, cull_disabled, depth_draw_never;
+		
+		void fragment() {
+			vec2 p = UV * 2.0 - vec2(1.0);
+			float d = length(p);
+			float soft = smoothstep(1.0, 0.0, d);
+			float center = pow(soft, 2.2);
+			ALBEDO = vec3(0.12, 0.72, 1.0);
+			EMISSION = ALBEDO * (0.25 + center * 0.9);
+			ALPHA = clamp(center * 0.42, 0.0, 0.42);
+		}
+	"""
+	var preview_mat := ShaderMaterial.new()
+	preview_mat.shader = preview_shader
+	_brush_preview.material_override = preview_mat
+	_brush_preview.rotation_degrees = Vector3(-90.0, 0.0, 0.0)
 	add_child(_brush_preview)
 	_brush_preview.visible = false
 
@@ -1307,7 +1895,7 @@ func _update_brush_preview(world_pos: Vector3) -> void:
 		_brush_preview.visible = false
 		return
 	_brush_preview.visible = true
-	_brush_preview.global_position = world_pos + Vector3(0.02, 0.02, 0.02)
+	_brush_preview.global_position = world_pos + Vector3(0.0, 0.05, 0.0)
 	_brush_preview.scale = Vector3(_brush_size, 1.0, _brush_size)
 
 func _rotate_stamp_preview(delta_deg: float) -> void:
@@ -1651,7 +2239,8 @@ func _save_map_to_path(path: String) -> bool:
 		"walls": {},
 		"scatter": {},
 		"stamps": [],
-		"terrain": {}
+		"terrain": {},
+		"horizon_mountains": []
 	}
 	var wall_system: Node = _get_or_create_wall_system()
 	if wall_system != null and wall_system.has_method("save_data"):
@@ -1660,6 +2249,8 @@ func _save_map_to_path(path: String) -> bool:
 		data["scatter"] = _scatter_system.call("serialize_state")
 	data["stamps"] = _serialize_stamp_instances()
 	data["terrain"] = _serialize_terrain_data()
+	if _horizon_system != null and is_instance_valid(_horizon_system) and _horizon_system.has_method("serialize"):
+		data["horizon_mountains"] = _horizon_system.call("serialize")
 	var file := FileAccess.open(path, FileAccess.WRITE)
 	if file == null:
 		_set_status("Save failed: %s" % path)
@@ -1687,6 +2278,7 @@ func _load_map_from_path(path: String) -> bool:
 	var scatter_data: Dictionary = data.get("scatter", {})
 	var stamp_data: Array = data.get("stamps", [])
 	var terrain_data: Dictionary = data.get("terrain", {})
+	var horizon_data: Array = data.get("horizon_mountains", [])
 	var wall_system: Node = _get_or_create_wall_system()
 	if wall_system != null and wall_system.has_method("load_data"):
 		wall_system.call("load_data", wall_data)
@@ -1694,6 +2286,8 @@ func _load_map_from_path(path: String) -> bool:
 		_scatter_system.call("load_state", scatter_data)
 	_deserialize_stamp_instances(stamp_data)
 	_deserialize_terrain_data(terrain_data)
+	if _horizon_system != null and is_instance_valid(_horizon_system) and _horizon_system.has_method("deserialize"):
+		_horizon_system.call("deserialize", horizon_data)
 	_set_status("Loaded map: %s" % path)
 	return true
 
