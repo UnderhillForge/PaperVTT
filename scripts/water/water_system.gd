@@ -71,8 +71,8 @@ const WATER_PRESETS: Dictionary = {
 
 # River configuration
 const DEFAULT_PARAMETERS = {
-	river_step_length_divs = 1,
-	river_step_width_divs = 1,
+	river_step_length_divs = 3,  # More segments along curve = smoother bends
+	river_step_width_divs = 2,   # More points across width = less stretching
 	river_smoothness = 0.5,
 	river_width_default = 2.0,
 	shader_type = 0,  # 0=Water, 1=Custom
@@ -506,7 +506,7 @@ func _regenerate_river_mesh(river_id: int) -> void:
 	var average_width = WaterHelperMethods.sum_array(widths) / float(max(1, widths.size()))
 	var steps = int(max(1.0, round(curve.get_baked_length() / average_width)))
 	var depth_value: float = float(river.get("average_depth", 7.5))
-	var surface_height_offset: float = clampf(0.05 + depth_value * 0.006, 0.05, 0.15)
+	var surface_height_offset: float = clampf(-0.14 - depth_value * 0.004, -0.18, -0.12)
 	
 	var river_width_values = WaterHelperMethods.generate_river_width_values(
 		curve, steps, 
