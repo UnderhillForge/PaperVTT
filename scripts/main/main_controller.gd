@@ -1760,8 +1760,10 @@ func _continue_tool_stroke() -> void:
 			_scatter_system.call("apply_brush", _current_tool, hit as Vector3, _brush_size, _brush_strength, _scatter_density, _scatter_scale_min, _scatter_scale_max, _scatter_rotation_randomness, _scatter_tilt)
 		return
 	if _current_tool.begins_with("grass"):
-		if _grass_system != null and _grass_system.has_method("apply_brush"):
-			_grass_system.call("apply_brush", _current_tool, hit as Vector3, _brush_size, _brush_strength)
+		if _grass_system != null and _water_system != null:
+			var is_over_water: bool = _check_position_over_water(hit as Vector3)
+			if not is_over_water and _grass_system.has_method("apply_brush"):
+				_grass_system.call("apply_brush", _current_tool, hit as Vector3, _brush_size, _brush_strength)
 		return
 	if _current_tool == "texturepaint":
 		if _terrain_node != null and _texture_painter != null:
@@ -1792,6 +1794,46 @@ func _get_mouse_world_position() -> Variant:
 			return point
 
 	return _ray_plane_intersection(origin, direction, 0.0)
+
+
+func _check_position_over_water(world_pos: Vector3) -> bool:
+	"""Check if a world position is over any active water surface using AABB collision."""
+	if _water_system == null or not _water_system.has_method("get_rivers"):
+		return false
+	
+	var rivers_variant: Variant = _water_system.call("get_rivers")
+	if not (rivers_variant is Dictionary):
+		return false
+	
+	var rivers: Dictionary = rivers_variant as Dictionary
+	var check_radius: float = _brush_size + 0.5
+	var check_height: float = 1.0
+	var check_aabb: AABB = AABB(
+		world_pos - Vector3(check_radius, check_height, check_radius),
+		Vector3(check_radius * 2.0, check_height * 2.0, check_radius * 2.0)
+	)
+	
+	for river_id in rivers:
+		var river: Dictionary = rivers[river_id]
+		var mesh_instance: MeshInstance3D = river.get("mesh_instance", null)
+		if mesh_instance == null or not is_instance_valid(mesh_instance):
+			continue
+		
+		var mesh: Mesh = mesh_instance.mesh
+		if mesh == null:
+			continue
+		
+		var mesh_aabb: AABB = mesh.get_aabb()
+		var global_aabb: AABB = AABB(
+			mesh_instance.global_position + mesh_aabb.position,
+			mesh_aabb.size
+		)
+		
+		if check_aabb.intersects(global_aabb):
+			return true
+	
+	return false
+
 
 func _ray_plane_intersection(origin: Vector3, direction: Vector3, y_height: float) -> Variant:
 	if absf(direction.y) < 0.0001:
