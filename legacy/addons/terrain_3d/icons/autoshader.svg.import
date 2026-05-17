@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bdwolwswwy8wr"
-path="res://.godot/imported/autoshader.svg-9998e61bbc6afd5b134b767acd17a425.ctex"
+path="res://.godot/imported/autoshader.svg-2a52628ac2daf1b915a61c6f9caaa50c.ctex"
 metadata={
 "has_editor_variant": true,
 "vram_texture": false
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://addons/terrain_3d/icons/autoshader.svg"
-dest_files=["res://.godot/imported/autoshader.svg-9998e61bbc6afd5b134b767acd17a425.ctex"]
+source_file="res://legacy/addons/terrain_3d/icons/autoshader.svg"
+dest_files=["res://.godot/imported/autoshader.svg-2a52628ac2daf1b915a61c6f9caaa50c.ctex"]
 
 [params]
 

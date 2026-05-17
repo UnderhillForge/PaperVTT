@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ceyngybn86j0k"
-path="res://.godot/imported/plant_bushLarge_SW.png-13688871174e490869c61c81aaca12f6.ctex"
+path="res://.godot/imported/plant_bushLarge_SW.png-dcc8260e68a76cb888f57e807894d625.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/textures/foliage/kenney_nature-kit/plant_bushLarge_SW.png"
-dest_files=["res://.godot/imported/plant_bushLarge_SW.png-13688871174e490869c61c81aaca12f6.ctex"]
+source_file="res://legacy/assets/textures/foliage/kenney_nature-kit/plant_bushLarge_SW.png"
+dest_files=["res://.godot/imported/plant_bushLarge_SW.png-dcc8260e68a76cb888f57e807894d625.ctex"]
 
 [params]
 

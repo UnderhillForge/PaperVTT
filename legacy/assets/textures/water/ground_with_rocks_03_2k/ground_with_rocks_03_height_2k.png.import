@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bkrwy80xvcxqu"
-path="res://.godot/imported/ground_with_rocks_03_height_2k.png-15e3391f36b14d65a8a0a0b9a62221d3.ctex"
+path="res://.godot/imported/ground_with_rocks_03_height_2k.png-266d39d6262d3c4af6f750120ac51c3c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/textures/water/ground_with_rocks_03_2k/ground_with_rocks_03_height_2k.png"
-dest_files=["res://.godot/imported/ground_with_rocks_03_height_2k.png-15e3391f36b14d65a8a0a0b9a62221d3.ctex"]
+source_file="res://legacy/assets/textures/water/ground_with_rocks_03_2k/ground_with_rocks_03_height_2k.png"
+dest_files=["res://.godot/imported/ground_with_rocks_03_height_2k.png-266d39d6262d3c4af6f750120ac51c3c.ctex"]
 
 [params]
 

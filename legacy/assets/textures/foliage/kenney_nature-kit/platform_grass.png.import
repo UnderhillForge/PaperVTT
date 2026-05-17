@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bvkb8p8x34ejo"
-path="res://.godot/imported/platform_grass.png-a97b94422fa928b15acd4b77dcf33b83.ctex"
+path="res://.godot/imported/platform_grass.png-f6953db1d4d42f4e9e6991bbd9505715.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/textures/foliage/kenney_nature-kit/platform_grass.png"
-dest_files=["res://.godot/imported/platform_grass.png-a97b94422fa928b15acd4b77dcf33b83.ctex"]
+source_file="res://legacy/assets/textures/foliage/kenney_nature-kit/platform_grass.png"
+dest_files=["res://.godot/imported/platform_grass.png-f6953db1d4d42f4e9e6991bbd9505715.ctex"]
 
 [params]
 

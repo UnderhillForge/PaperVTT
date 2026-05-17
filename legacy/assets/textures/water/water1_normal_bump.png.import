@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b7h54s6r5jpkf"
-path="res://.godot/imported/water1_normal_bump.png-e9cffeee8ebd193590e9143ceac778db.ctex"
+path="res://.godot/imported/water1_normal_bump.png-6b7e2e25369835633fcb48f91bb1b621.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/textures/water/water1_normal_bump.png"
-dest_files=["res://.godot/imported/water1_normal_bump.png-e9cffeee8ebd193590e9143ceac778db.ctex"]
+source_file="res://legacy/assets/textures/water/water1_normal_bump.png"
+dest_files=["res://.godot/imported/water1_normal_bump.png-6b7e2e25369835633fcb48f91bb1b621.ctex"]
 
 [params]
 

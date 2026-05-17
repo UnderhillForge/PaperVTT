@@ -3,8 +3,8 @@ extends Node3D
 const TerrainRuntimeEditor = preload("res://scripts/services/terrain_runtime_editor.gd")
 const OriginShiftSystemScript: Script = preload("res://scripts/world/origin_shift_system.gd")
 const DistantHorizonSystemScript: Script = preload("res://scripts/world/distant_horizon_system.gd")
-const TerrainTexturePainterClass = preload("res://scripts/terrain/terrain_texture_painter.gd")
-const WaterSystemScript: Script = preload("res://scripts/water/water_system.gd")
+# TerrainTexturePainterClass — removed (legacy terrain migration)
+# WaterSystemScript — removed (legacy water migration)
 
 @onready var terrain_placeholder: Node3D = $Terrain
 @onready var camera: Camera3D = $Camera3D
@@ -98,12 +98,12 @@ const HORIZON_MOUNTAIN_PLACE_DISTANCE: float = 3000.0
 const MENU_BAR_SCRIPT: Script = preload("res://scripts/ui/main_menu_bar.gd")
 const TOOLBAR_SCENE: PackedScene = preload("res://scenes/ui/WorldToolsToolbar.tscn")
 const ASSET_BROWSER_SCENE: PackedScene = preload("res://scenes/ui/AssetBrowser.tscn")
-const CUSTOM_TERRAIN_SCENE: PackedScene = preload("res://scenes/terrain/CustomHeightmapTerrain.tscn")
+# CUSTOM_TERRAIN_SCENE — removed (legacy terrain migration)
 const DUNGEONDRAFT_IMPORTER_SCRIPT: Script = preload("res://scripts/import/dungeondraft_importer.gd")
-const GRASS_SYSTEM_SCRIPT: Script = preload("res://scripts/terrain/grass_system.gd")
-const SCATTER_SYSTEM_SCRIPT: Script = preload("res://scripts/scatter/scatter_system.gd")
+# GRASS_SYSTEM_SCRIPT — removed (legacy terrain migration)
+# SCATTER_SYSTEM_SCRIPT — removed (legacy scatter migration)
 const PLAYER_CHARACTER_SCENE: PackedScene = preload("res://scenes/characters/PlayerCharacter.tscn")
-const WALL_TOOL_SCRIPT: Script = preload("res://scripts/tools/wall_tool.gd")
+# WALL_TOOL_SCRIPT — removed (legacy wall migration)
 const USER_SCREENSHOT_PATH: String = "user://full_editor_screenshot.png"
 const RES_SCREENSHOT_PATH: String = "res://debug_full_editor.png"
 const PREFAB_VISIBILITY_END_NEAR: float = 170.0
@@ -123,7 +123,7 @@ const DEFAULT_MAP_SAVE_PATH: String = "user://maps/papervtt_map.pvt"
 var _dungeondraft_importer: RefCounted = null
 var _dd_import_dialog: FileDialog = null
 var _import_prefab_paths: Array[String] = []
-var _wall_tool: RefCounted = WALL_TOOL_SCRIPT.new()
+var _wall_tool = null  # wall tool stub — legacy wall_tool.gd moved to legacy/
 var _import_prefab_key_to_path: Dictionary = {}
 var _import_wall_material: StandardMaterial3D = null
 var _import_floor_material: StandardMaterial3D = null
@@ -172,36 +172,9 @@ func _ready() -> void:
 	else:
 		_set_status("Heightmap terrain unavailable; stamping remains active")
 
-	# Grass system — created at runtime, parented to terrain placeholder.
-	_grass_system = Node3D.new()
-	_grass_system.name = "GrassSystem"
-	_grass_system.set_script(GRASS_SYSTEM_SCRIPT)
-	terrain_placeholder.add_child(_grass_system)
-	_grass_system.call("initialize", Vector2(256.0, 256.0))
-
-	_scatter_system = Node3D.new()
-	_scatter_system.name = "ScatterSystem"
-	_scatter_system.set_script(SCATTER_SYSTEM_SCRIPT)
-	add_child(_scatter_system)
-	if _scatter_system.has_method("initialize"):
-		_scatter_system.call("initialize", _terrain_node, 256.0)
+	# Grass, scatter, and water systems moved to legacy/ — stubs remain in variables
 	
-	# Water System — manages rivers and water bodies
-	_water_system = Node.new()
-	_water_system.name = "WaterSystem"
-	_water_system.set_script(WaterSystemScript)
-	add_child(_water_system)
-	if _water_system.has_method("initialize"):
-		_water_system.call("initialize", self, _terrain_node)
-	if _water_system.has_method("set_current_layer"):
-		_water_system.call("set_current_layer", _active_world_layer)
-	if _water_system.has_method("set_water_mode"):
-		_water_system.call("set_water_mode", _water_mode)
-	
-	# Texture Painter — discovers available textures for painting
-	_texture_painter = TerrainTexturePainterClass.new()
-	if world_tools != null and world_tools.has_method("populate_texture_buttons"):
-		world_tools.call("populate_texture_buttons", _texture_painter)
+	# Texture Painter — removed (legacy terrain migration)
 	
 	_ensure_character_setup()
 
@@ -2304,14 +2277,7 @@ func _sample_terrain_height(x: float, z: float) -> float:
 	return 0.0
 
 func _ensure_terrain_node() -> Node:
-	if CUSTOM_TERRAIN_SCENE != null:
-		var custom_node: Node = CUSTOM_TERRAIN_SCENE.instantiate()
-		if custom_node != null:
-			custom_node.name = "TerrainRuntime"
-			terrain_placeholder.add_child(custom_node)
-			return custom_node
-
-	# Fallback to a visible plane so map editing flow still works if Terrain3D is unavailable.
+	# Custom heightmap terrain scene moved to legacy/ — use flat plane fallback until TerraBrush is wired.
 	var ground := MeshInstance3D.new()
 	ground.name = "FallbackGround"
 	var plane := PlaneMesh.new()

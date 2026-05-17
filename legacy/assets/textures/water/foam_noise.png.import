@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://brcgmfmw8nl1m"
-path="res://.godot/imported/foam_noise.png-cff3e2592c32ccaef5ad8fdd4e0b588f.ctex"
+path="res://.godot/imported/foam_noise.png-c8384f303551cd1ceb6101a3ecc9b186.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/textures/water/foam_noise.png"
-dest_files=["res://.godot/imported/foam_noise.png-cff3e2592c32ccaef5ad8fdd4e0b588f.ctex"]
+source_file="res://legacy/assets/textures/water/foam_noise.png"
+dest_files=["res://.godot/imported/foam_noise.png-c8384f303551cd1ceb6101a3ecc9b186.ctex"]
 
 [params]
 

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dtq80wwc0o2ag"
-path="res://.godot/imported/plant_bushLargeTriangle.png-a129a31dde85828c7af9af4fdedd5829.ctex"
+path="res://.godot/imported/plant_bushLargeTriangle.png-8572c6d10b27a7915296f67b5aeb178c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/textures/foliage/kenney_nature-kit/plant_bushLargeTriangle.png"
-dest_files=["res://.godot/imported/plant_bushLargeTriangle.png-a129a31dde85828c7af9af4fdedd5829.ctex"]
+source_file="res://legacy/assets/textures/foliage/kenney_nature-kit/plant_bushLargeTriangle.png"
+dest_files=["res://.godot/imported/plant_bushLargeTriangle.png-8572c6d10b27a7915296f67b5aeb178c.ctex"]
 
 [params]
 
