@@ -1,5 +1,7 @@
 # PaperVTT
 
+> **Foundation Transition in Progress** — Branch `updated-foundation` is migrating the terrain core from a custom heightmap system to **TerraBrush 0.14.5-alpha** (GDExtension). Old terrain, water, wall, and scatter scripts are preserved under `legacy/` and will be removed once the new system is stable. The pen-and-ink post-process aesthetic is unchanged.
+
 PaperVTT is a stylized 3D map editor for tabletop worldbuilding, with a long-term direction toward a full virtual tabletop workflow.
 
 Built in Godot, it focuses on fast terrain shaping, prefab stamping, smart wall authoring, and paint-style biome dressing (grass + scatter) with a pen-and-ink inspired look.

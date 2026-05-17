@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/terrain/custom_heightmap_terrain.gd" id="1"]
+
+[node name="CustomHeightmapTerrain" type="Node3D"]
+script = ExtResource("1")
+
+[node name="TerrainMesh" type="MeshInstance3D" parent="."]
