@@ -86,6 +86,8 @@ signal clear_requested()
 @onready var _river_depth_value: Label = get_node_or_null("%RiverDepthValue")
 @onready var _river_color_row: HBoxContainer = get_node_or_null("%RiverColorRow")
 @onready var _river_color_button: ColorPickerButton = get_node_or_null("%RiverColorButton")
+@onready var _water_mode_row: HBoxContainer = get_node_or_null("%WaterModeRow")
+@onready var _water_mode_option: OptionButton = get_node_or_null("%WaterModeOption")
 
 @onready var _brush_label: Label = %BrushLabel
 @onready var _brush_size_row: HBoxContainer = %BrushSizeRow
@@ -238,6 +240,22 @@ func _ready() -> void:
 		_river_depth_slider.value_changed.connect(func(v: float) -> void: setting_changed.emit("river_average_depth", v))
 	if _river_color_button != null:
 		_river_color_button.color_changed.connect(func(c: Color) -> void: setting_changed.emit("water_color", c))
+	if _water_mode_option != null:
+		_water_mode_option.clear()
+		_water_mode_option.add_item("River")
+		_water_mode_option.set_item_metadata(0, "river")
+		_water_mode_option.add_item("Lake / Pond")
+		_water_mode_option.set_item_metadata(1, "lake")
+		_water_mode_option.add_item("Fill")
+		_water_mode_option.set_item_metadata(2, "fill")
+		_water_mode_option.select(0)
+		_water_mode_option.item_selected.connect(func(index: int) -> void:
+			var mode_value: String = "river"
+			var md: Variant = _water_mode_option.get_item_metadata(index)
+			if md is String and String(md) != "":
+				mode_value = String(md)
+			setting_changed.emit("water_mode", mode_value)
+		)
 	_wall_type_option.item_selected.connect(_on_wall_type_selected)
 
 	_wall_type_option.clear()
@@ -469,7 +487,7 @@ func _update_tool_hint(tool_name: String) -> void:
 		"wall":
 			_tool_hint.text = "[b]Smart Wall[/b]  [i]9[/i]\nLMB: click A then click B/C for chain walls\nCtrl-drag: rectangle • Shift in drag: perfect square\nRMB or Esc: end chain • Match Connected Heights keeps structures uniform\nRMB menu: Add Window • Ctrl-drag window height, Alt-drag width\nSnap to Standard Heights keeps openings tidy"
 		"riverdraw":
-			_tool_hint.text = "[b]Draw River[/b]\nLMB: add river point\nRMB / Esc: finish active river\nWidth, flow, and color controls update water"
+			_tool_hint.text = "[b]Water Tool[/b]\n[1] River path  [2] Lake/Pond  [3] Fill\nLMB: place/edit water body\nRMB / Esc: finish active river path"
 		_:
 			_tool_hint.text = "[b]World Tool[/b]\nSwitch tools from this sidebar or top menu\n[i]Esc: back to Select[/i]"
 
@@ -637,6 +655,10 @@ func _update_tool_visibility(tool_name: String) -> void:
 		_river_depth_slider.visible = is_river
 	if _river_color_row != null:
 		_river_color_row.visible = is_river
+	if _water_mode_row != null:
+		_water_mode_row.visible = is_river
+	if _water_mode_option != null:
+		_water_mode_option.visible = is_river
 
 func _format_tool_name(tool_name: String) -> String:
 	match tool_name:
@@ -655,7 +677,7 @@ func _format_tool_name(tool_name: String) -> String:
 		"horizonmountain":
 			return "Distant Mountain"
 		"riverdraw":
-			return "Draw River"
+			return "Water Tool"
 		"select":
 			return "Select"
 		"wall":
@@ -719,7 +741,8 @@ func get_settings() -> Dictionary:
 		"river_width": _river_width_slider.value if _river_width_slider != null else 2.0,
 		"river_flow_speed": _river_flow_slider.value if _river_flow_slider != null else 1.0,
 		"river_average_depth": _river_depth_slider.value if _river_depth_slider != null else 15.0,
-		"water_color": _river_color_button.color if _river_color_button != null else Color(0.2, 0.5, 0.3, 1.0)
+		"water_color": _river_color_button.color if _river_color_button != null else Color(0.2, 0.5, 0.3, 1.0),
+		"water_mode": _get_water_mode_value()
 	}
 
 func populate_texture_buttons(painter: RefCounted) -> void:
@@ -827,3 +850,11 @@ func _set_stroke_color(color: Color) -> void:
 	if _grass_stroke_color_button != null:
 		_grass_stroke_color_button.color = color
 	setting_changed.emit("grass_stroke_color", color)
+
+
+func _get_water_mode_value() -> String:
+	if _water_mode_option != null and _water_mode_option.item_count > 0:
+		var md: Variant = _water_mode_option.get_item_metadata(_water_mode_option.selected)
+		if md is String and String(md) != "":
+			return String(md)
+	return "river"

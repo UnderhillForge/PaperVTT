@@ -6,6 +6,14 @@ extends Node
 
 class_name WaterSystem
 
+const WATER_MODE_RIVER: String = "river"
+const WATER_MODE_LAKE: String = "lake"
+const WATER_MODE_FILL: String = "fill"
+
+const WATER_BODY_TYPE_RIVER: String = "river"
+const WATER_BODY_TYPE_LAKE: String = "lake"
+const WATER_BODY_TYPE_FILL: String = "fill"
+
 const WaterHelperMethods = preload("./water_helper_methods.gd")
 const DEFAULT_WATER_NORMAL_TEXTURES: Array[String] = [
 	"res://assets/textures/water/water1_normal_bump.png",
@@ -24,48 +32,22 @@ const DEFAULT_RIVERBED_TEXTURES: Dictionary = {
 const DEFAULT_WATER_PRESET: String = "crystal_clear"
 const WATER_PRESETS: Dictionary = {
 	"crystal_clear": {
-		"water_color": Color(1.0, 1.0, 1.0),
-		"shallow_color": Color(0.26, 0.68, 0.74),
-		"deep_color": Color(0.05, 0.23, 0.34),
+		"water_color": Color(0.14, 0.50, 0.56),
 		"water_depth": 7.5,
-		"flow_speed": 0.18,
-		"wave_strength": 0.14,
-		"normal_scale": 2.0,
-		"ripple_mix": 0.58,
-		"refraction_strength": 0.016,
-		"refraction_mix": 0.18,
-		"roughness_value": 0.22,
-		"specular_value": 0.18,
-		"fresnel_power": 4.0,
-		"foam_color": Color(0.95, 0.98, 1.0, 1.0),
-		"foam_amount": 0.12,
-		"edge_foam_distance": 0.40,
-		"alpha_shallow": 0.74,
-		"alpha_deep": 0.86,
-		"edge_softness": 0.24,
-		"depth_scale": 88.0,
+		"flow_speed": 0.24,
+		"ripple_strength": 0.32,
+		"transparency": 0.64,
+		"foam_amount": 0.14,
+		"specular_strength": 0.72,
 	},
 	"deep_river": {
-		"water_color": Color(1.0, 1.0, 1.0),
-		"shallow_color": Color(0.20, 0.54, 0.62),
-		"deep_color": Color(0.04, 0.17, 0.28),
+		"water_color": Color(0.10, 0.40, 0.49),
 		"water_depth": 11.5,
-		"flow_speed": 0.24,
-		"wave_strength": 0.18,
-		"normal_scale": 2.4,
-		"ripple_mix": 0.52,
-		"refraction_strength": 0.012,
-		"refraction_mix": 0.15,
-		"roughness_value": 0.24,
-		"specular_value": 0.16,
-		"fresnel_power": 4.8,
-		"foam_color": Color(0.95, 0.98, 1.0, 1.0),
-		"foam_amount": 0.16,
-		"edge_foam_distance": 0.48,
-		"alpha_shallow": 0.76,
-		"alpha_deep": 0.88,
-		"edge_softness": 0.20,
-		"depth_scale": 72.0,
+		"flow_speed": 0.28,
+		"ripple_strength": 0.38,
+		"transparency": 0.68,
+		"foam_amount": 0.18,
+		"specular_strength": 0.76,
 	},
 }
 
@@ -89,6 +71,9 @@ var _material_cache: Dictionary = {}  # Material cache for performance
 var _current_layer: int = 0  # Current world layer (for new rivers)
 var _current_water_preset: String = DEFAULT_WATER_PRESET
 var _riverbed_maps: Dictionary = {}
+var _lakes: Dictionary = {}  # Dictionary of lake/fill bodies keyed by unique ID
+var _next_lake_id: int = 0
+var _water_mode: String = WATER_MODE_RIVER
 
 signal river_created(river_id, river_node)
 signal river_updated(river_id, river_node)
@@ -121,7 +106,12 @@ func _create_water_material() -> ShaderMaterial:
 	var mat = ShaderMaterial.new()
 	mat.shader = load("res://shaders/water.gdshader")
 	apply_water_preset(_current_water_preset, mat)
-	mat.set_shader_parameter("albedo_color", Color(0.15, 0.48, 0.58, 1.0))
+	mat.set_shader_parameter("water_color", Color(0.14, 0.50, 0.56))
+	mat.set_shader_parameter("flow_speed", 0.24)
+	mat.set_shader_parameter("ripple_strength", 0.32)
+	mat.set_shader_parameter("transparency", 0.64)
+	mat.set_shader_parameter("foam_amount", 0.14)
+	mat.set_shader_parameter("specular_strength", 0.72)
 	
 	var normal_texture: Texture2D = _load_texture_from_candidates(DEFAULT_WATER_NORMAL_TEXTURES)
 	if normal_texture == null:
@@ -136,6 +126,36 @@ func _create_water_material() -> ShaderMaterial:
 	
 	_material_cache["default"] = mat
 	return mat
+
+
+func _apply_layer_visual_style(mat: ShaderMaterial, layer: int) -> void:
+	if mat == null:
+		return
+	if layer >= 0:
+		return
+	var water_color_variant: Variant = mat.get_shader_parameter("water_color")
+	var water_color: Color = water_color_variant as Color if water_color_variant is Color else Color(0.12, 0.48, 0.55)
+	var cavern_tint: Color = Color(0.08, 0.20, 0.26)
+	mat.set_shader_parameter("water_color", water_color.lerp(cavern_tint, 0.42).darkened(0.12))
+	var specular_variant: Variant = mat.get_shader_parameter("specular_strength")
+	var specular: float = float(specular_variant) if specular_variant != null else 0.64
+	mat.set_shader_parameter("specular_strength", clampf(specular * 0.72, 0.2, 0.9))
+	var transparency_variant: Variant = mat.get_shader_parameter("transparency")
+	var transparency: float = float(transparency_variant) if transparency_variant != null else 0.62
+	mat.set_shader_parameter("transparency", clampf(transparency + 0.03, 0.5, 0.78))
+
+
+func _refresh_layer_visibility() -> void:
+	for river_id in _rivers:
+		var river: Dictionary = _rivers[river_id]
+		var mesh_instance: MeshInstance3D = river.get("mesh_instance", null)
+		if mesh_instance != null:
+			mesh_instance.visible = int(river.get("layer", 0)) == _current_layer
+	for lake_id in _lakes:
+		var lake: Dictionary = _lakes[lake_id]
+		var mesh_instance: MeshInstance3D = lake.get("mesh_instance", null)
+		if mesh_instance != null:
+			mesh_instance.visible = int(lake.get("layer", 0)) == _current_layer
 
 
 func get_water_presets() -> Array[String]:
@@ -215,18 +235,35 @@ func _apply_river_material_settings(river_id: int) -> void:
 	if not (mesh_instance.material_override is ShaderMaterial):
 		mesh_instance.material_override = _duplicate_water_material()
 	var mat: ShaderMaterial = mesh_instance.material_override as ShaderMaterial
-	var depth_value: float = float(river.get("average_depth", 7.5))
+	var depth_value: float = float(river.get("average_depth", 15.0))
 	var preset: Dictionary = WATER_PRESETS.get(_current_water_preset, WATER_PRESETS[DEFAULT_WATER_PRESET])
-	mat.set_shader_parameter("water_color", preset.get("water_color", Color(1.0, 1.0, 1.0)))
-	mat.set_shader_parameter("shallow_color", preset.get("shallow_color", Color(0.24, 0.64, 0.70)))
-	mat.set_shader_parameter("deep_color", preset.get("deep_color", Color(0.06, 0.25, 0.35)))
-	mat.set_shader_parameter("flow_speed", preset.get("flow_speed", 0.18))
-	mat.set_shader_parameter("wave_strength", preset.get("wave_strength", 0.14))
-	mat.set_shader_parameter("normal_scale", preset.get("normal_scale", 2.2))
-	mat.set_shader_parameter("foam_amount", preset.get("foam_amount", 0.12))
-	mat.set_shader_parameter("transparency", clampf(0.94 - depth_value / 40.0, 0.72, 0.90))
-	mat.set_shader_parameter("average_depth", depth_value)
-	mat.set_shader_parameter("albedo_color", Color(0.15, 0.48, 0.58, 1.0))
+	mat.set_shader_parameter("water_color", preset.get("water_color", Color(0.14, 0.50, 0.56)))
+	mat.set_shader_parameter("flow_speed", preset.get("flow_speed", 0.24))
+	mat.set_shader_parameter("ripple_strength", preset.get("ripple_strength", 0.32))
+	mat.set_shader_parameter("foam_amount", preset.get("foam_amount", 0.14))
+	mat.set_shader_parameter("specular_strength", preset.get("specular_strength", 0.72))
+	mat.set_shader_parameter("transparency", clampf(float(preset.get("transparency", 0.64)) - depth_value / 650.0, 0.52, 0.74))
+	_apply_layer_visual_style(mat, int(river.get("layer", 0)))
+
+
+func _apply_lake_material_settings(lake_id: int) -> void:
+	if not _lakes.has(lake_id):
+		return
+	var lake: Dictionary = _lakes[lake_id]
+	var mesh_instance: MeshInstance3D = lake.get("mesh_instance", null)
+	if mesh_instance == null:
+		return
+	if not (mesh_instance.material_override is ShaderMaterial):
+		mesh_instance.material_override = _duplicate_water_material()
+	var mat: ShaderMaterial = mesh_instance.material_override as ShaderMaterial
+	var preset: Dictionary = WATER_PRESETS.get(_current_water_preset, WATER_PRESETS[DEFAULT_WATER_PRESET])
+	mat.set_shader_parameter("water_color", preset.get("water_color", Color(0.12, 0.48, 0.55)))
+	mat.set_shader_parameter("flow_speed", preset.get("flow_speed", 0.26) * 0.65)
+	mat.set_shader_parameter("ripple_strength", preset.get("ripple_strength", 0.42) * 0.75)
+	mat.set_shader_parameter("foam_amount", preset.get("foam_amount", 0.18) * 0.85)
+	mat.set_shader_parameter("specular_strength", preset.get("specular_strength", 0.64) * 0.95)
+	mat.set_shader_parameter("transparency", clampf(float(preset.get("transparency", 0.62)) - 0.04, 0.44, 0.66))
+	_apply_layer_visual_style(mat, int(lake.get("layer", 0)))
 
 
 func set_river_average_depth(river_id: int, depth: float) -> void:
@@ -376,6 +413,7 @@ func create_river(river_name: String = "", layer: int = -1) -> Node:
 	# Initialize river properties
 	var river_data = {
 		"id": river_id,
+		"type": WATER_BODY_TYPE_RIVER,
 		"name": river_name,
 		"layer": layer,
 		"mesh_instance": river_mesh_instance,
@@ -395,6 +433,7 @@ func create_river(river_name: String = "", layer: int = -1) -> Node:
 	
 	# Add to container
 	_river_container.add_child(river_mesh_instance)
+	river_mesh_instance.visible = layer == _current_layer
 	
 	# Store in dictionary
 	_rivers[river_id] = river_data
@@ -529,6 +568,321 @@ func _regenerate_river_mesh(river_id: int) -> void:
 	print("[WaterSystem] river mesh regenerated id=", river_id, " material=", mesh_instance.material_override, " surface_offset=", surface_height_offset, " depth=", depth_value)
 
 
+func _triangulate_lake_points(points: Array) -> PackedVector3Array:
+	var vertices := PackedVector3Array()
+	if points.size() < 3:
+		return vertices
+	var center: Vector3 = Vector3.ZERO
+	for p in points:
+		if p is Vector3:
+			center += p as Vector3
+	center /= float(points.size())
+	for i in range(points.size()):
+		var next_i: int = (i + 1) % points.size()
+		vertices.append(center)
+		vertices.append(points[i] as Vector3)
+		vertices.append(points[next_i] as Vector3)
+	return vertices
+
+
+func _build_lake_mesh(points: Array, water_level: float, surface_height_offset: float) -> Mesh:
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	st.set_smooth_group(0)
+	var triangles: PackedVector3Array = _triangulate_lake_points(points)
+	if triangles.is_empty():
+		return st.commit()
+	for i in range(0, triangles.size(), 3):
+		for j in range(3):
+			var p: Vector3 = triangles[i + j]
+			var v: Vector3 = Vector3(p.x, water_level + surface_height_offset, p.z)
+			var uv: Vector2 = Vector2(v.x * 0.08, v.z * 0.08)
+			st.set_uv(uv)
+			st.add_vertex(v)
+	st.generate_normals()
+	st.generate_tangents()
+	return st.commit()
+
+
+func create_lake(lake_name: String = "", center: Vector3 = Vector3.ZERO, radius: float = 7.0, layer: int = -1, body_type: String = WATER_BODY_TYPE_LAKE, average_depth: float = 12.0, shape_basin: bool = true) -> Node:
+	var lake_id: int = _next_lake_id
+	_next_lake_id += 1
+	if lake_name == "":
+		lake_name = "Lake_%d" % lake_id
+	if layer < 0:
+		layer = _current_layer
+	var mesh_instance := MeshInstance3D.new()
+	mesh_instance.name = lake_name
+	mesh_instance.set_meta("lake_id", lake_id)
+	mesh_instance.material_override = _duplicate_water_material()
+	var points: Array = []
+	var resolution: int = 24
+	for i in range(resolution):
+		var t: float = float(i) / float(resolution)
+		var angle: float = t * TAU
+		var r_noise: float = 1.0 + (WaterHelperMethods._hash_01(float(lake_id) * 11.7 + float(i) * 0.71) - 0.5) * 0.14
+		var p: Vector3 = center + Vector3(cos(angle) * radius * r_noise, 0.0, sin(angle) * radius * r_noise)
+		points.append(p)
+
+	var merge_target_id: int = _find_merge_target_lake(points, layer)
+	if merge_target_id >= 0 and _lakes.has(merge_target_id):
+		var merged_lake: Dictionary = _lakes[merge_target_id]
+		var merged_points: Array = []
+		merged_points.append_array(merged_lake.get("points", []))
+		merged_points.append_array(points)
+		merged_lake["points"] = _lake_points_to_hull(merged_points)
+		merged_lake["water_level"] = minf(float(merged_lake.get("water_level", center.y)), center.y)
+		merged_lake["average_depth"] = maxf(float(merged_lake.get("average_depth", 12.0)), average_depth)
+		if body_type == WATER_BODY_TYPE_FILL:
+			merged_lake["type"] = WATER_BODY_TYPE_FILL
+		_lakes[merge_target_id] = merged_lake
+		_regenerate_lake_mesh(merge_target_id)
+		if shape_basin:
+			_shape_lakebed_for_lake(merge_target_id)
+		emit_signal("river_updated", merge_target_id, merged_lake.get("mesh_instance", null))
+		emit_signal("rivers_changed")
+		return merged_lake.get("mesh_instance", null)
+
+	var lake_data: Dictionary = {
+		"id": lake_id,
+		"type": body_type,
+		"name": lake_name,
+		"layer": layer,
+		"mesh_instance": mesh_instance,
+		"points": points,
+		"water_level": center.y,
+		"average_depth": maxf(0.2, average_depth),
+		"valid": false,
+	}
+	_lakes[lake_id] = lake_data
+	_river_container.add_child(mesh_instance)
+	mesh_instance.visible = layer == _current_layer
+	_regenerate_lake_mesh(lake_id)
+	if shape_basin:
+		_shape_lakebed_for_lake(lake_id)
+	emit_signal("river_created", lake_id, mesh_instance)
+	emit_signal("rivers_changed")
+	return mesh_instance
+
+
+func _query_terrain_height(x: float, z: float, fallback_y: float) -> float:
+	if _terrain_node != null:
+		if _terrain_node.has_method("sample_height"):
+			return float(_terrain_node.call("sample_height", x, z))
+		if _terrain_node.has_method("get_height_at_position"):
+			return float(_terrain_node.call("get_height_at_position", Vector3(x, 0.0, z)))
+	if _main_controller != null and _main_controller.has_method("_sample_terrain_height"):
+		return float(_main_controller.call("_sample_terrain_height", x, z))
+	return fallback_y
+
+
+func _lake_points_to_hull(points: Array) -> Array:
+	var planar := PackedVector2Array()
+	for p in points:
+		if p is Vector3:
+			var pv: Vector3 = p as Vector3
+			planar.append(Vector2(pv.x, pv.z))
+	if planar.size() < 3:
+		return points.duplicate()
+	var hull: PackedVector2Array = Geometry2D.convex_hull(planar)
+	if hull.size() < 3:
+		return points.duplicate()
+	var y_sum: float = 0.0
+	var y_count: int = 0
+	for p in points:
+		if p is Vector3:
+			y_sum += (p as Vector3).y
+			y_count += 1
+	var y_level: float = y_sum / float(max(1, y_count))
+	var out_points: Array = []
+	for hp in hull:
+		out_points.append(Vector3(hp.x, y_level, hp.y))
+	return out_points
+
+
+func _point_inside_polygon_xz(point: Vector3, polygon: Array) -> bool:
+	if polygon.size() < 3:
+		return false
+	var inside: bool = false
+	var j: int = polygon.size() - 1
+	for i in range(polygon.size()):
+		if not (polygon[i] is Vector3) or not (polygon[j] is Vector3):
+			j = i
+			continue
+		var pi: Vector3 = polygon[i] as Vector3
+		var pj: Vector3 = polygon[j] as Vector3
+		var intersects: bool = ((pi.z > point.z) != (pj.z > point.z))
+		if intersects:
+			var denom: float = pj.z - pi.z
+			if absf(denom) < 0.00001:
+				j = i
+				continue
+			var x_at_z: float = ((pj.x - pi.x) * (point.z - pi.z) / denom) + pi.x
+			if point.x < x_at_z:
+				inside = not inside
+		j = i
+	return inside
+
+
+func _polygon_bounds_xz(points: Array) -> Rect2:
+	if points.is_empty():
+		return Rect2()
+	var min_x: float = INF
+	var min_z: float = INF
+	var max_x: float = -INF
+	var max_z: float = -INF
+	for p in points:
+		if p is Vector3:
+			var pv: Vector3 = p as Vector3
+			min_x = minf(min_x, pv.x)
+			min_z = minf(min_z, pv.z)
+			max_x = maxf(max_x, pv.x)
+			max_z = maxf(max_z, pv.z)
+	if min_x == INF:
+		return Rect2()
+	return Rect2(Vector2(min_x, min_z), Vector2(max_x - min_x, max_z - min_z))
+
+
+func _lake_polygons_overlap(points_a: Array, points_b: Array) -> bool:
+	if points_a.size() < 3 or points_b.size() < 3:
+		return false
+	var bounds_a: Rect2 = _polygon_bounds_xz(points_a)
+	var bounds_b: Rect2 = _polygon_bounds_xz(points_b)
+	if not bounds_a.intersects(bounds_b):
+		return false
+	for pa in points_a:
+		if pa is Vector3 and _point_inside_polygon_xz(pa as Vector3, points_b):
+			return true
+	for pb in points_b:
+		if pb is Vector3 and _point_inside_polygon_xz(pb as Vector3, points_a):
+			return true
+	return false
+
+
+func _find_merge_target_lake(points: Array, layer: int) -> int:
+	for lake_id in _lakes.keys():
+		var lake: Dictionary = _lakes[lake_id]
+		if int(lake.get("layer", 0)) != layer:
+			continue
+		var existing_points: Array = lake.get("points", [])
+		if _lake_polygons_overlap(existing_points, points):
+			return int(lake_id)
+	return -1
+
+
+func _sample_polygon_edge_water_level(points: Array, fallback_level: float) -> float:
+	if points.size() < 3:
+		return fallback_level
+	var sampled_level: float = fallback_level
+	for p in points:
+		if p is Vector3:
+			var pp: Vector3 = p as Vector3
+			sampled_level = minf(sampled_level, _query_terrain_height(pp.x, pp.z, fallback_level) + 0.06)
+	return sampled_level
+
+
+func _shape_lakebed_for_lake(lake_id: int) -> void:
+	if not _lakes.has(lake_id):
+		return
+	if _terrain_node == null or not _terrain_node.has_method("apply_brush"):
+		return
+	var lake: Dictionary = _lakes[lake_id]
+	var points: Array = lake.get("points", [])
+	if points.size() < 3:
+		return
+	var water_level: float = float(lake.get("water_level", 0.0))
+	var depth_m: float = maxf(0.2, float(lake.get("average_depth", 12.0)))
+	var target_bed_height: float = water_level - depth_m
+	var bounds: Rect2 = _polygon_bounds_xz(points)
+	if bounds.size.x <= 0.01 or bounds.size.y <= 0.01:
+		return
+
+	var sample_spacing: float = clampf(depth_m * 0.12, 1.0, 2.6)
+	var brush_size: float = sample_spacing * 1.2
+	var z: float = bounds.position.y
+	while z <= bounds.position.y + bounds.size.y + 0.001:
+		var x: float = bounds.position.x
+		while x <= bounds.position.x + bounds.size.x + 0.001:
+			var p: Vector3 = Vector3(x, water_level, z)
+			if _point_inside_polygon_xz(p, points):
+				var current_h: float = _query_terrain_height(x, z, water_level)
+				if current_h > target_bed_height + 0.01:
+					var delta_h: float = current_h - target_bed_height
+					var passes: int = int(clampf(ceil(delta_h / 0.6), 1.0, 18.0))
+					var strength: float = clampf(delta_h / 5.0, 0.2, 1.0)
+					for _pass in range(passes):
+						_terrain_node.call("apply_brush", "lower", p, brush_size, strength)
+					_paint_riverbed_at_point(p, maxf(1.2, brush_size * 0.85), 0.34)
+			x += sample_spacing
+		z += sample_spacing
+
+
+func create_fill_water(fill_name: String = "", center: Vector3 = Vector3.ZERO, radius: float = 10.0, layer: int = -1, average_depth: float = 12.0) -> Node:
+	var node: Node = create_lake(fill_name, center, radius, layer, WATER_BODY_TYPE_FILL, average_depth, false)
+	if node is MeshInstance3D and node.has_meta("lake_id"):
+		var lake_id: int = int(node.get_meta("lake_id"))
+		if _lakes.has(lake_id):
+			var points: Array = _lakes[lake_id].get("points", [])
+			var sampled_level: float = _sample_polygon_edge_water_level(points, center.y)
+			_lakes[lake_id]["water_level"] = sampled_level
+			_lakes[lake_id]["average_depth"] = maxf(0.2, average_depth)
+			_regenerate_lake_mesh(lake_id)
+			_shape_lakebed_for_lake(lake_id)
+	return node
+
+
+func _regenerate_lake_mesh(lake_id: int) -> void:
+	if not _lakes.has(lake_id):
+		return
+	var lake: Dictionary = _lakes[lake_id]
+	var mesh_instance: MeshInstance3D = lake.get("mesh_instance", null)
+	if mesh_instance == null:
+		return
+	var points: Array = lake.get("points", [])
+	if points.size() < 3:
+		return
+	var depth_value: float = float(lake.get("average_depth", 12.0))
+	var surface_height_offset: float = clampf(-0.14 - depth_value * 0.003, -0.18, -0.12)
+	var mesh: Mesh = _build_lake_mesh(points, float(lake.get("water_level", 0.0)), surface_height_offset)
+	mesh_instance.mesh = mesh
+	_lakes[lake_id]["valid"] = true
+	_apply_lake_material_settings(lake_id)
+
+
+func set_lake_points(lake_id: int, points: Array) -> void:
+	if not _lakes.has(lake_id):
+		return
+	_lakes[lake_id]["points"] = points.duplicate()
+	_regenerate_lake_mesh(lake_id)
+
+
+func add_lake_point(lake_id: int, point: Vector3) -> void:
+	if not _lakes.has(lake_id):
+		return
+	var points: Array = _lakes[lake_id].get("points", [])
+	points.append(point)
+	_lakes[lake_id]["points"] = points
+	_regenerate_lake_mesh(lake_id)
+
+
+func set_lake_water_level(lake_id: int, water_level: float) -> void:
+	if not _lakes.has(lake_id):
+		return
+	_lakes[lake_id]["water_level"] = water_level
+	_regenerate_lake_mesh(lake_id)
+
+
+func delete_lake(lake_id: int) -> void:
+	if not _lakes.has(lake_id):
+		return
+	var lake: Dictionary = _lakes[lake_id]
+	var mesh_instance: MeshInstance3D = lake.get("mesh_instance", null)
+	if mesh_instance != null:
+		mesh_instance.queue_free()
+	_lakes.erase(lake_id)
+	emit_signal("rivers_changed")
+
+
 # Delete a river
 func delete_river(river_id: int) -> void:
 	if not river_id in _rivers:
@@ -545,6 +899,8 @@ func delete_river(river_id: int) -> void:
 func clear_all() -> void:
 	for river_id in _rivers.keys():
 		delete_river(river_id)
+	for lake_id in _lakes.keys():
+		delete_lake(lake_id)
 
 
 func set_flow_speed(value: float) -> void:
@@ -554,6 +910,10 @@ func set_flow_speed(value: float) -> void:
 		var mesh_instance: MeshInstance3D = _rivers[river_id]["mesh_instance"]
 		if mesh_instance != null and mesh_instance.material_override is ShaderMaterial:
 			(mesh_instance.material_override as ShaderMaterial).set_shader_parameter("flow_speed", value)
+	for lake_id in _lakes:
+		var lake_mesh: MeshInstance3D = _lakes[lake_id].get("mesh_instance", null)
+		if lake_mesh != null and lake_mesh.material_override is ShaderMaterial:
+			(lake_mesh.material_override as ShaderMaterial).set_shader_parameter("flow_speed", value * 0.7)
 
 
 func set_water_color(color: Color) -> void:
@@ -563,11 +923,27 @@ func set_water_color(color: Color) -> void:
 		var mesh_instance: MeshInstance3D = _rivers[river_id]["mesh_instance"]
 		if mesh_instance != null and mesh_instance.material_override is ShaderMaterial:
 			(mesh_instance.material_override as ShaderMaterial).set_shader_parameter("water_color", color)
+	for lake_id in _lakes:
+		var lake_mesh: MeshInstance3D = _lakes[lake_id].get("mesh_instance", null)
+		if lake_mesh != null and lake_mesh.material_override is ShaderMaterial:
+			(lake_mesh.material_override as ShaderMaterial).set_shader_parameter("water_color", color)
 
 
 # Get all rivers
 func get_rivers() -> Dictionary:
+	return get_rivers_on_layer(_current_layer)
+
+
+func get_rivers_all() -> Dictionary:
 	return _rivers.duplicate()
+
+
+func get_lakes() -> Dictionary:
+	return get_lakes_on_layer(_current_layer)
+
+
+func get_lakes_all() -> Dictionary:
+	return _lakes.duplicate()
 
 
 # Get rivers on a specific world layer
@@ -579,9 +955,27 @@ func get_rivers_on_layer(layer: int) -> Dictionary:
 	return layer_rivers
 
 
+func get_lakes_on_layer(layer: int) -> Dictionary:
+	var layer_lakes := {}
+	for lake_id in _lakes:
+		if _lakes[lake_id].get("layer", 0) == layer:
+			layer_lakes[lake_id] = _lakes[lake_id]
+	return layer_lakes
+
+
 # Set active world layer for new rivers
 func set_current_layer(layer: int) -> void:
 	_current_layer = layer
+	_refresh_layer_visibility()
+
+
+func set_water_mode(mode: String) -> void:
+	if mode in [WATER_MODE_RIVER, WATER_MODE_LAKE, WATER_MODE_FILL]:
+		_water_mode = mode
+
+
+func get_water_mode() -> String:
+	return _water_mode
 
 
 # Get current layer
@@ -591,7 +985,21 @@ func get_current_layer() -> int:
 
 # Get river data
 func get_river(river_id: int) -> Dictionary:
-	return _rivers.get(river_id, {})
+	if not _rivers.has(river_id):
+		return {}
+	var river: Dictionary = _rivers[river_id]
+	if int(river.get("layer", 0)) != _current_layer:
+		return {}
+	return river
+
+
+func get_lake(lake_id: int) -> Dictionary:
+	if not _lakes.has(lake_id):
+		return {}
+	var lake: Dictionary = _lakes[lake_id]
+	if int(lake.get("layer", 0)) != _current_layer:
+		return {}
+	return lake
 
 
 # Serialize rivers to dictionary for saving
@@ -602,6 +1010,7 @@ func serialize_rivers() -> Array:
 		var river = _rivers[river_id]
 		var river_data = {
 			"id": river_id,
+			"type": WATER_BODY_TYPE_RIVER,
 			"name": river["name"],
 			"layer": river.get("layer", 0),
 			"curve_points": [],
@@ -624,6 +1033,34 @@ func serialize_rivers() -> Array:
 		serialized.append(river_data)
 	
 	return serialized
+
+
+func serialize_lakes() -> Array:
+	var serialized: Array = []
+	for lake_id in _lakes:
+		var lake: Dictionary = _lakes[lake_id]
+		var points_data: Array = []
+		for p in lake.get("points", []):
+			if p is Vector3:
+				var pv: Vector3 = p
+				points_data.append({"x": pv.x, "y": pv.y, "z": pv.z})
+		serialized.append({
+			"id": lake_id,
+			"type": lake.get("type", WATER_BODY_TYPE_LAKE),
+			"name": lake.get("name", "Lake"),
+			"layer": int(lake.get("layer", 0)),
+			"water_level": float(lake.get("water_level", 0.0)),
+			"average_depth": float(lake.get("average_depth", 12.0)),
+			"points": points_data,
+		})
+	return serialized
+
+
+func serialize_water_bodies() -> Dictionary:
+	return {
+		"rivers": serialize_rivers(),
+		"lakes": serialize_lakes(),
+	}
 
 
 # Deserialize rivers from saved data
@@ -665,3 +1102,41 @@ func deserialize_rivers(river_data_array: Array) -> void:
 		_apply_river_material_settings(river_id)
 		
 		_regenerate_river_mesh(river_id)
+	_refresh_layer_visibility()
+
+
+func deserialize_lakes(lake_data_array: Array) -> void:
+	for lake_id in _lakes.keys():
+		delete_lake(lake_id)
+	for lake_data in lake_data_array:
+		var layer: int = int(lake_data.get("layer", 0))
+		var type_name: String = str(lake_data.get("type", WATER_BODY_TYPE_LAKE))
+		var center := Vector3.ZERO
+		if lake_data.has("points") and (lake_data.get("points") as Array).size() > 0:
+			var fp: Dictionary = (lake_data.get("points") as Array)[0]
+			center = Vector3(float(fp.get("x", 0.0)), float(fp.get("y", 0.0)), float(fp.get("z", 0.0)))
+		var node: Node = create_lake(str(lake_data.get("name", "Lake")), center, 6.0, layer, type_name)
+		if not (node is MeshInstance3D) or not node.has_meta("lake_id"):
+			continue
+		var lake_id: int = int(node.get_meta("lake_id"))
+		if not _lakes.has(lake_id):
+			continue
+		var restored_points: Array = []
+		for point_data in lake_data.get("points", []):
+			if point_data is Dictionary:
+				restored_points.append(Vector3(
+					float(point_data.get("x", 0.0)),
+					float(point_data.get("y", 0.0)),
+					float(point_data.get("z", 0.0))
+				))
+		if restored_points.size() >= 3:
+			_lakes[lake_id]["points"] = restored_points
+		_lakes[lake_id]["water_level"] = float(lake_data.get("water_level", center.y))
+		_lakes[lake_id]["average_depth"] = float(lake_data.get("average_depth", 12.0))
+		_regenerate_lake_mesh(lake_id)
+	_refresh_layer_visibility()
+
+
+func deserialize_water_bodies(data: Dictionary) -> void:
+	deserialize_rivers(data.get("rivers", []))
+	deserialize_lakes(data.get("lakes", []))

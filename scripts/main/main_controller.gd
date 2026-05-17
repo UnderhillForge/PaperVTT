@@ -33,10 +33,12 @@ var _grass_system: Node3D = null
 var _scatter_system: Node3D = null
 var _water_system: Node = null
 var _active_river_id: int = -1
-var _river_width: float = 2.0
-var _river_flow_speed: float = 1.0
-var _river_average_depth: float = 7.5
-var _water_color: Color = Color(0.2, 0.5, 0.3, 1.0)
+var _river_width: float = 5.0
+var _river_flow_speed: float = 0.24
+var _river_average_depth: float = 15.0
+var _water_color: Color = Color(0.14, 0.50, 0.56, 1.0)
+var _water_mode: String = "river"
+var _active_world_layer: int = 0
 var _river_handle_root: Node3D = null
 var _river_point_handles: Array[Dictionary] = []
 var _dragging_river_handle: bool = false
@@ -191,6 +193,10 @@ func _ready() -> void:
 	add_child(_water_system)
 	if _water_system.has_method("initialize"):
 		_water_system.call("initialize", self, _terrain_node)
+	if _water_system.has_method("set_current_layer"):
+		_water_system.call("set_current_layer", _active_world_layer)
+	if _water_system.has_method("set_water_mode"):
+		_water_system.call("set_water_mode", _water_mode)
 	
 	# Texture Painter — discovers available textures for painting
 	_texture_painter = TerrainTexturePainterClass.new()
@@ -434,6 +440,29 @@ func _unhandled_input(event: InputEvent) -> void:
 		elif event.keycode == KEY_DELETE or event.keycode == KEY_BACKSPACE:
 			_delete_selected_river_point()
 			get_viewport().set_input_as_handled()
+		elif event.keycode == KEY_1:
+			_water_mode = "river"
+			if _water_system != null and _water_system.has_method("set_water_mode"):
+				_water_system.call("set_water_mode", _water_mode)
+			_set_status("Water mode: River path")
+			_update_active_tool_feedback()
+			get_viewport().set_input_as_handled()
+		elif event.keycode == KEY_2:
+			_finish_river_draw()
+			_water_mode = "lake"
+			if _water_system != null and _water_system.has_method("set_water_mode"):
+				_water_system.call("set_water_mode", _water_mode)
+			_set_status("Water mode: Lake / Pond")
+			_update_active_tool_feedback()
+			get_viewport().set_input_as_handled()
+		elif event.keycode == KEY_3:
+			_finish_river_draw()
+			_water_mode = "fill"
+			if _water_system != null and _water_system.has_method("set_water_mode"):
+				_water_system.call("set_water_mode", _water_mode)
+			_set_status("Water mode: Sculpt / Fill")
+			_update_active_tool_feedback()
+			get_viewport().set_input_as_handled()
 
 func _on_menu_action_requested(action: String) -> void:
 	if action.begins_with("tool_"):
@@ -627,6 +656,10 @@ func _on_tool_setting_changed(setting_name: String, value: Variant) -> void:
 				_water_color = value as Color
 				if _water_system.has_method("set_water_color"):
 					_water_system.call("set_water_color", _water_color)
+		"water_mode":
+			_water_mode = String(value)
+			if _water_system != null and _water_system.has_method("set_water_mode"):
+				_water_system.call("set_water_mode", _water_mode)
 
 func _on_prefab_selected(prefab_path: String) -> void:
 	_selected_prefab = prefab_path
@@ -700,6 +733,21 @@ func _handle_river_draw_click() -> void:
 		return
 
 	var world_pos: Vector3 = hit as Vector3
+	if _water_mode == "lake":
+		if _water_system.has_method("create_lake"):
+			var lake_radius: float = maxf(4.0, _river_width * 1.9)
+			var lake_node: Variant = _water_system.call("create_lake", "", world_pos, lake_radius, _active_world_layer, "lake", _river_average_depth, true)
+			if lake_node is MeshInstance3D:
+				_set_status("Lake created on layer %d" % _active_world_layer)
+			return
+	if _water_mode == "fill":
+		if _water_system.has_method("create_fill_water"):
+			var fill_radius: float = maxf(5.0, _river_width * 2.2)
+			var fill_node: Variant = _water_system.call("create_fill_water", "", world_pos, fill_radius, _active_world_layer, _river_average_depth)
+			if fill_node is MeshInstance3D:
+				_set_status("Fill water created on layer %d" % _active_world_layer)
+			return
+
 	if _active_river_id < 0:
 		if _selected_river_id >= 0 and _water_system.has_method("get_river"):
 			var selected_river_var: Variant = _water_system.call("get_river", _selected_river_id)
@@ -1628,9 +1676,20 @@ func _update_active_tool_feedback() -> void:
 		"horizonmountain":
 			viewport_hint.text = "Mode: Distant Mountain | LMB: click to place %dm away in that direction | Esc clears tool" % [int(HORIZON_MOUNTAIN_PLACE_DISTANCE)]
 		"riverdraw":
-			viewport_hint.text = "Mode: Draw River | LMB add points | RMB/Esc finish river | Width %.1f | Flow %.2f | Depth %.1f" % [_river_width, _river_flow_speed, _river_average_depth]
+			viewport_hint.text = "Mode: Water (%s) | [1]River [2]Lake [3]Fill | LMB place/edit | RMB/Esc finish river path | Width %.1f | Flow %.2f | Depth %.1f | Layer %d" % [_water_mode.capitalize(), _river_width, _river_flow_speed, _river_average_depth, _active_world_layer]
 		_:
 			viewport_hint.text = "Mode: %s" % _format_tool_name(_current_tool)
+
+
+func set_active_world_layer(layer: int) -> void:
+	_active_world_layer = layer
+	if _water_system != null and _water_system.has_method("set_current_layer"):
+		_water_system.call("set_current_layer", layer)
+	_update_active_tool_feedback()
+
+
+func get_active_world_layer() -> int:
+	return _active_world_layer
 
 func _format_tool_name(tool_name: String) -> String:
 	match tool_name:
@@ -1804,8 +1863,18 @@ func _check_position_over_water(world_pos: Vector3) -> bool:
 	var rivers_variant: Variant = _water_system.call("get_rivers")
 	if not (rivers_variant is Dictionary):
 		return false
+	var lakes: Dictionary = {}
+	if _water_system.has_method("get_lakes"):
+		var lakes_variant: Variant = _water_system.call("get_lakes")
+		if lakes_variant is Dictionary:
+			lakes = lakes_variant as Dictionary
 	
 	var rivers: Dictionary = rivers_variant as Dictionary
+	var water_bodies: Array[Dictionary] = []
+	for river_id in rivers:
+		water_bodies.append(rivers[river_id])
+	for lake_id in lakes:
+		water_bodies.append(lakes[lake_id])
 	var check_radius: float = _brush_size + 0.5
 	var check_height: float = 1.0
 	var check_aabb: AABB = AABB(
@@ -1813,9 +1882,8 @@ func _check_position_over_water(world_pos: Vector3) -> bool:
 		Vector3(check_radius * 2.0, check_height * 2.0, check_radius * 2.0)
 	)
 	
-	for river_id in rivers:
-		var river: Dictionary = rivers[river_id]
-		var mesh_instance: MeshInstance3D = river.get("mesh_instance", null)
+	for water_body in water_bodies:
+		var mesh_instance: MeshInstance3D = water_body.get("mesh_instance", null)
 		if mesh_instance == null or not is_instance_valid(mesh_instance):
 			continue
 		
