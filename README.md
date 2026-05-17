@@ -1,6 +1,6 @@
 # PaperVTT
 
-> **Foundation Transition in Progress** — Branch `updated-foundation` is migrating the terrain core from a custom heightmap system to **TerraBrush 0.14.5-alpha** (GDExtension). Old terrain, water, wall, and scatter scripts are preserved under `legacy/` and will be removed once the new system is stable. The pen-and-ink post-process aesthetic is unchanged.
+> **Note:** Project is transitioning to TerraBrush as the new terrain/water foundation. Old custom systems have been moved to `/legacy/` for reference.
 
 PaperVTT is a stylized 3D map editor for tabletop worldbuilding, with a long-term direction toward a full virtual tabletop workflow.
 
