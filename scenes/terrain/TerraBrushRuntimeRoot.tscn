@@ -1,0 +1,60 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/textures/world/grass_02_2k/grass_02_base_2k.png" id="1_grass_alb"]
+[ext_resource type="Texture2D" path="res://assets/textures/world/grass_02_2k/grass_02_normal_gl_2k.png" id="2_grass_nrm"]
+[ext_resource type="Texture2D" path="res://assets/textures/world/grass_02_2k/grass_02_roughness_2k.png" id="3_grass_rgh"]
+[ext_resource type="Texture2D" path="res://assets/textures/world/grass_02_2k/grass_02_height_2k.png" id="4_grass_hgt"]
+[ext_resource type="Texture2D" path="res://assets/textures/world/cliff_rocks_02_2k/cliff_rocks_02_baseColor_2k.png" id="5_stone_alb"]
+[ext_resource type="Texture2D" path="res://assets/textures/world/cliff_rocks_02_2k/cliff_rocks_02_normal_gl_2k.png" id="6_stone_nrm"]
+[ext_resource type="Texture2D" path="res://assets/textures/world/cliff_rocks_02_2k/cliff_rocks_02_roughness_2k.png" id="7_stone_rgh"]
+[ext_resource type="Texture2D" path="res://assets/textures/world/cliff_rocks_02_2k/cliff_rocks_02_height_2k.png" id="8_stone_hgt"]
+[ext_resource type="Texture2D" path="res://assets/textures/world/cliff_rocks_02_2k/cliff_rocks_02_baseColor_2k.png" id="9_cliff_alb"]
+[ext_resource type="Texture2D" path="res://assets/textures/world/cliff_rocks_02_2k/cliff_rocks_02_normal_gl_2k.png" id="10_cliff_nrm"]
+[ext_resource type="Texture2D" path="res://assets/textures/world/cliff_rocks_02_2k/cliff_rocks_02_roughness_2k.png" id="11_cliff_rgh"]
+[ext_resource type="Texture2D" path="res://assets/textures/world/cliff_rocks_02_2k/cliff_rocks_02_height_2k.png" id="12_cliff_hgt"]
+
+[sub_resource type="TextureSetResource" id="Resource_grass"]
+name = "Grass"
+albedoTexture = ExtResource("1_grass_alb")
+normalTexture = ExtResource("2_grass_nrm")
+roughnessTexture = ExtResource("3_grass_rgh")
+heightTexture = ExtResource("4_grass_hgt")
+
+[sub_resource type="TextureSetResource" id="Resource_stone"]
+name = "Stone Ground"
+albedoTexture = ExtResource("5_stone_alb")
+normalTexture = ExtResource("6_stone_nrm")
+roughnessTexture = ExtResource("7_stone_rgh")
+heightTexture = ExtResource("8_stone_hgt")
+
+[sub_resource type="TextureSetResource" id="Resource_cliff"]
+name = "Cliff Rock"
+albedoTexture = ExtResource("9_cliff_alb")
+normalTexture = ExtResource("10_cliff_nrm")
+roughnessTexture = ExtResource("11_cliff_rgh")
+heightTexture = ExtResource("12_cliff_hgt")
+
+[sub_resource type="TextureSetsResource" id="Resource_texsets"]
+textureSets = Array[TextureSetResource]([SubResource("Resource_grass"), SubResource("Resource_stone"), SubResource("Resource_cliff")])
+
+[sub_resource type="ZoneResource" id="Resource_zone0"]
+
+[sub_resource type="ZonesResource" id="Resource_zones"]
+zones = Array[ZoneResource]([SubResource("Resource_zone0")])
+
+[node name="TerraBrushRuntimeRoot" type="Node3D"]
+
+[node name="TerraBrush" type="TerraBrush" parent="."]
+dataPath = "res://terrain_data/test"
+lodLevels = 4
+textureSets = SubResource("Resource_texsets")
+terrainZones = SubResource("Resource_zones")
+physics_interpolation_mode = 2
+
+[node name="TerraBrushEditor" type="TerraBrushEditor" parent="."]
+terraBrushNode = NodePath("../TerraBrush")
+enableOnReady = false
+allowBuiltInToolSelectors = true
+defaultBrushSize = 50
+maxBrushSize = 200
+defaultBrushStrength = 0.5

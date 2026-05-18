@@ -1,5 +1,5 @@
 shader_type spatial;
-render_mode cull_disabled, depth_draw_opaque, unshaded;  // Changed from depth_draw_always
+render_mode cull_disabled, depth_draw_opaque, diffuse_burley, specular_schlick_ggx;
 
 // Wind parameters
 uniform float wind_strength : hint_range(0.0, 2.0) = 0.8;

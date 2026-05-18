@@ -5,31 +5,15 @@
 [ext_resource type="Script" uid="uid://dw7daknpkm586" path="res://scripts/ui/main_menu_bar.gd" id="3"]
 [ext_resource type="PackedScene" path="res://scenes/ui/WorldToolsToolbar.tscn" id="4"]
 [ext_resource type="PackedScene" path="res://scenes/ui/AssetBrowser.tscn" id="5"]
-[ext_resource type="PackedScene" path="res://scenes/ui/PostProcessCanvas.tscn" id="6"]
+[ext_resource type="PackedScene" path="res://scenes/terrain/WorldBrushRuntimeRoot.tscn" id="6"]
 [ext_resource type="Texture2D" uid="uid://317kt067hren" path="res://assets/art/d20.png" id="7"]
 [ext_resource type="Script" uid="uid://csjccrhj5wnx7" path="res://addons/phantom_camera/scripts/phantom_camera/phantom_camera_3d.gd" id="8"]
 [ext_resource type="Script" uid="uid://bd046eokvcnu2" path="res://addons/phantom_camera/scripts/phantom_camera_host/phantom_camera_host.gd" id="9"]
 [ext_resource type="Script" uid="uid://b8hhnqsugykly" path="res://addons/phantom_camera/scripts/resources/camera_3d_resource.gd" id="10"]
 [ext_resource type="Script" uid="uid://8umksf8e80fw" path="res://addons/phantom_camera/scripts/resources/tween_resource.gd" id="11"]
-
-[sub_resource type="ProceduralSkyMaterial" id="1"]
-sky_horizon_color = Color(0.85, 0.9, 0.95, 1)
-ground_bottom_color = Color(0.22, 0.24, 0.26, 1)
-ground_horizon_color = Color(0.53, 0.57, 0.62, 1)
-
-[sub_resource type="Sky" id="2"]
-sky_material = SubResource("1")
-
-[sub_resource type="Environment" id="3"]
-background_mode = 2
-sky = SubResource("2")
-ambient_light_source = 3
-ambient_light_color = Color(0.66, 0.69, 0.72, 1)
-ambient_light_energy = 1.45
-tonemap_mode = 2
-adjustment_enabled = true
-adjustment_brightness = 1.1
-adjustment_contrast = 1.08
+[ext_resource type="Script" path="res://addons/sky_3d/src/Sky3D.gd" id="12"]
+[ext_resource type="PackedScene" path="res://scenes/ui/TimeWeatherPanel.tscn" id="13"]
+[ext_resource type="Script" path="res://scripts/environment/TimeOfDayLighting.gd" id="14"]
 
 [sub_resource type="Resource" id="6"]
 script = ExtResource("11")
@@ -50,7 +34,11 @@ border_color = Color(0.31, 0.36, 0.25, 1)
 [node name="Main" type="Node3D" unique_id=1633296315]
 script = ExtResource("1")
 
-[node name="Sun" type="DirectionalLight3D" parent="." unique_id=1040758351]
+[node name="Sky3D" type="WorldEnvironment" parent="." unique_id=1907193878]
+script = ExtResource("12")
+current_time = 14.533
+
+[node name="SunLight" type="DirectionalLight3D" parent="Sky3D" unique_id=1040758351]
 transform = Transform3D(0.92388, -0.309017, 0.224144, 0.152391, 0.786566, 0.598741, -0.351019, -0.534131, 0.768178, 0, 0, 0)
 light_color = Color(1, 0.968627, 0.901961, 1)
 light_energy = 4.0
@@ -58,10 +46,16 @@ shadow_enabled = true
 directional_shadow_split_1 = 0.14
 directional_shadow_max_distance = 260.0
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1907193878]
-environment = SubResource("3")
+[node name="LightingManager" type="Node" parent="."]
+script = ExtResource("14")
+sky_3d = NodePath("../Sky3D")
+directional_light = NodePath("../Sky3D/SunLight")
+world_environment = NodePath("../Sky3D")
+post_process_canvas = NodePath("../PostProcessCanvas")
 
 [node name="Terrain" type="Node3D" parent="." unique_id=625229837]
+
+[node name="WorldBrushRuntimeRoot" parent="Terrain" instance=ExtResource("6")]
 
 [node name="StampRoot" type="Node3D" parent="." unique_id=1191310545]
 
@@ -222,6 +216,13 @@ text = "Optimize Editor"
 unique_name_in_owner = true
 layout_mode = 2
 
+[node name="TimeWeatherPanel" parent="EditorCanvas/RootUI" unique_id=811297011 instance=ExtResource("13")]
+unique_name_in_owner = true
+layout_mode = 0
+preview_open_radial_menu = false
+preview_open_time_panel = false
+preview_weather_mode = ""
+
 [node name="StatusPanel" type="PanelContainer" parent="EditorCanvas/RootUI/Layout" unique_id=775331724]
 custom_minimum_size = Vector2(0, 28)
 layout_mode = 2
@@ -230,5 +231,3 @@ layout_mode = 2
 unique_name_in_owner = true
 layout_mode = 2
 text = "Ready"
-
-[node name="PostProcessCanvas" parent="." unique_id=1285510062 instance=ExtResource("6")]

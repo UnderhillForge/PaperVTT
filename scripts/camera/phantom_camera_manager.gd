@@ -191,6 +191,9 @@ func clear_follow_target() -> void:
 	if not _is_top_down_mode:
 		_set_editor_mode()
 
+func has_follow_target() -> bool:
+	return _active_target != null and is_instance_valid(_active_target)
+
 func recenter() -> void:
 	if _camera_focus != null:
 		_camera_focus.global_position = Vector3.ZERO

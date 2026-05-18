@@ -5,16 +5,20 @@ background_mode = 2
 ambient_light_color = Color(0.87451, 0.87451, 0.87451, 1)
 ambient_light_energy = 0.8
 
-[node name="TerraBrushMinimalTest" type="Node3D"]
+[node name="TerraBrushMinimalTest" type="Node3D" unique_id=1294028689]
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=2006255081]
 environment = SubResource("Environment_1")
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=640571850]
 transform = Transform3D(0.866025, -0.433013, 0.25, 0, 0.5, 0.866025, -0.5, -0.75, 0.433013, 0, 100, 0)
 light_energy = 1.2
 shadow_enabled = true
 
-[node name="Camera3D" type="Camera3D" parent="."]
+[node name="Camera3D" type="Camera3D" parent="." unique_id=469555814]
 transform = Transform3D(1, 0, 0, 0, 0.819152, 0.573576, 0, -0.573576, 0.819152, 0, 80, 120)
 fov = 60.0
+
+[node name="TerraBrush" type="TerraBrush" parent="." unique_id=526232031]
+dataPath = "res://terrain_data/test"
+lodLevels = 4

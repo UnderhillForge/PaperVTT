@@ -5,7 +5,7 @@
 
 [sub_resource type="ShaderMaterial" id="1"]
 shader = ExtResource("1")
-shader_parameter/enabled = true
+shader_parameter/enabled = false
 shader_parameter/outline_color = Color(0, 0, 0, 1)
 shader_parameter/outline_thickness = 4.0
 shader_parameter/outline_strength = 2.35
@@ -27,6 +27,7 @@ usage = 2
 render_target_update_mode = 4
 
 [node name="FullscreenOverlay" type="TextureRect" parent="."]
+visible = false
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0

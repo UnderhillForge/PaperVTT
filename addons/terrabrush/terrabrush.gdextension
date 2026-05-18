@@ -17,7 +17,7 @@ windows.release.x86_64 = "res://addons/terrabrush/bin/libterrabrush.windows.rele
 linux.debug.x86_64 = "res://addons/terrabrush/bin/libterrabrush.linux.debug.x86_64.so"
 linux.release.x86_64 = "res://addons/terrabrush/bin/libterrabrush.linux.release.x86_64.so"
 
-macos.debug = "res://addons/terrabrush/bin/libterrabrush.macos.debug.framework/libterrabrush.macos.debug"
+macos.debug = "res://addons/terrabrush/bin/libterrabrush.macos.release.framework/libterrabrush.macos.release"
 macos.release = "res://addons/terrabrush/bin/libterrabrush.macos.release.framework/libterrabrush.macos.release"
 
 web.debug = "res://addons/terrabrush/bin/libterrabrush.web.debug.wasm32.wasm"
