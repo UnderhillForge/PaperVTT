@@ -7,6 +7,8 @@ class_name WorldBrush
 @export var min_terrain_height: float = -14.0
 @export var seed_initial_terrain: bool = true
 @export var auto_test_snow: bool = true
+@export var dirty_rect_border: int = 4
+@export var debug_visualize_dirty_rect: bool = false
 
 var _active_world_layer: int = 0
 var _mesh_instance: MeshInstance3D = null
@@ -20,17 +22,31 @@ var _layer_paint: Dictionary = {}
 var _layer_water: Dictionary = {}
 var _layer_snow: Dictionary = {}
 
+var dirty_min: Vector2i = Vector2i.ZERO
+var dirty_max: Vector2i = Vector2i.ZERO
+var is_dirty: bool = false
+var _full_rebuild_mode: bool = true
+var _surface_ready: bool = false
+
 func _ready() -> void:
 	_ensure_nodes()
 	_ensure_layer_data(_active_world_layer)
 	if auto_test_snow:
 		apply_procedural_snow(2.8, 10.0, 0.6)
-	_rebuild_surface()
+	rebuild_mesh()
 
 func set_world_layer(layer: int) -> void:
 	_active_world_layer = layer
 	_ensure_layer_data(_active_world_layer)
-	_rebuild_surface()
+	rebuild_mesh()
+
+
+func set_full_rebuild_mode(enabled: bool) -> void:
+	_full_rebuild_mode = enabled
+
+
+func get_full_rebuild_mode() -> bool:
+	return _full_rebuild_mode
 
 func get_world_layer() -> int:
 	return _active_world_layer
@@ -161,7 +177,8 @@ func apply_brush(tool_name: String, world_pos: Vector3, brush_size: float, brush
 	_layer_paint[_active_world_layer] = paint
 	_layer_water[_active_world_layer] = water
 	_layer_snow[_active_world_layer] = snow
-	_rebuild_surface()
+	_mark_dirty_rect(min_x, max_x, min_z, max_z)
+	_rebuild_after_stroke(radius, tool_name)
 
 func begin_texture_stroke(_perf_mode: bool = true, _brush_radius: float = 8.0) -> void:
 	pass
@@ -184,7 +201,7 @@ func apply_procedural_snow(min_height: float = 2.0, max_height: float = 22.0, in
 		t = clampf(t, 0.0, 1.0)
 		snow[i] = clampf(maxf(snow[i], t * intensity), 0.0, 1.0)
 	_layer_snow[_active_world_layer] = snow
-	_rebuild_surface()
+	rebuild_mesh()
 
 func _ensure_nodes() -> void:
 	if _mesh_instance == null:
@@ -271,11 +288,75 @@ func _neighbor_average(data: PackedFloat32Array, x: int, z: int) -> float:
 		return data[_idx(x, z, n)]
 	return sum / count
 
+
+func _compute_normal(data: PackedFloat32Array, x: int, z: int, step: float) -> Vector3:
+	var n: int = terrain_resolution + 1
+	var xl: int = maxi(0, x - 1)
+	var xr: int = mini(terrain_resolution, x + 1)
+	var zd: int = maxi(0, z - 1)
+	var zu: int = mini(terrain_resolution, z + 1)
+	var hl: float = data[_idx(xl, z, n)]
+	var hr: float = data[_idx(xr, z, n)]
+	var hd: float = data[_idx(x, zd, n)]
+	var hu: float = data[_idx(x, zu, n)]
+	var nx: float = hl - hr
+	var nz: float = hd - hu
+	return Vector3(nx, 2.0 * step, nz).normalized()
+
+
+func _mark_dirty_rect(min_x: int, max_x: int, min_z: int, max_z: int) -> void:
+	var border: int = clampi(dirty_rect_border, 1, 4)
+	var expanded_min_x: int = maxi(0, min_x - border)
+	var expanded_max_x: int = mini(terrain_resolution, max_x + border)
+	var expanded_min_z: int = maxi(0, min_z - border)
+	var expanded_max_z: int = mini(terrain_resolution, max_z + border)
+	if not is_dirty:
+		dirty_min = Vector2i(expanded_min_x, expanded_min_z)
+		dirty_max = Vector2i(expanded_max_x, expanded_max_z)
+		is_dirty = true
+		return
+	dirty_min.x = mini(dirty_min.x, expanded_min_x)
+	dirty_min.y = mini(dirty_min.y, expanded_min_z)
+	dirty_max.x = maxi(dirty_max.x, expanded_max_x)
+	dirty_max.y = maxi(dirty_max.y, expanded_max_z)
+
+
+func _rebuild_after_stroke(radius: float, tool_name: String) -> void:
+	if _full_rebuild_mode:
+		print("Rebuild mode: full (force enabled) | tool: ", tool_name)
+		rebuild_mesh()
+		return
+	var supports_dirty: bool = tool_name in ["raise", "lower", "smooth", "flatten", "paint", "texturepaint", "textureerase"]
+	if not supports_dirty:
+		print("Rebuild mode: full (tool requires full refresh) | tool: ", tool_name)
+		rebuild_mesh()
+		return
+	if radius >= terrain_size * 0.30:
+		print("Rebuild mode: full (large brush) | radius: ", radius)
+		rebuild_mesh()
+		return
+	if not is_dirty:
+		return
+	var dirty_width: int = dirty_max.x - dirty_min.x + 1
+	var dirty_height: int = dirty_max.y - dirty_min.y + 1
+	if dirty_width <= 0 or dirty_height <= 0:
+		print("Rebuild mode: full (invalid dirty bounds)")
+		rebuild_mesh()
+		return
+	var dirty_vertices: int = dirty_width * dirty_height
+	var total_vertices: int = (terrain_resolution + 1) * (terrain_resolution + 1)
+	if dirty_vertices >= int(ceil(float(total_vertices) * 0.33)):
+		print("Rebuild mode: full (dirty region too large) | vertices: ", dirty_vertices, " / ", total_vertices)
+		rebuild_mesh()
+		return
+	rebuild_dirty_mesh()
+
 func _idx(x: int, z: int, stride: int) -> int:
 	return z * stride + x
 
-func _rebuild_surface() -> void:
+func rebuild_mesh() -> void:
 	_ensure_layer_data(_active_world_layer)
+	var start_time: int = Time.get_ticks_usec()
 	var heights: PackedFloat32Array = _layer_heights[_active_world_layer]
 	var paint: PackedFloat32Array = _layer_paint[_active_world_layer]
 	var water: PackedFloat32Array = _layer_water[_active_world_layer]
@@ -347,5 +428,141 @@ func _rebuild_surface() -> void:
 	arr[Mesh.ARRAY_INDEX] = indices
 
 	var mesh := ArrayMesh.new()
-	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr, Array(), Dictionary(), Mesh.ARRAY_FLAG_USE_DYNAMIC_UPDATE)
+	mesh.set_custom_aabb(AABB(Vector3(-half, min_terrain_height, -half), Vector3(terrain_size, max_terrain_height - min_terrain_height, terrain_size)))
 	_mesh_instance.mesh = mesh
+	is_dirty = false
+	dirty_min = Vector2i.ZERO
+	dirty_max = Vector2i.ZERO
+	_surface_ready = true
+	print("Full rebuild: %.3f ms" % (float(Time.get_ticks_usec() - start_time) / 1000.0))
+
+
+func rebuild_dirty_mesh() -> void:
+	_ensure_layer_data(_active_world_layer)
+	if _mesh_instance == null or _mesh_instance.mesh == null or not (_mesh_instance.mesh is ArrayMesh):
+		rebuild_mesh()
+		return
+	if not is_dirty:
+		return
+	var mesh := _mesh_instance.mesh as ArrayMesh
+	if mesh.get_surface_count() == 0:
+		rebuild_mesh()
+		return
+	var start_time: int = Time.get_ticks_usec()
+	var heights: PackedFloat32Array = _layer_heights[_active_world_layer]
+	var paint: PackedFloat32Array = _layer_paint[_active_world_layer]
+	var water: PackedFloat32Array = _layer_water[_active_world_layer]
+	var snow: PackedFloat32Array = _layer_snow[_active_world_layer]
+	var stride: int = terrain_resolution + 1
+	var half: float = terrain_size * 0.5
+	var step: float = terrain_size / float(terrain_resolution)
+	var row_vertex_size: int = 12
+	var row_normal_size: int = 4
+	var row_color_size: int = 4
+	var normal_block_offset: int = row_vertex_size * stride * stride
+	var dirty_width: int = dirty_max.x - dirty_min.x + 1
+	var dirty_height: int = dirty_max.y - dirty_min.y + 1
+	var vertex_count: int = dirty_width * dirty_height
+	print("Dirty Rect: ", dirty_min, "->", dirty_max, " | Size: ", dirty_width, "×", dirty_height, " Vertices: ", vertex_count)
+
+	for z in range(dirty_min.y, dirty_max.y + 1):
+		var row_count: int = dirty_max.x - dirty_min.x + 1
+		if row_count <= 0:
+			continue
+		var position_bytes := PackedByteArray()
+		position_bytes.resize(row_count * row_vertex_size)
+		var normal_bytes := PackedByteArray()
+		normal_bytes.resize(row_count * row_normal_size)
+		var color_bytes := PackedByteArray()
+		color_bytes.resize(row_count * row_color_size)
+		for i in range(row_count):
+			var x: int = dirty_min.x + i
+			var idxv: int = _idx(x, z, stride)
+			var byte_ofs: int = i * row_vertex_size
+			var px: float = -half + float(x) * step
+			var pz: float = -half + float(z) * step
+			position_bytes.encode_float(byte_ofs + 0, px)
+			position_bytes.encode_float(byte_ofs + 4, heights[idxv])
+			position_bytes.encode_float(byte_ofs + 8, pz)
+
+			var normal: Vector3 = _compute_normal(heights, x, z, step)
+			var oct: Vector2 = normal.octahedron_encode()
+			var nx: int = clampi(int(round(oct.x * 65535.0)), 0, 65535)
+			var ny: int = clampi(int(round(oct.y * 65535.0)), 0, 65535)
+			normal_bytes.encode_u16(i * row_normal_size + 0, nx)
+			normal_bytes.encode_u16(i * row_normal_size + 2, ny)
+
+			var terrain_col: Color = Color(0.20, 0.29, 0.22, 1.0)
+			terrain_col = terrain_col.lerp(Color(0.40, 0.33, 0.24, 1.0), paint[idxv])
+			terrain_col = terrain_col.lerp(Color(0.19, 0.40, 0.52, 1.0), water[idxv] * 0.9)
+			terrain_col = terrain_col.lerp(Color(0.91, 0.93, 0.95, 1.0), snow[idxv])
+			if debug_visualize_dirty_rect:
+				terrain_col = Color.RED
+			color_bytes.encode_u32(i * row_color_size, terrain_col.to_rgba32())
+
+		var start_index: int = z * stride + dirty_min.x
+		mesh.surface_update_vertex_region(0, start_index * row_vertex_size, position_bytes)
+		mesh.surface_update_vertex_region(0, normal_block_offset + start_index * row_normal_size, normal_bytes)
+		mesh.surface_update_attribute_region(0, start_index * row_color_size, color_bytes)
+
+	var seam_start_time: int = Time.get_ticks_usec()
+	_update_dirty_border_seams(mesh, heights, paint, water, snow, stride, half, step, row_vertex_size, row_normal_size, row_color_size, normal_block_offset)
+	var seam_time: int = Time.get_ticks_usec() - seam_start_time
+
+	print("Dirty Rect Update Applied: ", dirty_min, "->", dirty_max, " | main: ", Time.get_ticks_usec() - start_time - seam_time, "µs | seams: ", seam_time, "µs")
+
+	is_dirty = false
+	dirty_min = Vector2i.ZERO
+	dirty_max = Vector2i.ZERO
+	print("Dirty rebuild: %.3f ms" % (float(Time.get_ticks_usec() - start_time) / 1000.0))
+
+
+func _update_dirty_border_seams(mesh: ArrayMesh, heights: PackedFloat32Array, paint: PackedFloat32Array, water: PackedFloat32Array, snow: PackedFloat32Array, stride: int, half: float, step: float, row_vertex_size: int, row_normal_size: int, row_color_size: int, normal_block_offset: int) -> void:
+	var border_vertices: Array[Vector2i] = []
+	var updated_min_x: int = maxi(0, dirty_min.x - 1)
+	var updated_max_x: int = mini(terrain_resolution, dirty_max.x + 1)
+	var updated_min_z: int = maxi(0, dirty_min.y - 1)
+	var updated_max_z: int = mini(terrain_resolution, dirty_max.y + 1)
+
+	for z in range(updated_min_z, updated_max_z + 1):
+		for x in range(updated_min_x, updated_max_x + 1):
+			var is_on_border: bool = (x == dirty_min.x - 1 or x == dirty_max.x + 1 or z == dirty_min.y - 1 or z == dirty_max.y + 1)
+			if is_on_border and x >= 0 and x <= terrain_resolution and z >= 0 and z <= terrain_resolution:
+				border_vertices.append(Vector2i(x, z))
+
+	if border_vertices.is_empty():
+		return
+
+	for bv in border_vertices:
+		var x: int = bv.x
+		var z: int = bv.y
+		var idxv: int = _idx(x, z, stride)
+		var normal: Vector3 = _compute_normal(heights, x, z, step)
+		var oct: Vector2 = normal.octahedron_encode()
+		var nx: int = clampi(int(round(oct.x * 65535.0)), 0, 65535)
+		var ny: int = clampi(int(round(oct.y * 65535.0)), 0, 65535)
+
+		var terrain_col: Color = Color(0.20, 0.29, 0.22, 1.0)
+		terrain_col = terrain_col.lerp(Color(0.40, 0.33, 0.24, 1.0), paint[idxv])
+		terrain_col = terrain_col.lerp(Color(0.19, 0.40, 0.52, 1.0), water[idxv] * 0.9)
+		terrain_col = terrain_col.lerp(Color(0.91, 0.93, 0.95, 1.0), snow[idxv])
+
+		var normal_bytes := PackedByteArray()
+		normal_bytes.resize(row_normal_size)
+		normal_bytes.encode_u16(0, nx)
+		normal_bytes.encode_u16(2, ny)
+
+		var color_bytes := PackedByteArray()
+		color_bytes.resize(row_color_size)
+		color_bytes.encode_u32(0, terrain_col.to_rgba32())
+
+		var vertex_offset: int = idxv * row_vertex_size
+		var normal_offset: int = normal_block_offset + idxv * row_normal_size
+		var color_offset: int = idxv * row_color_size
+
+		mesh.surface_update_vertex_region(0, normal_offset, normal_bytes)
+		mesh.surface_update_attribute_region(0, color_offset, color_bytes)
+
+func _rebuild_surface() -> void:
+	rebuild_mesh()

@@ -33,6 +33,8 @@ var _lightning_interval_value: Label = null
 var _lightning_intensity_slider: HSlider = null
 var _lightning_intensity_value: Label = null
 var _lightning_random_check: CheckBox = null
+var _full_rebuild_check: CheckBox = null
+var _debug_visualize_dirty_rect_check: CheckBox = null
 
 var _updating_ui: bool = false
 var _active_weathers: Array[String] = ["normal"]
@@ -250,6 +252,30 @@ func _ready() -> void:
 	)
 	root.add_child(_lightning_random_check)
 
+	root.add_child(HSeparator.new())
+	root.add_child(_make_section_title("Debug"))
+	_full_rebuild_check = CheckBox.new()
+	_full_rebuild_check.text = "Force Full Rebuild"
+	_full_rebuild_check.button_pressed = true
+	_full_rebuild_check.tooltip_text = "Force the terrain to rebuild the full mesh after every stroke."
+	_full_rebuild_check.toggled.connect(func(v: bool) -> void:
+		if _updating_ui:
+			return
+		environment_setting_changed.emit("full_rebuild_mode", v)
+	)
+	root.add_child(_full_rebuild_check)
+
+	_debug_visualize_dirty_rect_check = CheckBox.new()
+	_debug_visualize_dirty_rect_check.text = "Visualize Dirty Rect (Red)"
+	_debug_visualize_dirty_rect_check.button_pressed = false
+	_debug_visualize_dirty_rect_check.tooltip_text = "Highlight the dirty rect region with bright red for debugging seam issues."
+	_debug_visualize_dirty_rect_check.toggled.connect(func(v: bool) -> void:
+		if _updating_ui:
+			return
+		environment_setting_changed.emit("debug_visualize_dirty_rect", v)
+	)
+	root.add_child(_debug_visualize_dirty_rect_check)
+
 	_update_weather_slider_visibility(false)
 
 
@@ -291,6 +317,10 @@ func set_environment_state(state: Dictionary) -> void:
 	_lightning_intensity_slider.value = float(state.get("lightning_intensity", 2.2))
 	_lightning_intensity_value.text = "%.2f" % _lightning_intensity_slider.value
 	_lightning_random_check.button_pressed = bool(state.get("lightning_random_variation", true))
+	if _full_rebuild_check != null:
+		_full_rebuild_check.button_pressed = bool(state.get("full_rebuild_mode", true))
+	if _debug_visualize_dirty_rect_check != null:
+		_debug_visualize_dirty_rect_check.button_pressed = bool(state.get("debug_visualize_dirty_rect", false))
 	_updating_ui = false
 
 	_update_weather_slider_visibility(_weather_stack_check.button_pressed)

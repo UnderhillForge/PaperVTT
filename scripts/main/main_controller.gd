@@ -200,6 +200,8 @@ var _weather_channel_intensity: Dictionary = {
 	"foggy": 0.0,
 	"stormy": 0.0,
 }
+var _terrain_full_rebuild_mode: bool = true
+var _debug_visualize_dirty_rect: bool = false
 var _lightning_enabled: bool = false
 var _lightning_interval: float = 18.0
 var _lightning_intensity: float = 2.2
@@ -455,6 +457,8 @@ func _sync_environment_inspector() -> void:
 		"weather_stacking_enabled": _weather_stacking_enabled,
 		"weather_channels": _weather_channel_intensity,
 		"weather": _sky_weather,
+		"full_rebuild_mode": _terrain_full_rebuild_mode,
+		"debug_visualize_dirty_rect": _debug_visualize_dirty_rect,
 		"lightning_enabled": _lightning_enabled,
 		"lightning_interval": _lightning_interval,
 		"lightning_intensity": _lightning_intensity,
@@ -828,6 +832,7 @@ func _export_sky_state() -> Dictionary:
 		"lightning_interval": _lightning_interval,
 		"lightning_intensity": _lightning_intensity,
 		"lightning_random_variation": _lightning_random_variation,
+		"full_rebuild_mode": _terrain_full_rebuild_mode,
 	}
 
 
@@ -851,11 +856,15 @@ func _import_sky_state(data: Dictionary) -> void:
 	_lightning_interval = clampf(float(data.get("lightning_interval", _lightning_interval)), 8.0, 60.0)
 	_lightning_intensity = clampf(float(data.get("lightning_intensity", _lightning_intensity)), 0.0, 5.0)
 	_lightning_random_variation = bool(data.get("lightning_random_variation", _lightning_random_variation))
+	_terrain_full_rebuild_mode = bool(data.get("full_rebuild_mode", _terrain_full_rebuild_mode))
+	_debug_visualize_dirty_rect = bool(data.get("debug_visualize_dirty_rect", _debug_visualize_dirty_rect))
 	_lightning_timer = 0.01
 	_apply_time_of_day(_sky_time_hours)
 	_apply_day_length(_sky_minutes_per_day)
 	_apply_weather_preset(_sky_weather, false)
 	_sync_environment_inspector()
+	if _terrain_node != null and _terrain_node.has_method("set_full_rebuild_mode"):
+		_terrain_node.call("set_full_rebuild_mode", _terrain_full_rebuild_mode)
 	emit_signal("sky_state_changed", _sky_time_hours, _sky_weather)
 
 func _exit_tree() -> void:
@@ -1359,6 +1368,14 @@ func _on_tool_setting_changed(setting_name: String, value: Variant) -> void:
 			_lightning_intensity = clampf(float(value), 0.0, 5.0)
 		"lightning_random_variation":
 			_lightning_random_variation = bool(value)
+		"full_rebuild_mode":
+			_terrain_full_rebuild_mode = bool(value)
+			if _terrain_node != null and _terrain_node.has_method("set_full_rebuild_mode"):
+				_terrain_node.call("set_full_rebuild_mode", _terrain_full_rebuild_mode)
+		"debug_visualize_dirty_rect":
+			_debug_visualize_dirty_rect = bool(value)
+			if _terrain_node != null and _terrain_node.has_method("set") and _terrain_node.has_property("debug_visualize_dirty_rect"):
+				_terrain_node.debug_visualize_dirty_rect = _debug_visualize_dirty_rect
 	_sync_environment_inspector()
 
 func _on_prefab_selected(prefab_path: String) -> void:
@@ -3254,6 +3271,8 @@ func _ensure_terrain_node() -> Node:
 	if worldbrush_node != null:
 		if worldbrush_node.has_method("set_world_layer"):
 			worldbrush_node.call("set_world_layer", _active_world_layer)
+		if worldbrush_node.has_method("set_full_rebuild_mode"):
+			worldbrush_node.call("set_full_rebuild_mode", _terrain_full_rebuild_mode)
 		return worldbrush_node
 
 	var terrabrush_node: Node = _get_terrabrush_node()
