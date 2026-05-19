@@ -42,6 +42,8 @@ enum CameraMode { TOP_DOWN, EDITOR_FREE, CHARACTER_FOLLOW }
 @export var auto_return_speed: float = 5.0
 @export var manual_return_delay: float = 1.2
 @export var rmb_orbit_sensitivity: float = 0.2
+@export var orbit_return_speed: float = 8.0
+@export var orbit_return_speed_idle: float = 3.0
 @export var spring_length: float = 8.0
 @export var spring_length_min: float = 2.0
 @export var spring_length_max: float = 15.0
@@ -99,6 +101,8 @@ func _ensure_camera_rig() -> void:
 		camera_rig.spring_collision_mask = spring_collision_mask
 		camera_rig.auto_follow_damping = auto_return_speed
 		camera_rig.manual_look_return_delay = manual_return_delay
+		camera_rig.orbit_return_speed = orbit_return_speed
+		camera_rig.orbit_return_speed_idle = orbit_return_speed_idle
 		add_child(camera_rig)
 		await get_tree().process_frame
 

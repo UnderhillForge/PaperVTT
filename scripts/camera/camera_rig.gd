@@ -27,6 +27,11 @@ class_name CameraRig
 @export var auto_follow_damping: float = 5.0
 @export var manual_look_return_delay: float = 1.5
 
+## Orbit damping: speed of camera returning to behind-character on direction change.
+## Higher = faster/snappier, Lower = slower/smoother.
+@export var orbit_return_speed: float = 8.0
+@export var orbit_return_speed_idle: float = 3.0  # Slower return while character is idle
+
 @onready var offset_pivot: Node3D = $OffsetPivot
 @onready var horizontal_pivot: Node3D = $OffsetPivot/HorizontalPivot
 @onready var vertical_pivot: Node3D = $OffsetPivot/HorizontalPivot/VerticalPivot
@@ -127,10 +132,10 @@ func _update_follow_behavior(delta: float) -> void:
 			char_forward = char_forward.normalized()
 			var target_yaw := rad_to_deg(atan2(-char_forward.x, -char_forward.z))
 
-			var yaw_diff := fmod(target_yaw - yaw_degrees + 540.0, 360.0) - 180.0
-			# Faster return while moving, slower drift while idle
-			var blend_speed: float = auto_follow_damping if is_moving else auto_follow_damping * 0.2
-			yaw_degrees += yaw_diff * clampf(blend_speed * delta, 0.0, 1.0)
+			# Faster orbit while moving, slower drift while idle
+			var orbit_speed := orbit_return_speed if is_moving else orbit_return_speed_idle
+			# Smoothly interpolate toward target yaw with proper angle wrapping
+			yaw_degrees = _lerp_angle(yaw_degrees, target_yaw, orbit_speed * delta)
 
 
 func _ensure_structure() -> void:
@@ -160,6 +165,19 @@ func _ensure_structure() -> void:
 		camera = Camera3D.new()
 		camera.name = "Camera3D"
 		spring_arm.add_child(camera)
+
+
+func _lerp_angle(from: float, to: float, weight: float) -> float:
+	"""Smoothly interpolate between two angles with proper wrapping."""
+	# Normalize angles to [0, 360)
+	from = fmod(from + 360.0, 360.0)
+	to = fmod(to + 360.0, 360.0)
+	
+	# Find shortest path between angles
+	var diff := fmod(to - from + 540.0, 360.0) - 180.0
+	
+	# Lerp along the shortest path
+	return fmod(from + diff * clampf(weight, 0.0, 1.0) + 360.0, 360.0)
 
 
 func _configure_spring_arm() -> void:
