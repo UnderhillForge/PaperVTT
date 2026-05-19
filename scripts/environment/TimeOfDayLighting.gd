@@ -11,13 +11,13 @@ class_name TimeOfDayLighting
 @export var day_start_hour: float = 7.0
 @export var day_end_hour: float = 19.0
 
-@export var afternoon_sun_energy_min: float = 1.8
-@export var afternoon_sun_energy_max: float = 2.5
+@export var afternoon_sun_energy_min: float = 2.2
+@export var afternoon_sun_energy_max: float = 3.2
 @export var night_moon_energy_min: float = 0.15
 @export var night_moon_energy_max: float = 0.4
 
 @export var ambient_energy_night: float = 0.35
-@export var ambient_energy_day: float = 0.58
+@export var ambient_energy_day: float = 0.65
 @export var ambient_day_color: Color = Color(1.0, 0.95, 0.85, 1.0)
 @export var ambient_night_color: Color = Color(0.50, 0.56, 0.70, 1.0)
 
@@ -25,6 +25,8 @@ var sky_node: Node = null
 var sun_light: DirectionalLight3D = null
 var env_node: WorldEnvironment = null
 var postfx_node: CanvasLayer = null
+
+var _sculpt_boost_active: bool = false
 
 var _override_enabled: bool = false
 var _override_color: Color = Color(1.0, 0.95, 0.86, 1.0)
@@ -49,6 +51,10 @@ func _ready() -> void:
 	sun_light = get_node_or_null(directional_light) as DirectionalLight3D
 	env_node = get_node_or_null(world_environment) as WorldEnvironment
 	postfx_node = get_node_or_null(post_process_canvas) as CanvasLayer
+
+
+func set_sculpt_boost(enabled: bool) -> void:
+	_sculpt_boost_active = enabled
 
 
 func set_lighting_override(enabled: bool, color: Color, energy: float, saturation: float, tint_strength: float) -> void:
@@ -83,6 +89,8 @@ func update_lighting(time_of_day: float) -> void:
 	if t < afternoon_start_hour or t > afternoon_end_hour:
 		sun_energy = lerpf(0.2, afternoon_sun_energy_min, day_factor)
 	sun_energy *= weather_mult
+	if _sculpt_boost_active:
+		sun_energy = minf(sun_energy + 0.7, afternoon_sun_energy_max + 0.6)
 
 	var auto_light_color: Color = Color(1.0, 0.92 + warmth * 0.08, 0.85 + warmth * 0.1, 1.0)
 	_override_blend = move_toward(_override_blend, 1.0 if _override_enabled else 0.0, 0.06)
@@ -105,7 +113,9 @@ func update_lighting(time_of_day: float) -> void:
 	if env_node != null and env_node.environment != null:
 		var ambient: float = ambient_energy_night + (ambient_energy_day - ambient_energy_night) * day_factor
 		ambient += 0.03 * afternoon_peak
-		env_node.environment.ambient_light_energy = clampf(ambient, 0.3, 0.6)
+		if _sculpt_boost_active:
+			ambient += 0.12
+		env_node.environment.ambient_light_energy = clampf(ambient, 0.3, 0.82)
 		env_node.environment.ambient_light_color = ambient_night_color.lerp(ambient_day_color, day_factor)
 		env_node.environment.ssao_enabled = true
 		env_node.environment.ssao_intensity = lerpf(0.3, 0.42, day_factor)

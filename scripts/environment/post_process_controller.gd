@@ -12,6 +12,7 @@ extends CanvasLayer
 var _capture_camera: Camera3D = null
 var _render_scale: float = 1.0
 var _daylight_factor: float = 0.0
+var _sculpt_mode: bool = false
 
 func _ready() -> void:
 	_viewport.disable_3d = false
@@ -62,6 +63,10 @@ func set_lightweight_mode(value: bool) -> void:
 	lightweight_mode = value
 	_apply_quality_preset()
 
+
+func set_sculpt_mode(sculpt_enabled: bool) -> void:
+	_sculpt_mode = sculpt_enabled
+	_apply_quality_preset()
 
 func set_daylight_factor(value: float) -> void:
 	_daylight_factor = clampf(value, 0.0, 1.0)
@@ -115,10 +120,16 @@ func _apply_quality_preset() -> void:
 	# Daylight softens line crush and raises tonal lift to keep afternoons bright.
 	var daytime_outline_strength: float = lerpf(base_outline_strength, base_outline_strength * 0.78, _daylight_factor)
 	var daytime_line_darken: float = lerpf(base_line_darken, base_line_darken * 0.65, _daylight_factor)
+
+	# Sculpt mode further reduces shadow crushing for maximum shape readability.
+	if _sculpt_mode:
+		daytime_outline_strength *= 0.68
+		daytime_line_darken *= 0.45
+
 	material.set_shader_parameter("outline_strength", daytime_outline_strength)
 	material.set_shader_parameter("line_darken", daytime_line_darken)
-	material.set_shader_parameter("daytime_brightness", lerpf(1.0, 1.07, _daylight_factor))
-	material.set_shader_parameter("daytime_contrast", lerpf(1.0, 0.95, _daylight_factor))
+	material.set_shader_parameter("daytime_brightness", lerpf(1.0, 1.07, _daylight_factor) + (0.06 if _sculpt_mode else 0.0))
+	material.set_shader_parameter("daytime_contrast", lerpf(1.0, 0.95, _daylight_factor) - (0.03 if _sculpt_mode else 0.0))
 
 func _sync_viewport_size() -> void:
 	var size: Vector2i = get_viewport().get_visible_rect().size

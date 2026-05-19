@@ -214,6 +214,7 @@ var _weather_channel_intensity: Dictionary = {
 }
 var _terrain_full_rebuild_mode: bool = false
 var _debug_visualize_dirty_rect: bool = false
+var _sculpt_mode_active: bool = false
 var _lightning_enabled: bool = false
 var _lightning_interval: float = 18.0
 var _lightning_intensity: float = 2.2
@@ -1212,6 +1213,16 @@ func _on_menu_action_requested(action: String) -> void:
 		"help_about", "app_about":
 			_show_about_dialog()
 
+func _apply_sculpt_mode_boost(enabled: bool) -> void:
+	if _sculpt_mode_active == enabled:
+		return
+	_sculpt_mode_active = enabled
+	if time_of_day_lighting != null and time_of_day_lighting.has_method("set_sculpt_boost"):
+		time_of_day_lighting.call("set_sculpt_boost", enabled)
+	if postfx_canvas != null and postfx_canvas.has_method("set_sculpt_mode"):
+		postfx_canvas.call("set_sculpt_mode", enabled)
+
+
 func _on_tool_changed(tool_name: String) -> void:
 	if _current_tool == "riverdraw" and tool_name != "riverdraw":
 		_finish_river_draw()
@@ -1229,6 +1240,7 @@ func _on_tool_changed(tool_name: String) -> void:
 		_activate_wall_tool()
 	else:
 		_deactivate_wall_tool()
+	_apply_sculpt_mode_boost(tool_name in ["raise", "lower", "smooth", "flatten"])
 	_update_active_tool_feedback()
 	_update_worldbrush_inspector_for_tool(tool_name)
 	_update_tool_name_display()
