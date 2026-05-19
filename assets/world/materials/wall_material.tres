@@ -1,0 +1,17 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3]
+
+[ext_resource type="Shader" path="res://shaders/wall_ink.gdshader" id="1"]
+
+[resource]
+shader = ExtResource("1")
+shader_parameter/tint_color = Color(0.77, 0.76, 0.73, 1)
+shader_parameter/line_color = Color(0.05, 0.05, 0.05, 1)
+shader_parameter/hatch_color = Color(0.16, 0.15, 0.14, 1)
+shader_parameter/roughness_value = 0.92
+shader_parameter/edge_strength = 1.15
+shader_parameter/edge_power = 2.8
+shader_parameter/hatch_density = 24.0
+shader_parameter/hatch_strength = 0.2
+shader_parameter/paper_grain_strength = 0.12
+shader_parameter/is_preview = false
+shader_parameter/preview_alpha = 0.34

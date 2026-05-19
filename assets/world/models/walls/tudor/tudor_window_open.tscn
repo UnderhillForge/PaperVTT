@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3]
+
+[sub_resource type="BoxMesh" id="1"]
+size = Vector3(1.0, 1.0, 0.16)
+
+[sub_resource type="BoxMesh" id="2"]
+size = Vector3(0.78, 0.78, 0.03)
+
+[node name="tudor_window_open" type="Node3D"]
+
+[node name="Frame" type="MeshInstance3D" parent="."]
+mesh = SubResource("1")
+
+[node name="Pane" type="MeshInstance3D" parent="."]
+mesh = SubResource("2")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.085)

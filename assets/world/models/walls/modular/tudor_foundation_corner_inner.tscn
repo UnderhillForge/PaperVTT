@@ -1,0 +1,8 @@
+[gd_scene format=3]
+
+[node name="tudor_foundation_corner_inner" type="Node3D" unique_id=1312399438]
+metadata/piece_name = "foundation_corner_inner"
+metadata/piece_kind = "foundation_corner_inner"
+metadata/wall_variant = "tudor"
+metadata/grid_snap_m = 0.5
+metadata/wall_height_m = 3.4

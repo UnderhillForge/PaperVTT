@@ -1,0 +1,10276 @@
+{
+	"assets": {
+		"res://assets/world/models/characters/adventurers/Barbarian.tscn": {
+			"category": "characters",
+			"name": "characters/adventurers/Barbarian",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/adventurers/Knight.tscn": {
+			"category": "characters",
+			"name": "characters/adventurers/Knight",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/adventurers/Mage.tscn": {
+			"category": "characters",
+			"name": "characters/adventurers/Mage",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/adventurers/Ranger.tscn": {
+			"category": "characters",
+			"name": "characters/adventurers/Ranger",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/adventurers/Rogue.tscn": {
+			"category": "characters",
+			"name": "characters/adventurers/Rogue",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/adventurers/Rogue_Hooded.tscn": {
+			"category": "characters",
+			"name": "characters/adventurers/Rogue_Hooded",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/adventurers/arrow_bow.tscn": {
+			"category": "characters",
+			"name": "characters/adventurers/arrow_bow",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/adventurers/arrow_bow_bundle.tscn": {
+			"category": "characters",
+			"name": "characters/adventurers/arrow_bow_bundle",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/adventurers/arrow_crossbow.tscn": {
+			"category": "characters",
+			"name": "characters/adventurers/arrow_crossbow",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/adventurers/arrow_crossbow_bundle.tscn": {
+			"category": "characters",
+			"name": "characters/adventurers/arrow_crossbow_bundle",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/adventurers/axe_1handed.tscn": {
+			"category": "characters",
+			"name": "characters/adventurers/axe_1handed",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/adventurers/axe_2handed.tscn": {
+			"category": "characters",
+			"name": "characters/adventurers/axe_2handed",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/adventurers/bow.tscn": {
+			"category": "characters",
+			"name": "characters/adventurers/bow",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/adventurers/bow_withString.tscn": {
+			"category": "characters",
+			"name": "characters/adventurers/bow_withString",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/adventurers/crossbow_1handed.tscn": {
+			"category": "characters",
+			"name": "characters/adventurers/crossbow_1handed",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/adventurers/crossbow_2handed.tscn": {
+			"category": "characters",
+			"name": "characters/adventurers/crossbow_2handed",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/adventurers/dagger.tscn": {
+			"category": "characters",
+			"name": "characters/adventurers/dagger",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/adventurers/mug_empty.tscn": {
+			"category": "characters",
+			"name": "characters/adventurers/mug_empty",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/adventurers/mug_full.tscn": {
+			"category": "characters",
+			"name": "characters/adventurers/mug_full",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/adventurers/quiver.tscn": {
+			"category": "characters",
+			"name": "characters/adventurers/quiver",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/adventurers/shield_badge.tscn": {
+			"category": "characters",
+			"name": "characters/adventurers/shield_badge",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/adventurers/shield_badge_color.tscn": {
+			"category": "characters",
+			"name": "characters/adventurers/shield_badge_color",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/adventurers/shield_round.tscn": {
+			"category": "characters",
+			"name": "characters/adventurers/shield_round",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/adventurers/shield_round_barbarian.tscn": {
+			"category": "characters",
+			"name": "characters/adventurers/shield_round_barbarian",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/adventurers/shield_round_color.tscn": {
+			"category": "characters",
+			"name": "characters/adventurers/shield_round_color",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/adventurers/shield_spikes.tscn": {
+			"category": "characters",
+			"name": "characters/adventurers/shield_spikes",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/adventurers/shield_spikes_color.tscn": {
+			"category": "characters",
+			"name": "characters/adventurers/shield_spikes_color",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/adventurers/shield_square.tscn": {
+			"category": "characters",
+			"name": "characters/adventurers/shield_square",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/adventurers/shield_square_color.tscn": {
+			"category": "characters",
+			"name": "characters/adventurers/shield_square_color",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/adventurers/smokebomb.tscn": {
+			"category": "characters",
+			"name": "characters/adventurers/smokebomb",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/adventurers/spellbook_closed.tscn": {
+			"category": "characters",
+			"name": "characters/adventurers/spellbook_closed",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/adventurers/spellbook_open.tscn": {
+			"category": "characters",
+			"name": "characters/adventurers/spellbook_open",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/adventurers/staff.tscn": {
+			"category": "characters",
+			"name": "characters/adventurers/staff",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/adventurers/sword_1handed.tscn": {
+			"category": "characters",
+			"name": "characters/adventurers/sword_1handed",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/adventurers/sword_2handed.tscn": {
+			"category": "characters",
+			"name": "characters/adventurers/sword_2handed",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/adventurers/sword_2handed_color.tscn": {
+			"category": "characters",
+			"name": "characters/adventurers/sword_2handed_color",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/adventurers/wand.tscn": {
+			"category": "characters",
+			"name": "characters/adventurers/wand",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/core/adventurer_barbarian_a.tscn": {
+			"category": "characters",
+			"name": "characters/core/adventurer_barbarian_a",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/core/adventurer_knight_a.tscn": {
+			"category": "characters",
+			"name": "characters/core/adventurer_knight_a",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/core/adventurer_mage_a.tscn": {
+			"category": "characters",
+			"name": "characters/core/adventurer_mage_a",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/core/adventurer_ranger_a.tscn": {
+			"category": "characters",
+			"name": "characters/core/adventurer_ranger_a",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/core/adventurer_rogue_a.tscn": {
+			"category": "characters",
+			"name": "characters/core/adventurer_rogue_a",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/core/skeleton_mage_a.tscn": {
+			"category": "characters",
+			"name": "characters/core/skeleton_mage_a",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/core/skeleton_minion_a.tscn": {
+			"category": "characters",
+			"name": "characters/core/skeleton_minion_a",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/core/skeleton_rogue_a.tscn": {
+			"category": "characters",
+			"name": "characters/core/skeleton_rogue_a",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/core/skeleton_warrior_a.tscn": {
+			"category": "characters",
+			"name": "characters/core/skeleton_warrior_a",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/skeletons/Skeleton_Arrow.tscn": {
+			"category": "characters",
+			"name": "characters/skeletons/Skeleton_Arrow",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/skeletons/Skeleton_Arrow_Broken.tscn": {
+			"category": "characters",
+			"name": "characters/skeletons/Skeleton_Arrow_Broken",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/skeletons/Skeleton_Arrow_Broken_Half.tscn": {
+			"category": "characters",
+			"name": "characters/skeletons/Skeleton_Arrow_Broken_Half",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/skeletons/Skeleton_Arrow_Half.tscn": {
+			"category": "characters",
+			"name": "characters/skeletons/Skeleton_Arrow_Half",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/skeletons/Skeleton_Axe.tscn": {
+			"category": "characters",
+			"name": "characters/skeletons/Skeleton_Axe",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/skeletons/Skeleton_Blade.tscn": {
+			"category": "characters",
+			"name": "characters/skeletons/Skeleton_Blade",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/skeletons/Skeleton_Crossbow.tscn": {
+			"category": "characters",
+			"name": "characters/skeletons/Skeleton_Crossbow",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/skeletons/Skeleton_Mage.tscn": {
+			"category": "characters",
+			"name": "characters/skeletons/Skeleton_Mage",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/skeletons/Skeleton_Minion.tscn": {
+			"category": "characters",
+			"name": "characters/skeletons/Skeleton_Minion",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/skeletons/Skeleton_Quiver.tscn": {
+			"category": "characters",
+			"name": "characters/skeletons/Skeleton_Quiver",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/skeletons/Skeleton_Rogue.tscn": {
+			"category": "characters",
+			"name": "characters/skeletons/Skeleton_Rogue",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/skeletons/Skeleton_Shield_Large_A.tscn": {
+			"category": "characters",
+			"name": "characters/skeletons/Skeleton_Shield_Large_A",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/skeletons/Skeleton_Shield_Large_B.tscn": {
+			"category": "characters",
+			"name": "characters/skeletons/Skeleton_Shield_Large_B",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/skeletons/Skeleton_Shield_Small_A.tscn": {
+			"category": "characters",
+			"name": "characters/skeletons/Skeleton_Shield_Small_A",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/skeletons/Skeleton_Shield_Small_B.tscn": {
+			"category": "characters",
+			"name": "characters/skeletons/Skeleton_Shield_Small_B",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/skeletons/Skeleton_Staff.tscn": {
+			"category": "characters",
+			"name": "characters/skeletons/Skeleton_Staff",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/characters/skeletons/Skeleton_Warrior.tscn": {
+			"category": "characters",
+			"name": "characters/skeletons/Skeleton_Warrior",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/core/floor_dirt_patch_large.tscn": {
+			"category": "floors",
+			"name": "floors/core/floor_dirt_patch_large",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/core/floor_stone_tile_large.tscn": {
+			"category": "floors",
+			"name": "floors/core/floor_stone_tile_large",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/core/floor_stone_tile_small.tscn": {
+			"category": "floors",
+			"name": "floors/core/floor_stone_tile_small",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/core/floor_wood_plank_large.tscn": {
+			"category": "floors",
+			"name": "floors/core/floor_wood_plank_large",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/core/floor_wood_plank_small.tscn": {
+			"category": "floors",
+			"name": "floors/core/floor_wood_plank_small",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/core/path_stone_corner.tscn": {
+			"category": "floors",
+			"name": "floors/core/path_stone_corner",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/core/path_stone_straight.tscn": {
+			"category": "floors",
+			"name": "floors/core/path_stone_straight",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/dirt/crops_dirt_double_row_corner.tscn": {
+			"category": "floors",
+			"name": "floors/dirt/crops_dirt_double_row_corner",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/dirt/crops_dirt_row_corner.tscn": {
+			"category": "floors",
+			"name": "floors/dirt/crops_dirt_row_corner",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/dirt/floor_dirt_large.tscn": {
+			"category": "floors",
+			"name": "floors/dirt/floor_dirt_large",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/dirt/floor_dirt_large_rocky.tscn": {
+			"category": "floors",
+			"name": "floors/dirt/floor_dirt_large_rocky",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/dirt/floor_dirt_small_A.tscn": {
+			"category": "floors",
+			"name": "floors/dirt/floor_dirt_small_A",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/dirt/floor_dirt_small_B.tscn": {
+			"category": "floors",
+			"name": "floors/dirt/floor_dirt_small_B",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/dirt/floor_dirt_small_C.tscn": {
+			"category": "floors",
+			"name": "floors/dirt/floor_dirt_small_C",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/dirt/floor_dirt_small_D.tscn": {
+			"category": "floors",
+			"name": "floors/dirt/floor_dirt_small_D",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/dirt/floor_dirt_small_corner.tscn": {
+			"category": "floors",
+			"name": "floors/dirt/floor_dirt_small_corner",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/dirt/floor_dirt_small_weeds.tscn": {
+			"category": "floors",
+			"name": "floors/dirt/floor_dirt_small_weeds",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/Textiles_A.tscn": {
+			"category": "floors",
+			"name": "floors/misc/Textiles_A",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/Textiles_B.tscn": {
+			"category": "floors",
+			"name": "floors/misc/Textiles_B",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/Textiles_C.tscn": {
+			"category": "floors",
+			"name": "floors/misc/Textiles_C",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/Textiles_Stack_Large.tscn": {
+			"category": "floors",
+			"name": "floors/misc/Textiles_Stack_Large",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/Textiles_Stack_Large_Colored.tscn": {
+			"category": "floors",
+			"name": "floors/misc/Textiles_Stack_Large_Colored",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/Textiles_Stack_Small.tscn": {
+			"category": "floors",
+			"name": "floors/misc/Textiles_Stack_Small",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/bed_floor.tscn": {
+			"category": "floors",
+			"name": "floors/misc/bed_floor",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/ceiling_tile.tscn": {
+			"category": "floors",
+			"name": "floors/misc/ceiling_tile",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/floor_foundation_allsides.tscn": {
+			"category": "floors",
+			"name": "floors/misc/floor_foundation_allsides",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/floor_foundation_front.tscn": {
+			"category": "floors",
+			"name": "floors/misc/floor_foundation_front",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/floor_foundation_front_and_back.tscn": {
+			"category": "floors",
+			"name": "floors/misc/floor_foundation_front_and_back",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/floor_foundation_front_and_sides.tscn": {
+			"category": "floors",
+			"name": "floors/misc/floor_foundation_front_and_sides",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/floor_tile_big_grate.tscn": {
+			"category": "floors",
+			"name": "floors/misc/floor_tile_big_grate",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/floor_tile_big_grate_open.tscn": {
+			"category": "floors",
+			"name": "floors/misc/floor_tile_big_grate_open",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/floor_tile_big_spikes.tscn": {
+			"category": "floors",
+			"name": "floors/misc/floor_tile_big_spikes",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/floor_tile_extralarge_grates.tscn": {
+			"category": "floors",
+			"name": "floors/misc/floor_tile_extralarge_grates",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/floor_tile_extralarge_grates_open.tscn": {
+			"category": "floors",
+			"name": "floors/misc/floor_tile_extralarge_grates_open",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/floor_tile_grate.tscn": {
+			"category": "floors",
+			"name": "floors/misc/floor_tile_grate",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/floor_tile_grate_open.tscn": {
+			"category": "floors",
+			"name": "floors/misc/floor_tile_grate_open",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/floor_tile_large.tscn": {
+			"category": "floors",
+			"name": "floors/misc/floor_tile_large",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/floor_tile_large_rocks.tscn": {
+			"category": "floors",
+			"name": "floors/misc/floor_tile_large_rocks",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/floor_tile_small.tscn": {
+			"category": "floors",
+			"name": "floors/misc/floor_tile_small",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/floor_tile_small_broken_A.tscn": {
+			"category": "floors",
+			"name": "floors/misc/floor_tile_small_broken_A",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/floor_tile_small_broken_B.tscn": {
+			"category": "floors",
+			"name": "floors/misc/floor_tile_small_broken_B",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/floor_tile_small_decorated.tscn": {
+			"category": "floors",
+			"name": "floors/misc/floor_tile_small_decorated",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/floor_tile_small_weeds_A.tscn": {
+			"category": "floors",
+			"name": "floors/misc/floor_tile_small_weeds_A",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/floor_tile_small_weeds_B.tscn": {
+			"category": "floors",
+			"name": "floors/misc/floor_tile_small_weeds_B",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/ground_grass.tscn": {
+			"category": "floors",
+			"name": "floors/misc/ground_grass",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/ground_pathBend.tscn": {
+			"category": "floors",
+			"name": "floors/misc/ground_pathBend",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/ground_pathBendBank.tscn": {
+			"category": "floors",
+			"name": "floors/misc/ground_pathBendBank",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/ground_pathCross.tscn": {
+			"category": "floors",
+			"name": "floors/misc/ground_pathCross",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/ground_pathEnd.tscn": {
+			"category": "floors",
+			"name": "floors/misc/ground_pathEnd",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/ground_pathEndClosed.tscn": {
+			"category": "floors",
+			"name": "floors/misc/ground_pathEndClosed",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/ground_pathOpen.tscn": {
+			"category": "floors",
+			"name": "floors/misc/ground_pathOpen",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/ground_pathRocks.tscn": {
+			"category": "floors",
+			"name": "floors/misc/ground_pathRocks",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/ground_pathSide.tscn": {
+			"category": "floors",
+			"name": "floors/misc/ground_pathSide",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/ground_pathSideOpen.tscn": {
+			"category": "floors",
+			"name": "floors/misc/ground_pathSideOpen",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/ground_pathSplit.tscn": {
+			"category": "floors",
+			"name": "floors/misc/ground_pathSplit",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/ground_pathStraight.tscn": {
+			"category": "floors",
+			"name": "floors/misc/ground_pathStraight",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/ground_pathTile.tscn": {
+			"category": "floors",
+			"name": "floors/misc/ground_pathTile",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/ground_path_corner.tscn": {
+			"category": "floors",
+			"name": "floors/misc/ground_path_corner",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/ground_path_corner_small.tscn": {
+			"category": "floors",
+			"name": "floors/misc/ground_path_corner_small",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/ground_riverBend.tscn": {
+			"category": "floors",
+			"name": "floors/misc/ground_riverBend",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/ground_riverBendBank.tscn": {
+			"category": "floors",
+			"name": "floors/misc/ground_riverBendBank",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/ground_riverCross.tscn": {
+			"category": "floors",
+			"name": "floors/misc/ground_riverCross",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/ground_riverEnd.tscn": {
+			"category": "floors",
+			"name": "floors/misc/ground_riverEnd",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/ground_riverEndClosed.tscn": {
+			"category": "floors",
+			"name": "floors/misc/ground_riverEndClosed",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/ground_riverOpen.tscn": {
+			"category": "floors",
+			"name": "floors/misc/ground_riverOpen",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/ground_riverRocks.tscn": {
+			"category": "floors",
+			"name": "floors/misc/ground_riverRocks",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/ground_riverSide.tscn": {
+			"category": "floors",
+			"name": "floors/misc/ground_riverSide",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/ground_riverSideOpen.tscn": {
+			"category": "floors",
+			"name": "floors/misc/ground_riverSideOpen",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/ground_riverSplit.tscn": {
+			"category": "floors",
+			"name": "floors/misc/ground_riverSplit",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/ground_riverStraight.tscn": {
+			"category": "floors",
+			"name": "floors/misc/ground_riverStraight",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/ground_riverTile.tscn": {
+			"category": "floors",
+			"name": "floors/misc/ground_riverTile",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/ground_river_corner.tscn": {
+			"category": "floors",
+			"name": "floors/misc/ground_river_corner",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/misc/ground_river_corner_small.tscn": {
+			"category": "floors",
+			"name": "floors/misc/ground_river_corner_small",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/stone/floor_foundation_corner.tscn": {
+			"category": "floors",
+			"name": "floors/stone/floor_foundation_corner",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/stone/floor_foundation_diagonal_corner.tscn": {
+			"category": "floors",
+			"name": "floors/stone/floor_foundation_diagonal_corner",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/stone/floor_tile_small_corner.tscn": {
+			"category": "floors",
+			"name": "floors/stone/floor_tile_small_corner",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/stone/path_stone.tscn": {
+			"category": "floors",
+			"name": "floors/stone/path_stone",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/stone/path_stoneCircle.tscn": {
+			"category": "floors",
+			"name": "floors/stone/path_stoneCircle",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/stone/path_stoneEnd.tscn": {
+			"category": "floors",
+			"name": "floors/stone/path_stoneEnd",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/stone/path_stone_corner.tscn": {
+			"category": "floors",
+			"name": "floors/stone/path_stone_corner",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/wood/floor_wood_large.tscn": {
+			"category": "floors",
+			"name": "floors/wood/floor_wood_large",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/wood/floor_wood_large_dark.tscn": {
+			"category": "floors",
+			"name": "floors/wood/floor_wood_large_dark",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/wood/floor_wood_small.tscn": {
+			"category": "floors",
+			"name": "floors/wood/floor_wood_small",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/wood/floor_wood_small_dark.tscn": {
+			"category": "floors",
+			"name": "floors/wood/floor_wood_small_dark",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/wood/path_wood.tscn": {
+			"category": "floors",
+			"name": "floors/wood/path_wood",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/wood/path_woodEnd.tscn": {
+			"category": "floors",
+			"name": "floors/wood/path_woodEnd",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/floors/wood/path_wood_corner.tscn": {
+			"category": "floors",
+			"name": "floors/wood/path_wood_corner",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/furniture/beds/bed.tscn": {
+			"category": "furniture",
+			"name": "furniture/beds/bed",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/furniture/beds/bed_decorated.tscn": {
+			"category": "furniture",
+			"name": "furniture/beds/bed_decorated",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/furniture/beds/bed_frame.tscn": {
+			"category": "furniture",
+			"name": "furniture/beds/bed_frame",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/furniture/chairs/chair.tscn": {
+			"category": "furniture",
+			"name": "furniture/chairs/chair",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/furniture/chairs/stool_wood.tscn": {
+			"category": "furniture",
+			"name": "furniture/chairs/stool_wood",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/furniture/core/bed_frame_single.tscn": {
+			"category": "furniture",
+			"name": "furniture/core/bed_frame_single",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/furniture/core/chair_wood_a.tscn": {
+			"category": "furniture",
+			"name": "furniture/core/chair_wood_a",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/furniture/core/shelf_large_wood_a.tscn": {
+			"category": "furniture",
+			"name": "furniture/core/shelf_large_wood_a",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/furniture/core/stool_wood_a.tscn": {
+			"category": "furniture",
+			"name": "furniture/core/stool_wood_a",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/furniture/core/table_long_wood_a.tscn": {
+			"category": "furniture",
+			"name": "furniture/core/table_long_wood_a",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/furniture/core/table_small_wood_a.tscn": {
+			"category": "furniture",
+			"name": "furniture/core/table_small_wood_a",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/furniture/shelves/shelf_large.tscn": {
+			"category": "furniture",
+			"name": "furniture/shelves/shelf_large",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/furniture/shelves/shelf_small.tscn": {
+			"category": "furniture",
+			"name": "furniture/shelves/shelf_small",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/furniture/shelves/shelf_small_candles.tscn": {
+			"category": "furniture",
+			"name": "furniture/shelves/shelf_small_candles",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/furniture/tables/table_long.tscn": {
+			"category": "furniture",
+			"name": "furniture/tables/table_long",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/furniture/tables/table_long_broken.tscn": {
+			"category": "furniture",
+			"name": "furniture/tables/table_long_broken",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/furniture/tables/table_long_decorated_A.tscn": {
+			"category": "furniture",
+			"name": "furniture/tables/table_long_decorated_A",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/furniture/tables/table_long_decorated_C.tscn": {
+			"category": "furniture",
+			"name": "furniture/tables/table_long_decorated_C",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/furniture/tables/table_long_tablecloth.tscn": {
+			"category": "furniture",
+			"name": "furniture/tables/table_long_tablecloth",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/furniture/tables/table_long_tablecloth_decorated_A.tscn": {
+			"category": "furniture",
+			"name": "furniture/tables/table_long_tablecloth_decorated_A",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/furniture/tables/table_medium.tscn": {
+			"category": "furniture",
+			"name": "furniture/tables/table_medium",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/furniture/tables/table_medium_broken.tscn": {
+			"category": "furniture",
+			"name": "furniture/tables/table_medium_broken",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/furniture/tables/table_medium_decorated_A.tscn": {
+			"category": "furniture",
+			"name": "furniture/tables/table_medium_decorated_A",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/furniture/tables/table_medium_tablecloth.tscn": {
+			"category": "furniture",
+			"name": "furniture/tables/table_medium_tablecloth",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/furniture/tables/table_medium_tablecloth_decorated_B.tscn": {
+			"category": "furniture",
+			"name": "furniture/tables/table_medium_tablecloth_decorated_B",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/furniture/tables/table_small.tscn": {
+			"category": "furniture",
+			"name": "furniture/tables/table_small",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/furniture/tables/table_small_decorated_A.tscn": {
+			"category": "furniture",
+			"name": "furniture/tables/table_small_decorated_A",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/furniture/tables/table_small_decorated_B.tscn": {
+			"category": "furniture",
+			"name": "furniture/tables/table_small_decorated_B",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/bushes/Bush_1_A_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/bushes/Bush_1_A_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/bushes/Bush_1_B_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/bushes/Bush_1_B_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/bushes/Bush_1_C_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/bushes/Bush_1_C_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/bushes/Bush_1_D_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/bushes/Bush_1_D_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/bushes/Bush_1_E_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/bushes/Bush_1_E_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/bushes/Bush_1_F_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/bushes/Bush_1_F_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/bushes/Bush_1_G_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/bushes/Bush_1_G_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/bushes/Bush_2_A_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/bushes/Bush_2_A_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/bushes/Bush_2_B_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/bushes/Bush_2_B_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/bushes/Bush_2_C_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/bushes/Bush_2_C_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/bushes/Bush_2_D_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/bushes/Bush_2_D_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/bushes/Bush_2_E_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/bushes/Bush_2_E_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/bushes/Bush_2_F_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/bushes/Bush_2_F_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/bushes/Bush_3_A_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/bushes/Bush_3_A_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/bushes/Bush_3_B_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/bushes/Bush_3_B_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/bushes/Bush_3_C_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/bushes/Bush_3_C_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/bushes/Bush_4_A_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/bushes/Bush_4_A_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/bushes/Bush_4_B_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/bushes/Bush_4_B_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/bushes/Bush_4_C_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/bushes/Bush_4_C_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/bushes/Bush_4_D_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/bushes/Bush_4_D_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/bushes/Bush_4_E_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/bushes/Bush_4_E_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/bushes/Bush_4_F_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/bushes/Bush_4_F_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/bushes/plant_bush.tscn": {
+			"category": "nature",
+			"name": "nature/bushes/plant_bush",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/bushes/plant_bushDetailed.tscn": {
+			"category": "nature",
+			"name": "nature/bushes/plant_bushDetailed",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/bushes/plant_bushLarge.tscn": {
+			"category": "nature",
+			"name": "nature/bushes/plant_bushLarge",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/bushes/plant_bushLargeTriangle.tscn": {
+			"category": "nature",
+			"name": "nature/bushes/plant_bushLargeTriangle",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/bushes/plant_bushSmall.tscn": {
+			"category": "nature",
+			"name": "nature/bushes/plant_bushSmall",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/bushes/plant_bushTriangle.tscn": {
+			"category": "nature",
+			"name": "nature/bushes/plant_bushTriangle",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/core/bush_large_a.tscn": {
+			"category": "nature",
+			"name": "nature/core/bush_large_a",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/core/bush_small_a.tscn": {
+			"category": "nature",
+			"name": "nature/core/bush_small_a",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/core/log_large_a.tscn": {
+			"category": "nature",
+			"name": "nature/core/log_large_a",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/core/mushroom_red_group_a.tscn": {
+			"category": "nature",
+			"name": "nature/core/mushroom_red_group_a",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/core/rock_large_a.tscn": {
+			"category": "nature",
+			"name": "nature/core/rock_large_a",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/core/rock_small_a.tscn": {
+			"category": "nature",
+			"name": "nature/core/rock_small_a",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/core/tree_oak_a.tscn": {
+			"category": "nature",
+			"name": "nature/core/tree_oak_a",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/core/tree_pine_tall_a.tscn": {
+			"category": "nature",
+			"name": "nature/core/tree_pine_tall_a",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/grass/Grass_1_A_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/grass/Grass_1_A_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/grass/Grass_1_A_Singlesided_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/grass/Grass_1_A_Singlesided_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/grass/Grass_1_B_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/grass/Grass_1_B_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/grass/Grass_1_B_Singlesided_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/grass/Grass_1_B_Singlesided_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/grass/Grass_1_C_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/grass/Grass_1_C_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/grass/Grass_1_C_Singlesided_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/grass/Grass_1_C_Singlesided_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/grass/Grass_1_D_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/grass/Grass_1_D_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/grass/Grass_1_D_Singlesided_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/grass/Grass_1_D_Singlesided_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/grass/Grass_1_Mesh.tscn": {
+			"category": "nature",
+			"name": "nature/grass/Grass_1_Mesh",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/grass/Grass_1_SingleSided_Mesh.tscn": {
+			"category": "nature",
+			"name": "nature/grass/Grass_1_SingleSided_Mesh",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/grass/Grass_2_A_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/grass/Grass_2_A_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/grass/Grass_2_A_Singlesided_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/grass/Grass_2_A_Singlesided_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/grass/Grass_2_B_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/grass/Grass_2_B_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/grass/Grass_2_B_Singlesided_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/grass/Grass_2_B_Singlesided_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/grass/Grass_2_C_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/grass/Grass_2_C_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/grass/Grass_2_C_Singlesided_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/grass/Grass_2_C_Singlesided_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/grass/Grass_2_D_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/grass/Grass_2_D_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/grass/Grass_2_D_Singlesided_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/grass/Grass_2_D_Singlesided_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/grass/Grass_2_Mesh.tscn": {
+			"category": "nature",
+			"name": "nature/grass/Grass_2_Mesh",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/grass/Grass_2_SingleSided_Mesh.tscn": {
+			"category": "nature",
+			"name": "nature/grass/Grass_2_SingleSided_Mesh",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/grass/grass.tscn": {
+			"category": "nature",
+			"name": "nature/grass/grass",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/grass/grass_large.tscn": {
+			"category": "nature",
+			"name": "nature/grass/grass_large",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/grass/grass_leafs.tscn": {
+			"category": "nature",
+			"name": "nature/grass/grass_leafs",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/grass/grass_leafsLarge.tscn": {
+			"category": "nature",
+			"name": "nature/grass/grass_leafsLarge",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/grass/platform_grass.tscn": {
+			"category": "nature",
+			"name": "nature/grass/platform_grass",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/logs/Wood_Log_A.tscn": {
+			"category": "nature",
+			"name": "nature/logs/Wood_Log_A",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/logs/Wood_Log_B.tscn": {
+			"category": "nature",
+			"name": "nature/logs/Wood_Log_B",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/logs/Wood_Log_Stack.tscn": {
+			"category": "nature",
+			"name": "nature/logs/Wood_Log_Stack",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/logs/campfire_logs.tscn": {
+			"category": "nature",
+			"name": "nature/logs/campfire_logs",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/logs/log.tscn": {
+			"category": "nature",
+			"name": "nature/logs/log",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/logs/log_large.tscn": {
+			"category": "nature",
+			"name": "nature/logs/log_large",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/logs/log_stack.tscn": {
+			"category": "nature",
+			"name": "nature/logs/log_stack",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/logs/log_stackLarge.tscn": {
+			"category": "nature",
+			"name": "nature/logs/log_stackLarge",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/logs/stump_old.tscn": {
+			"category": "nature",
+			"name": "nature/logs/stump_old",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/logs/stump_oldTall.tscn": {
+			"category": "nature",
+			"name": "nature/logs/stump_oldTall",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/logs/stump_round.tscn": {
+			"category": "nature",
+			"name": "nature/logs/stump_round",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/logs/stump_roundDetailed.tscn": {
+			"category": "nature",
+			"name": "nature/logs/stump_roundDetailed",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/logs/stump_square.tscn": {
+			"category": "nature",
+			"name": "nature/logs/stump_square",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/logs/stump_squareDetailed.tscn": {
+			"category": "nature",
+			"name": "nature/logs/stump_squareDetailed",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/logs/stump_squareDetailedWide.tscn": {
+			"category": "nature",
+			"name": "nature/logs/stump_squareDetailedWide",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/plants/mushroom_red.tscn": {
+			"category": "nature",
+			"name": "nature/plants/mushroom_red",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/plants/mushroom_redGroup.tscn": {
+			"category": "nature",
+			"name": "nature/plants/mushroom_redGroup",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/plants/mushroom_redTall.tscn": {
+			"category": "nature",
+			"name": "nature/plants/mushroom_redTall",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/plants/mushroom_tan.tscn": {
+			"category": "nature",
+			"name": "nature/plants/mushroom_tan",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/plants/mushroom_tanGroup.tscn": {
+			"category": "nature",
+			"name": "nature/plants/mushroom_tanGroup",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/plants/mushroom_tanTall.tscn": {
+			"category": "nature",
+			"name": "nature/plants/mushroom_tanTall",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/plants/plant_flatShort.tscn": {
+			"category": "nature",
+			"name": "nature/plants/plant_flatShort",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/plants/plant_flatTall.tscn": {
+			"category": "nature",
+			"name": "nature/plants/plant_flatTall",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/Rock_1_A_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/Rock_1_A_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/Rock_1_B_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/Rock_1_B_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/Rock_1_C_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/Rock_1_C_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/Rock_1_D_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/Rock_1_D_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/Rock_1_E_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/Rock_1_E_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/Rock_1_F_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/Rock_1_F_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/Rock_1_G_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/Rock_1_G_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/Rock_1_H_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/Rock_1_H_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/Rock_1_I_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/Rock_1_I_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/Rock_1_J_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/Rock_1_J_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/Rock_1_K_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/Rock_1_K_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/Rock_1_L_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/Rock_1_L_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/Rock_1_M_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/Rock_1_M_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/Rock_1_N_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/Rock_1_N_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/Rock_1_O_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/Rock_1_O_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/Rock_1_P_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/Rock_1_P_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/Rock_1_Q_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/Rock_1_Q_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/Rock_2_A_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/Rock_2_A_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/Rock_2_B_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/Rock_2_B_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/Rock_2_C_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/Rock_2_C_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/Rock_2_D_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/Rock_2_D_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/Rock_2_E_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/Rock_2_E_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/Rock_2_F_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/Rock_2_F_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/Rock_2_G_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/Rock_2_G_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/Rock_2_H_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/Rock_2_H_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/Rock_3_A_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/Rock_3_A_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/Rock_3_B_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/Rock_3_B_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/Rock_3_C_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/Rock_3_C_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/Rock_3_D_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/Rock_3_D_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/Rock_3_E_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/Rock_3_E_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/Rock_3_F_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/Rock_3_F_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/Rock_3_G_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/Rock_3_G_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/Rock_3_H_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/Rock_3_H_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/Rock_3_I_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/Rock_3_I_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/Rock_3_J_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/Rock_3_J_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/Rock_3_K_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/Rock_3_K_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/Rock_3_L_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/Rock_3_L_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/Rock_3_M_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/Rock_3_M_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/Rock_3_N_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/Rock_3_N_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/Rock_3_O_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/Rock_3_O_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/Rock_3_P_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/Rock_3_P_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/Rock_3_Q_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/Rock_3_Q_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/Rock_3_R_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/Rock_3_R_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/cliff_blockCave_rock.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/cliff_blockCave_rock",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/cliff_blockDiagonal_rock.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/cliff_blockDiagonal_rock",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/cliff_blockHalf_rock.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/cliff_blockHalf_rock",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/cliff_blockQuarter_rock.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/cliff_blockQuarter_rock",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/cliff_blockSlope_rock.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/cliff_blockSlope_rock",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/cliff_block_rock.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/cliff_block_rock",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/cliff_cave_rock.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/cliff_cave_rock",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/cliff_diagonal_rock.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/cliff_diagonal_rock",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/cliff_half_rock.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/cliff_half_rock",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/cliff_large_rock.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/cliff_large_rock",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/cliff_rock.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/cliff_rock",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/cliff_steps_rock.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/cliff_steps_rock",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/cliff_topDiagonal_rock.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/cliff_topDiagonal_rock",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/cliff_top_rock.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/cliff_top_rock",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/cliff_waterfallTop_rock.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/cliff_waterfallTop_rock",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/cliff_waterfall_rock.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/cliff_waterfall_rock",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/rock_largeA.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/rock_largeA",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/rock_largeB.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/rock_largeB",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/rock_largeC.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/rock_largeC",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/rock_largeD.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/rock_largeD",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/rock_largeE.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/rock_largeE",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/rock_largeF.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/rock_largeF",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/rock_smallA.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/rock_smallA",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/rock_smallB.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/rock_smallB",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/rock_smallC.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/rock_smallC",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/rock_smallD.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/rock_smallD",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/rock_smallE.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/rock_smallE",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/rock_smallF.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/rock_smallF",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/rock_smallFlatA.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/rock_smallFlatA",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/rock_smallFlatB.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/rock_smallFlatB",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/rock_smallFlatC.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/rock_smallFlatC",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/rock_smallG.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/rock_smallG",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/rock_smallH.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/rock_smallH",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/rock_smallI.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/rock_smallI",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/rock_smallTopA.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/rock_smallTopA",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/rock_smallTopB.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/rock_smallTopB",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/rock_tallA.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/rock_tallA",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/rock_tallB.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/rock_tallB",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/rock_tallC.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/rock_tallC",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/rock_tallD.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/rock_tallD",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/rock_tallE.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/rock_tallE",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/rock_tallF.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/rock_tallF",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/rock_tallG.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/rock_tallG",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/rock_tallH.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/rock_tallH",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/rock_tallI.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/rock_tallI",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/rocks/rock_tallJ.tscn": {
+			"category": "nature",
+			"name": "nature/rocks/rock_tallJ",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				3.0,
+				3.0,
+				3.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/StarterTree.tscn": {
+			"category": "nature",
+			"name": "nature/trees/StarterTree",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/Tree_1_A_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/trees/Tree_1_A_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/Tree_1_B_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/trees/Tree_1_B_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/Tree_1_C_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/trees/Tree_1_C_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/Tree_2_A_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/trees/Tree_2_A_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/Tree_2_B_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/trees/Tree_2_B_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/Tree_2_C_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/trees/Tree_2_C_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/Tree_2_D_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/trees/Tree_2_D_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/Tree_2_E_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/trees/Tree_2_E_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/Tree_3_A_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/trees/Tree_3_A_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/Tree_3_B_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/trees/Tree_3_B_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/Tree_3_C_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/trees/Tree_3_C_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/Tree_4_A_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/trees/Tree_4_A_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/Tree_4_B_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/trees/Tree_4_B_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/Tree_4_C_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/trees/Tree_4_C_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/Tree_Bare_1_A_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/trees/Tree_Bare_1_A_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/Tree_Bare_1_B_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/trees/Tree_Bare_1_B_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/Tree_Bare_1_C_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/trees/Tree_Bare_1_C_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/Tree_Bare_2_A_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/trees/Tree_Bare_2_A_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/Tree_Bare_2_B_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/trees/Tree_Bare_2_B_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/Tree_Bare_2_C_Color1.tscn": {
+			"category": "nature",
+			"name": "nature/trees/Tree_Bare_2_C_Color1",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_blocks.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_blocks",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_blocks_dark.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_blocks_dark",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_blocks_fall.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_blocks_fall",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_cone.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_cone",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_cone_dark.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_cone_dark",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_cone_fall.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_cone_fall",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_default.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_default",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_default_dark.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_default_dark",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_default_fall.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_default_fall",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_detailed.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_detailed",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_detailed_dark.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_detailed_dark",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_detailed_fall.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_detailed_fall",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_fat.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_fat",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_fat_darkh.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_fat_darkh",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_fat_fall.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_fat_fall",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_oak.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_oak",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_oak_dark.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_oak_dark",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_oak_fall.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_oak_fall",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_palm.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_palm",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_palmBend.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_palmBend",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_palmDetailedShort.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_palmDetailedShort",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_palmDetailedTall.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_palmDetailedTall",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_palmShort.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_palmShort",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_palmTall.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_palmTall",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_pineDefaultA.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_pineDefaultA",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_pineDefaultB.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_pineDefaultB",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_pineRoundA.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_pineRoundA",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_pineRoundB.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_pineRoundB",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_pineRoundC.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_pineRoundC",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_pineRoundD.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_pineRoundD",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				10.0,
+				10.0,
+				10.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_pineRoundE.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_pineRoundE",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_pineRoundF.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_pineRoundF",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_pineSmallA.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_pineSmallA",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_pineSmallB.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_pineSmallB",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_pineSmallC.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_pineSmallC",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_pineSmallD.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_pineSmallD",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_pineTallA.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_pineTallA",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_pineTallA_detailed.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_pineTallA_detailed",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_pineTallB.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_pineTallB",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_pineTallB_detailed.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_pineTallB_detailed",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_pineTallC.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_pineTallC",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_pineTallC_detailed.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_pineTallC_detailed",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_pineTallD.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_pineTallD",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_pineTallD_detailed.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_pineTallD_detailed",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_pine_ground_a.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_pine_ground_a",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_pine_ground_b.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_pine_ground_b",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_plateau.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_plateau",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_plateau_dark.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_plateau_dark",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_plateau_fall.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_plateau_fall",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_simple.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_simple",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_simple_dark.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_simple_dark",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_simple_fall.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_simple_fall",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_small.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_small",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_small_dark.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_small_dark",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_small_fall.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_small_fall",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_tall.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_tall",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_tall_dark.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_tall_dark",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_tall_fall.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_tall_fall",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_thin.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_thin",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_thin_dark.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_thin_dark",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/nature/trees/tree_thin_fall.tscn": {
+			"category": "nature",
+			"name": "nature/trees/tree_thin_fall",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/props/barrels/Fuel_A_Barrel.tscn": {
+			"category": "props",
+			"name": "props/barrels/Fuel_A_Barrel",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/props/barrels/Fuel_A_Barrel_Dirty.tscn": {
+			"category": "props",
+			"name": "props/barrels/Fuel_A_Barrel_Dirty",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/props/barrels/Fuel_A_Barrels.tscn": {
+			"category": "props",
+			"name": "props/barrels/Fuel_A_Barrels",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/props/barrels/Fuel_B_Barrel.tscn": {
+			"category": "props",
+			"name": "props/barrels/Fuel_B_Barrel",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/props/barrels/Fuel_B_Barrel_Dirty.tscn": {
+			"category": "props",
+			"name": "props/barrels/Fuel_B_Barrel_Dirty",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/props/barrels/Fuel_B_Barrels.tscn": {
+			"category": "props",
+			"name": "props/barrels/Fuel_B_Barrels",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/props/barrels/Fuel_C_Barrel.tscn": {
+			"category": "props",
+			"name": "props/barrels/Fuel_C_Barrel",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/props/barrels/Fuel_C_Barrel_Dirty.tscn": {
+			"category": "props",
+			"name": "props/barrels/Fuel_C_Barrel_Dirty",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/props/barrels/Fuel_C_Barrels.tscn": {
+			"category": "props",
+			"name": "props/barrels/Fuel_C_Barrels",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/props/barrels/barrel_large.tscn": {
+			"category": "props",
+			"name": "props/barrels/barrel_large",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/props/barrels/barrel_large_decorated.tscn": {
+			"category": "props",
+			"name": "props/barrels/barrel_large_decorated",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/props/barrels/barrel_small.tscn": {
+			"category": "props",
+			"name": "props/barrels/barrel_small",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/props/barrels/barrel_small_stack.tscn": {
+			"category": "props",
+			"name": "props/barrels/barrel_small_stack",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/props/core/barrel_fuel_a_clean.tscn": {
+			"category": "props",
+			"name": "props/core/barrel_fuel_a_clean",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/props/core/barrel_large.tscn": {
+			"category": "props",
+			"name": "props/core/barrel_large",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/props/core/barrel_small.tscn": {
+			"category": "props",
+			"name": "props/core/barrel_small",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/props/core/candle_triple_cluster.tscn": {
+			"category": "props",
+			"name": "props/core/candle_triple_cluster",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/props/core/crate_stack_large.tscn": {
+			"category": "props",
+			"name": "props/core/crate_stack_large",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/props/core/rubble_large_a.tscn": {
+			"category": "props",
+			"name": "props/core/rubble_large_a",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/props/core/torch_wall_mounted.tscn": {
+			"category": "props",
+			"name": "props/core/torch_wall_mounted",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/props/crates/crates_stacked.tscn": {
+			"category": "props",
+			"name": "props/crates/crates_stacked",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/props/debris/rubble_half.tscn": {
+			"category": "props",
+			"name": "props/debris/rubble_half",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/props/debris/rubble_large.tscn": {
+			"category": "props",
+			"name": "props/debris/rubble_large",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/props/torches/candle.tscn": {
+			"category": "props",
+			"name": "props/torches/candle",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/props/torches/candle_lit.tscn": {
+			"category": "props",
+			"name": "props/torches/candle_lit",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/props/torches/candle_melted.tscn": {
+			"category": "props",
+			"name": "props/torches/candle_melted",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/props/torches/candle_thin.tscn": {
+			"category": "props",
+			"name": "props/torches/candle_thin",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/props/torches/candle_thin_lit.tscn": {
+			"category": "props",
+			"name": "props/torches/candle_thin_lit",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/props/torches/candle_triple.tscn": {
+			"category": "props",
+			"name": "props/torches/candle_triple",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/props/torches/torch.tscn": {
+			"category": "props",
+			"name": "props/torches/torch",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/props/torches/torch_lit.tscn": {
+			"category": "props",
+			"name": "props/torches/torch_lit",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/props/torches/torch_mounted.tscn": {
+			"category": "props",
+			"name": "props/torches/torch_mounted",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/test/ThePaintedWench_02Upload.blend": {
+			"category": "props",
+			"name": "test/ThePaintedWench_02Upload",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.4,
+				1.4,
+				1.4
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/test/house65.blend": {
+			"category": "props",
+			"name": "test/house65",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/test/house65.glb": {
+			"category": "props",
+			"name": "test/house65",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/arches/wall_arched.tscn": {
+			"category": "walls",
+			"name": "walls/arches/wall_arched",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/arches/wall_archedwindow_open.tscn": {
+			"category": "walls",
+			"name": "walls/arches/wall_archedwindow_open",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/core/wall_stone_arch.tscn": {
+			"category": "walls",
+			"name": "walls/core/wall_stone_arch",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/core/wall_stone_corner.tscn": {
+			"category": "walls",
+			"name": "walls/core/wall_stone_corner",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/core/wall_stone_doorway.tscn": {
+			"category": "walls",
+			"name": "walls/core/wall_stone_doorway",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/core/wall_stone_straight.tscn": {
+			"category": "walls",
+			"name": "walls/core/wall_stone_straight",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/core/wall_stone_tsplit.tscn": {
+			"category": "walls",
+			"name": "walls/core/wall_stone_tsplit",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/corners/barrier_corner.tscn": {
+			"category": "walls",
+			"name": "walls/corners/barrier_corner",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/corners/fence_corner.tscn": {
+			"category": "walls",
+			"name": "walls/corners/fence_corner",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/corners/wall_corner.tscn": {
+			"category": "walls",
+			"name": "walls/corners/wall_corner",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/corners/wall_corner_scaffold.tscn": {
+			"category": "walls",
+			"name": "walls/corners/wall_corner_scaffold",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/corners/wall_corner_small.tscn": {
+			"category": "walls",
+			"name": "walls/corners/wall_corner_small",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/doors/fence_gate.tscn": {
+			"category": "walls",
+			"name": "walls/doors/fence_gate",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/doors/wall_archedwindow_gated.tscn": {
+			"category": "walls",
+			"name": "walls/doors/wall_archedwindow_gated",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/doors/wall_archedwindow_gated_scaffold.tscn": {
+			"category": "walls",
+			"name": "walls/doors/wall_archedwindow_gated_scaffold",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/doors/wall_corner_gated.tscn": {
+			"category": "walls",
+			"name": "walls/doors/wall_corner_gated",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/doors/wall_doorway.tscn": {
+			"category": "walls",
+			"name": "walls/doors/wall_doorway",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/doors/wall_doorway_Tsplit.tscn": {
+			"category": "walls",
+			"name": "walls/doors/wall_doorway_Tsplit",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/doors/wall_doorway_scaffold.tscn": {
+			"category": "walls",
+			"name": "walls/doors/wall_doorway_scaffold",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/doors/wall_doorway_sides.tscn": {
+			"category": "walls",
+			"name": "walls/doors/wall_doorway_sides",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/doors/wall_gated.tscn": {
+			"category": "walls",
+			"name": "walls/doors/wall_gated",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/misc/stairs_wall_left.tscn": {
+			"category": "walls",
+			"name": "walls/misc/stairs_wall_left",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/misc/stairs_wall_right.tscn": {
+			"category": "walls",
+			"name": "walls/misc/stairs_wall_right",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/misc/stairs_walled.tscn": {
+			"category": "walls",
+			"name": "walls/misc/stairs_walled",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/misc/wall.tscn": {
+			"category": "walls",
+			"name": "walls/misc/wall",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/misc/wall_Tsplit.tscn": {
+			"category": "walls",
+			"name": "walls/misc/wall_Tsplit",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/misc/wall_Tsplit_sloped.tscn": {
+			"category": "walls",
+			"name": "walls/misc/wall_Tsplit_sloped",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/misc/wall_broken.tscn": {
+			"category": "walls",
+			"name": "walls/misc/wall_broken",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/misc/wall_cracked.tscn": {
+			"category": "walls",
+			"name": "walls/misc/wall_cracked",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/misc/wall_crossing.tscn": {
+			"category": "walls",
+			"name": "walls/misc/wall_crossing",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/misc/wall_endcap.tscn": {
+			"category": "walls",
+			"name": "walls/misc/wall_endcap",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/misc/wall_half.tscn": {
+			"category": "walls",
+			"name": "walls/misc/wall_half",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/misc/wall_half_endcap.tscn": {
+			"category": "walls",
+			"name": "walls/misc/wall_half_endcap",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/misc/wall_half_endcap_sloped.tscn": {
+			"category": "walls",
+			"name": "walls/misc/wall_half_endcap_sloped",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/misc/wall_open_scaffold.tscn": {
+			"category": "walls",
+			"name": "walls/misc/wall_open_scaffold",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/misc/wall_pillar.tscn": {
+			"category": "walls",
+			"name": "walls/misc/wall_pillar",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/misc/wall_scaffold.tscn": {
+			"category": "walls",
+			"name": "walls/misc/wall_scaffold",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/misc/wall_shelves.tscn": {
+			"category": "walls",
+			"name": "walls/misc/wall_shelves",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/misc/wall_sloped.tscn": {
+			"category": "walls",
+			"name": "walls/misc/wall_sloped",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/misc/wall_window_closed.tscn": {
+			"category": "walls",
+			"name": "walls/misc/wall_window_closed",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/misc/wall_window_closed_scaffold.tscn": {
+			"category": "walls",
+			"name": "walls/misc/wall_window_closed_scaffold",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/misc/wall_window_open.tscn": {
+			"category": "walls",
+			"name": "walls/misc/wall_window_open",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/misc/wall_window_open_scaffold.tscn": {
+			"category": "walls",
+			"name": "walls/misc/wall_window_open_scaffold",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/stone_corner_inner_90.glb": {
+			"category": "walls",
+			"name": "walls/modular/stone_corner_inner_90",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/stone_corner_inner_90.tscn": {
+			"category": "walls",
+			"name": "walls/modular/stone_corner_inner_90",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/stone_corner_outer_90.glb": {
+			"category": "walls",
+			"name": "walls/modular/stone_corner_outer_90",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/stone_corner_outer_90.tscn": {
+			"category": "walls",
+			"name": "walls/modular/stone_corner_outer_90",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/stone_foundation_corner_inner.glb": {
+			"category": "walls",
+			"name": "walls/modular/stone_foundation_corner_inner",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/stone_foundation_corner_inner.tscn": {
+			"category": "walls",
+			"name": "walls/modular/stone_foundation_corner_inner",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/stone_foundation_corner_outer.glb": {
+			"category": "walls",
+			"name": "walls/modular/stone_foundation_corner_outer",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/stone_foundation_corner_outer.tscn": {
+			"category": "walls",
+			"name": "walls/modular/stone_foundation_corner_outer",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/stone_foundation_straight_4m.glb": {
+			"category": "walls",
+			"name": "walls/modular/stone_foundation_straight_4m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/stone_foundation_straight_4m.tscn": {
+			"category": "walls",
+			"name": "walls/modular/stone_foundation_straight_4m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/stone_foundation_straight_8m.glb": {
+			"category": "walls",
+			"name": "walls/modular/stone_foundation_straight_8m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/stone_foundation_straight_8m.tscn": {
+			"category": "walls",
+			"name": "walls/modular/stone_foundation_straight_8m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/stone_junction_t.glb": {
+			"category": "walls",
+			"name": "walls/modular/stone_junction_t",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/stone_junction_t.tscn": {
+			"category": "walls",
+			"name": "walls/modular/stone_junction_t",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/stone_junction_x.glb": {
+			"category": "walls",
+			"name": "walls/modular/stone_junction_x",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/stone_junction_x.tscn": {
+			"category": "walls",
+			"name": "walls/modular/stone_junction_x",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/stone_wall_arch_4m.glb": {
+			"category": "walls",
+			"name": "walls/modular/stone_wall_arch_4m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/stone_wall_arch_4m.tscn": {
+			"category": "walls",
+			"name": "walls/modular/stone_wall_arch_4m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/stone_wall_door_2m.glb": {
+			"category": "walls",
+			"name": "walls/modular/stone_wall_door_2m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/stone_wall_door_2m.tscn": {
+			"category": "walls",
+			"name": "walls/modular/stone_wall_door_2m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/stone_wall_door_4m.glb": {
+			"category": "walls",
+			"name": "walls/modular/stone_wall_door_4m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/stone_wall_door_4m.tscn": {
+			"category": "walls",
+			"name": "walls/modular/stone_wall_door_4m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/stone_wall_end_cap.glb": {
+			"category": "walls",
+			"name": "walls/modular/stone_wall_end_cap",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/stone_wall_end_cap.tscn": {
+			"category": "walls",
+			"name": "walls/modular/stone_wall_end_cap",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/stone_wall_header.glb": {
+			"category": "walls",
+			"name": "walls/modular/stone_wall_header",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/stone_wall_header.tscn": {
+			"category": "walls",
+			"name": "walls/modular/stone_wall_header",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/stone_wall_straight_1m.glb": {
+			"category": "walls",
+			"name": "walls/modular/stone_wall_straight_1m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/stone_wall_straight_1m.tscn": {
+			"category": "walls",
+			"name": "walls/modular/stone_wall_straight_1m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/stone_wall_straight_2m.glb": {
+			"category": "walls",
+			"name": "walls/modular/stone_wall_straight_2m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/stone_wall_straight_2m.tscn": {
+			"category": "walls",
+			"name": "walls/modular/stone_wall_straight_2m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/stone_wall_straight_4m.glb": {
+			"category": "walls",
+			"name": "walls/modular/stone_wall_straight_4m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/stone_wall_straight_4m.tscn": {
+			"category": "walls",
+			"name": "walls/modular/stone_wall_straight_4m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/stone_wall_straight_8m.glb": {
+			"category": "walls",
+			"name": "walls/modular/stone_wall_straight_8m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/stone_wall_straight_8m.tscn": {
+			"category": "walls",
+			"name": "walls/modular/stone_wall_straight_8m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/stone_wall_window_2m.glb": {
+			"category": "walls",
+			"name": "walls/modular/stone_wall_window_2m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/stone_wall_window_2m.tscn": {
+			"category": "walls",
+			"name": "walls/modular/stone_wall_window_2m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/stone_wall_window_4m.glb": {
+			"category": "walls",
+			"name": "walls/modular/stone_wall_window_4m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/stone_wall_window_4m.tscn": {
+			"category": "walls",
+			"name": "walls/modular/stone_wall_window_4m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/tudor_corner_inner_90.glb": {
+			"category": "walls",
+			"name": "walls/modular/tudor_corner_inner_90",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/tudor_corner_inner_90.tscn": {
+			"category": "walls",
+			"name": "walls/modular/tudor_corner_inner_90",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/tudor_corner_outer_90.glb": {
+			"category": "walls",
+			"name": "walls/modular/tudor_corner_outer_90",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/tudor_corner_outer_90.tscn": {
+			"category": "walls",
+			"name": "walls/modular/tudor_corner_outer_90",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/tudor_foundation_corner_inner.glb": {
+			"category": "walls",
+			"name": "walls/modular/tudor_foundation_corner_inner",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/tudor_foundation_corner_inner.tscn": {
+			"category": "walls",
+			"name": "walls/modular/tudor_foundation_corner_inner",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/tudor_foundation_corner_outer.glb": {
+			"category": "walls",
+			"name": "walls/modular/tudor_foundation_corner_outer",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/tudor_foundation_corner_outer.tscn": {
+			"category": "walls",
+			"name": "walls/modular/tudor_foundation_corner_outer",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/tudor_foundation_straight_4m.glb": {
+			"category": "walls",
+			"name": "walls/modular/tudor_foundation_straight_4m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/tudor_foundation_straight_4m.tscn": {
+			"category": "walls",
+			"name": "walls/modular/tudor_foundation_straight_4m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/tudor_foundation_straight_8m.glb": {
+			"category": "walls",
+			"name": "walls/modular/tudor_foundation_straight_8m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/tudor_foundation_straight_8m.tscn": {
+			"category": "walls",
+			"name": "walls/modular/tudor_foundation_straight_8m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/tudor_junction_t.glb": {
+			"category": "walls",
+			"name": "walls/modular/tudor_junction_t",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/tudor_junction_t.tscn": {
+			"category": "walls",
+			"name": "walls/modular/tudor_junction_t",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/tudor_junction_x.glb": {
+			"category": "walls",
+			"name": "walls/modular/tudor_junction_x",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/tudor_junction_x.tscn": {
+			"category": "walls",
+			"name": "walls/modular/tudor_junction_x",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/tudor_wall_arch_4m.glb": {
+			"category": "walls",
+			"name": "walls/modular/tudor_wall_arch_4m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/tudor_wall_arch_4m.tscn": {
+			"category": "walls",
+			"name": "walls/modular/tudor_wall_arch_4m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/tudor_wall_door_2m.glb": {
+			"category": "walls",
+			"name": "walls/modular/tudor_wall_door_2m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/tudor_wall_door_2m.tscn": {
+			"category": "walls",
+			"name": "walls/modular/tudor_wall_door_2m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/tudor_wall_door_4m.glb": {
+			"category": "walls",
+			"name": "walls/modular/tudor_wall_door_4m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/tudor_wall_door_4m.tscn": {
+			"category": "walls",
+			"name": "walls/modular/tudor_wall_door_4m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/tudor_wall_end_cap.glb": {
+			"category": "walls",
+			"name": "walls/modular/tudor_wall_end_cap",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/tudor_wall_end_cap.tscn": {
+			"category": "walls",
+			"name": "walls/modular/tudor_wall_end_cap",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/tudor_wall_header.glb": {
+			"category": "walls",
+			"name": "walls/modular/tudor_wall_header",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/tudor_wall_header.tscn": {
+			"category": "walls",
+			"name": "walls/modular/tudor_wall_header",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/tudor_wall_straight_1m.glb": {
+			"category": "walls",
+			"name": "walls/modular/tudor_wall_straight_1m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/tudor_wall_straight_1m.tscn": {
+			"category": "walls",
+			"name": "walls/modular/tudor_wall_straight_1m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/tudor_wall_straight_2m.glb": {
+			"category": "walls",
+			"name": "walls/modular/tudor_wall_straight_2m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/tudor_wall_straight_2m.tscn": {
+			"category": "walls",
+			"name": "walls/modular/tudor_wall_straight_2m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/tudor_wall_straight_4m.glb": {
+			"category": "walls",
+			"name": "walls/modular/tudor_wall_straight_4m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/tudor_wall_straight_4m.tscn": {
+			"category": "walls",
+			"name": "walls/modular/tudor_wall_straight_4m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/tudor_wall_straight_8m.glb": {
+			"category": "walls",
+			"name": "walls/modular/tudor_wall_straight_8m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/tudor_wall_straight_8m.tscn": {
+			"category": "walls",
+			"name": "walls/modular/tudor_wall_straight_8m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/tudor_wall_window_2m.glb": {
+			"category": "walls",
+			"name": "walls/modular/tudor_wall_window_2m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/tudor_wall_window_2m.tscn": {
+			"category": "walls",
+			"name": "walls/modular/tudor_wall_window_2m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/tudor_wall_window_4m.glb": {
+			"category": "walls",
+			"name": "walls/modular/tudor_wall_window_4m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/modular/tudor_wall_window_4m.tscn": {
+			"category": "walls",
+			"name": "walls/modular/tudor_wall_window_4m",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/stone/cliff_blockSlopeHalfWalls_rock.tscn": {
+			"category": "walls",
+			"name": "walls/stone/cliff_blockSlopeHalfWalls_rock",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/stone/cliff_blockSlopeHalfWalls_stone.tscn": {
+			"category": "walls",
+			"name": "walls/stone/cliff_blockSlopeHalfWalls_stone",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/stone/cliff_blockSlopeWalls_rock.tscn": {
+			"category": "walls",
+			"name": "walls/stone/cliff_blockSlopeWalls_rock",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/stone/cliff_blockSlopeWalls_stone.tscn": {
+			"category": "walls",
+			"name": "walls/stone/cliff_blockSlopeWalls_stone",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/stone/cliff_cornerInnerLarge_rock.tscn": {
+			"category": "walls",
+			"name": "walls/stone/cliff_cornerInnerLarge_rock",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/stone/cliff_cornerInnerLarge_stone.tscn": {
+			"category": "walls",
+			"name": "walls/stone/cliff_cornerInnerLarge_stone",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/stone/cliff_cornerInnerTop_rock.tscn": {
+			"category": "walls",
+			"name": "walls/stone/cliff_cornerInnerTop_rock",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/stone/cliff_cornerInnerTop_stone.tscn": {
+			"category": "walls",
+			"name": "walls/stone/cliff_cornerInnerTop_stone",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/stone/cliff_cornerInner_rock.tscn": {
+			"category": "walls",
+			"name": "walls/stone/cliff_cornerInner_rock",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/stone/cliff_cornerInner_stone.tscn": {
+			"category": "walls",
+			"name": "walls/stone/cliff_cornerInner_stone",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/stone/cliff_cornerLarge_rock.tscn": {
+			"category": "walls",
+			"name": "walls/stone/cliff_cornerLarge_rock",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/stone/cliff_cornerLarge_stone.tscn": {
+			"category": "walls",
+			"name": "walls/stone/cliff_cornerLarge_stone",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/stone/cliff_cornerTop_rock.tscn": {
+			"category": "walls",
+			"name": "walls/stone/cliff_cornerTop_rock",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/stone/cliff_cornerTop_stone.tscn": {
+			"category": "walls",
+			"name": "walls/stone/cliff_cornerTop_stone",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/stone/cliff_corner_rock.tscn": {
+			"category": "walls",
+			"name": "walls/stone/cliff_corner_rock",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/stone/cliff_corner_stone.tscn": {
+			"category": "walls",
+			"name": "walls/stone/cliff_corner_stone",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/stone/cliff_halfCornerInner_rock.tscn": {
+			"category": "walls",
+			"name": "walls/stone/cliff_halfCornerInner_rock",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/stone/cliff_halfCornerInner_stone.tscn": {
+			"category": "walls",
+			"name": "walls/stone/cliff_halfCornerInner_stone",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/stone/cliff_halfCorner_rock.tscn": {
+			"category": "walls",
+			"name": "walls/stone/cliff_halfCorner_rock",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/stone/cliff_halfCorner_stone.tscn": {
+			"category": "walls",
+			"name": "walls/stone/cliff_halfCorner_stone",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/stone/cliff_stepsCornerInner_rock.tscn": {
+			"category": "walls",
+			"name": "walls/stone/cliff_stepsCornerInner_rock",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/stone/cliff_stepsCornerInner_stone.tscn": {
+			"category": "walls",
+			"name": "walls/stone/cliff_stepsCornerInner_stone",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/stone/cliff_stepsCorner_rock.tscn": {
+			"category": "walls",
+			"name": "walls/stone/cliff_stepsCorner_rock",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/stone/cliff_stepsCorner_stone.tscn": {
+			"category": "walls",
+			"name": "walls/stone/cliff_stepsCorner_stone",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/tudor/tudor_corner_cardinal.tscn": {
+			"category": "walls",
+			"name": "walls/tudor/tudor_corner_cardinal",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/tudor/tudor_corner_inner.tscn": {
+			"category": "walls",
+			"name": "walls/tudor/tudor_corner_inner",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/tudor/tudor_corner_outer.tscn": {
+			"category": "walls",
+			"name": "walls/tudor/tudor_corner_outer",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/tudor/tudor_window.tscn": {
+			"category": "walls",
+			"name": "walls/tudor/tudor_window",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls/tudor/tudor_window_open.tscn": {
+			"category": "walls",
+			"name": "walls/tudor/tudor_window_open",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls_meshes/corners/fence_corner.glb": {
+			"category": "props",
+			"name": "walls_meshes/corners/fence_corner",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls_meshes/doors/fence_gate.glb": {
+			"category": "props",
+			"name": "walls_meshes/doors/fence_gate",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls_meshes/stone/cliff_blockSlopeHalfWalls_rock.glb": {
+			"category": "props",
+			"name": "walls_meshes/stone/cliff_blockSlopeHalfWalls_rock",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls_meshes/stone/cliff_blockSlopeHalfWalls_stone.glb": {
+			"category": "props",
+			"name": "walls_meshes/stone/cliff_blockSlopeHalfWalls_stone",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls_meshes/stone/cliff_blockSlopeWalls_rock.glb": {
+			"category": "props",
+			"name": "walls_meshes/stone/cliff_blockSlopeWalls_rock",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls_meshes/stone/cliff_blockSlopeWalls_stone.glb": {
+			"category": "props",
+			"name": "walls_meshes/stone/cliff_blockSlopeWalls_stone",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls_meshes/stone/cliff_cornerInnerLarge_rock.glb": {
+			"category": "props",
+			"name": "walls_meshes/stone/cliff_cornerInnerLarge_rock",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls_meshes/stone/cliff_cornerInnerLarge_stone.glb": {
+			"category": "props",
+			"name": "walls_meshes/stone/cliff_cornerInnerLarge_stone",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls_meshes/stone/cliff_cornerInnerTop_rock.glb": {
+			"category": "props",
+			"name": "walls_meshes/stone/cliff_cornerInnerTop_rock",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls_meshes/stone/cliff_cornerInnerTop_stone.glb": {
+			"category": "props",
+			"name": "walls_meshes/stone/cliff_cornerInnerTop_stone",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls_meshes/stone/cliff_cornerInner_rock.glb": {
+			"category": "props",
+			"name": "walls_meshes/stone/cliff_cornerInner_rock",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls_meshes/stone/cliff_cornerInner_stone.glb": {
+			"category": "props",
+			"name": "walls_meshes/stone/cliff_cornerInner_stone",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls_meshes/stone/cliff_cornerLarge_rock.glb": {
+			"category": "props",
+			"name": "walls_meshes/stone/cliff_cornerLarge_rock",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls_meshes/stone/cliff_cornerLarge_stone.glb": {
+			"category": "props",
+			"name": "walls_meshes/stone/cliff_cornerLarge_stone",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls_meshes/stone/cliff_cornerTop_rock.glb": {
+			"category": "props",
+			"name": "walls_meshes/stone/cliff_cornerTop_rock",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls_meshes/stone/cliff_cornerTop_stone.glb": {
+			"category": "props",
+			"name": "walls_meshes/stone/cliff_cornerTop_stone",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls_meshes/stone/cliff_corner_rock.glb": {
+			"category": "props",
+			"name": "walls_meshes/stone/cliff_corner_rock",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls_meshes/stone/cliff_corner_stone.glb": {
+			"category": "props",
+			"name": "walls_meshes/stone/cliff_corner_stone",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls_meshes/stone/cliff_halfCornerInner_rock.glb": {
+			"category": "props",
+			"name": "walls_meshes/stone/cliff_halfCornerInner_rock",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls_meshes/stone/cliff_halfCornerInner_stone.glb": {
+			"category": "props",
+			"name": "walls_meshes/stone/cliff_halfCornerInner_stone",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls_meshes/stone/cliff_halfCorner_rock.glb": {
+			"category": "props",
+			"name": "walls_meshes/stone/cliff_halfCorner_rock",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls_meshes/stone/cliff_halfCorner_stone.glb": {
+			"category": "props",
+			"name": "walls_meshes/stone/cliff_halfCorner_stone",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls_meshes/stone/cliff_stepsCornerInner_rock.glb": {
+			"category": "props",
+			"name": "walls_meshes/stone/cliff_stepsCornerInner_rock",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls_meshes/stone/cliff_stepsCornerInner_stone.glb": {
+			"category": "props",
+			"name": "walls_meshes/stone/cliff_stepsCornerInner_stone",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls_meshes/stone/cliff_stepsCorner_rock.glb": {
+			"category": "props",
+			"name": "walls_meshes/stone/cliff_stepsCorner_rock",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		},
+		"res://assets/world/models/walls_meshes/stone/cliff_stepsCorner_stone.glb": {
+			"category": "props",
+			"name": "walls_meshes/stone/cliff_stepsCorner_stone",
+			"preview_rotation": [
+				18.0,
+				28.0,
+				0.0
+			],
+			"scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"tags": [],
+			"uniform_scale": true
+		}
+	}
+}

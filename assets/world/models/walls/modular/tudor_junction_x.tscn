@@ -1,0 +1,8 @@
+[gd_scene format=3]
+
+[node name="tudor_junction_x" type="Node3D" unique_id=518913734]
+metadata/piece_name = "junction_x"
+metadata/piece_kind = "junction_x"
+metadata/wall_variant = "tudor"
+metadata/grid_snap_m = 0.5
+metadata/wall_height_m = 3.4

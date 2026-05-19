@@ -1,0 +1,11 @@
+Model Information:
+* title:	Tudor Window
+* source:	https://sketchfab.com/3d-models/tudor-window-41ad315eec024797a501458b2bfccc96
+* author:	ErisedMedia (https://sketchfab.com/ericmcameron)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Tudor Window" (https://sketchfab.com/3d-models/tudor-window-41ad315eec024797a501458b2bfccc96) by ErisedMedia (https://sketchfab.com/ericmcameron) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

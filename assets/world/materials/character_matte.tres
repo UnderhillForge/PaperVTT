@@ -1,0 +1,7 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[resource]
+roughness = 0.85
+metallic = 0.0
+emission_enabled = false
+rim_enabled = false

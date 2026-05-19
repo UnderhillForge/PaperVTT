@@ -1,0 +1,8 @@
+[gd_scene format=3]
+
+[node name="stone_foundation_straight_4m" type="Node3D" unique_id=1825001465]
+metadata/piece_name = "foundation_straight_4m"
+metadata/piece_kind = "foundation_straight"
+metadata/wall_variant = "stone"
+metadata/grid_snap_m = 0.5
+metadata/wall_height_m = 3.4
