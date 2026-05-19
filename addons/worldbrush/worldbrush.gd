@@ -7,8 +7,9 @@ class_name WorldBrush
 @export var min_terrain_height: float = -14.0
 @export var seed_initial_terrain: bool = true
 @export var auto_test_snow: bool = true
-@export var dirty_rect_border: int = 4
-@export var dirty_rebuild_extra_ring: int = 1
+@export var enable_dirty_rect_rebuild: bool = false
+@export var dirty_rect_border: int = 5
+@export var dirty_rebuild_extra_ring: int = 2
 @export var dirty_edge_blend_strength: float = 0.45
 @export var debug_visualize_dirty_rect: bool = false
 @export var debug_rebuild_logging: bool = false
@@ -432,7 +433,8 @@ func _mark_dirty_rect(min_x: int, max_x: int, min_z: int, max_z: int) -> void:
 		dirty_max.y = maxi(dirty_max.y, expanded_max_z)
 	if debug_rebuild_logging:
 		var size: Vector2i = dirty_max - dirty_min + Vector2i.ONE
-		print("Dirty Rect Size: ", size.x, "x", size.y, " | Border: ", border)
+		var risk_str: String = "low" if border >= 4 else "medium"
+		print("Dirty Rect: ", size, " | Border: ", border, " | Green splotch risk: ", risk_str)
 
 
 func _apply_local_relax_pass(heights: PackedFloat32Array, min_x: int, max_x: int, min_z: int, max_z: int, influence_radius: float, local_center: Vector3) -> void:
@@ -459,8 +461,9 @@ func _apply_local_relax_pass(heights: PackedFloat32Array, min_x: int, max_x: int
 
 
 func _rebuild_after_stroke(radius: float, tool_name: String) -> void:
-	if _full_rebuild_mode:
-		_log_rebuild("Rebuild mode: full (force enabled) | tool: %s" % tool_name)
+	if _full_rebuild_mode or not enable_dirty_rect_rebuild:
+		if debug_rebuild_logging:
+			print("Terrain Rebuild Path: FULL REBUILD (dirty rect disabled) | tool: %s | force_full: %s" % [tool_name, str(_full_rebuild_mode)])
 		rebuild_mesh()
 		return
 	var supports_dirty: bool = tool_name in ["raise", "lower", "smooth", "flatten", "paint", "texturepaint", "textureerase"]
@@ -486,6 +489,8 @@ func _rebuild_after_stroke(radius: float, tool_name: String) -> void:
 		_log_rebuild("Rebuild mode: full (dirty region too large) | vertices: %d / %d" % [dirty_vertices, total_vertices])
 		rebuild_mesh()
 		return
+	if debug_rebuild_logging:
+		print("Terrain Rebuild Path: DIRTY RECT ACTIVE | tool: %s | border: %d | extra_ring: %d | blend: %.2f" % [tool_name, clampi(dirty_rect_border, 3, 8), clampi(dirty_rebuild_extra_ring, 1, 4), clampf(dirty_edge_blend_strength, 0.0, 1.0)])
 	rebuild_dirty_mesh()
 
 
@@ -602,7 +607,7 @@ func rebuild_dirty_mesh() -> void:
 	var half: float = terrain_size * 0.5
 	var step: float = terrain_size / float(terrain_resolution)
 	var row_vertex_size: int = 12
-	var row_normal_size: int = 4
+	var row_normal_size: int = 12
 	var row_color_size: int = 4
 	var normal_block_offset: int = row_vertex_size * stride * stride
 	var dirty_width: int = dirty_max.x - dirty_min.x + 1
@@ -637,11 +642,10 @@ func rebuild_dirty_mesh() -> void:
 			position_bytes.encode_float(byte_ofs + 8, pz)
 
 			var normal: Vector3 = _compute_normal(heights, x, z, step)
-			var oct: Vector2 = normal.octahedron_encode()
-			var nx: int = clampi(int(round(oct.x * 65535.0)), 0, 65535)
-			var ny: int = clampi(int(round(oct.y * 65535.0)), 0, 65535)
-			normal_bytes.encode_u16(i * row_normal_size + 0, nx)
-			normal_bytes.encode_u16(i * row_normal_size + 2, ny)
+			var n_ofs: int = i * row_normal_size
+			normal_bytes.encode_float(n_ofs + 0, normal.x)
+			normal_bytes.encode_float(n_ofs + 4, normal.y)
+			normal_bytes.encode_float(n_ofs + 8, normal.z)
 
 			var terrain_col: Color = _compute_vertex_color(paint[idxv], water[idxv], snow[idxv])
 			if debug_visualize_dirty_rect:
@@ -672,27 +676,28 @@ func _blend_dirty_outer_border(mesh: ArrayMesh, heights: PackedFloat32Array, pai
 	var blend_strength: float = clampf(dirty_edge_blend_strength, 0.0, 1.0)
 	if blend_strength <= 0.0:
 		return
+	var inner_blend: float = blend_strength * 0.55
 	for z in range(min_z, max_z + 1):
 		for x in range(min_x, max_x + 1):
-			var on_outer_border: bool = (x == min_x or x == max_x or z == min_z or z == max_z)
-			if not on_outer_border:
+			var ring1: bool = (x == min_x or x == max_x or z == min_z or z == max_z)
+			var ring2: bool = not ring1 and (x == min_x + 1 or x == max_x - 1 or z == min_z + 1 or z == max_z - 1)
+			if not ring1 and not ring2:
 				continue
+			var b: float = blend_strength if ring1 else inner_blend
 			var idxv: int = _idx(x, z, stride)
 			var current_normal: Vector3 = _compute_normal(heights, x, z, step)
 			var avg_normal: Vector3 = _average_neighbor_normal(heights, x, z, step)
-			var blended_normal: Vector3 = current_normal.lerp(avg_normal, blend_strength).normalized()
-			var oct: Vector2 = blended_normal.octahedron_encode()
-			var nx: int = clampi(int(round(oct.x * 65535.0)), 0, 65535)
-			var ny: int = clampi(int(round(oct.y * 65535.0)), 0, 65535)
-
-			var current_color: Color = _compute_vertex_color(paint[idxv], water[idxv], snow[idxv])
-			var avg_color: Color = _average_neighbor_color(paint, water, snow, x, z, stride)
-			var blended_color: Color = current_color.lerp(avg_color, blend_strength)
+			var blended_normal: Vector3 = current_normal.lerp(avg_normal, b).normalized()
 
 			var normal_bytes := PackedByteArray()
 			normal_bytes.resize(row_normal_size)
-			normal_bytes.encode_u16(0, nx)
-			normal_bytes.encode_u16(2, ny)
+			normal_bytes.encode_float(0, blended_normal.x)
+			normal_bytes.encode_float(4, blended_normal.y)
+			normal_bytes.encode_float(8, blended_normal.z)
+
+			var current_color: Color = _compute_vertex_color(paint[idxv], water[idxv], snow[idxv])
+			var avg_color: Color = _average_neighbor_color(paint, water, snow, x, z, stride)
+			var blended_color: Color = current_color.lerp(avg_color, b)
 
 			var color_bytes := PackedByteArray()
 			color_bytes.resize(row_color_size)
