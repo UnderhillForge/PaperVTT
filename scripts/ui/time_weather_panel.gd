@@ -6,7 +6,7 @@ signal weather_changed(weather_id: String)
 signal day_length_changed(minutes_per_day: float)
 
 const WeatherRadialMenuScript: Script = preload("res://scripts/ui/weather_radial_menu.gd")
-const TRIGGER_ICON_PATH: String = "res://assets/icons/000000/transparent/1x1/lorc/hourglass.svg"
+const TRIGGER_ICON_PATH: String = "res://assets/ui/icons/000000/transparent/1x1/lorc/hourglass.svg"
 
 const WEATHER_CLEAR: String = "normal"
 const WEATHER_LABELS: Dictionary = {

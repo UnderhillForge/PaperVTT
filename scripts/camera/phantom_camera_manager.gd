@@ -66,6 +66,8 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	if event is InputEventMouseButton:
 		var mb: InputEventMouseButton = event as InputEventMouseButton
+		if mb.pressed and mb.ctrl_pressed and (mb.button_index == MOUSE_BUTTON_WHEEL_UP or mb.button_index == MOUSE_BUTTON_WHEEL_DOWN):
+			return
 		if mb.button_index == MOUSE_BUTTON_RIGHT:
 			if mb.pressed:
 				_right_drag_start = mb.position
@@ -126,6 +128,8 @@ func _handle_top_down_input(event: InputEvent) -> void:
 
 	if event is InputEventMouseButton and event.pressed:
 		var mb: InputEventMouseButton = event as InputEventMouseButton
+		if mb.ctrl_pressed and (mb.button_index == MOUSE_BUTTON_WHEEL_UP or mb.button_index == MOUSE_BUTTON_WHEEL_DOWN):
+			return
 		if mb.button_index == MOUSE_BUTTON_WHEEL_UP:
 			_adjust_top_down_size(-top_down_size_step)
 			get_viewport().set_input_as_handled()
@@ -148,6 +152,8 @@ func _handle_editor_camera_input(event: InputEvent) -> void:
 
 	if event is InputEventMouseButton and event.pressed:
 		var mb: InputEventMouseButton = event as InputEventMouseButton
+		if mb.ctrl_pressed and (mb.button_index == MOUSE_BUTTON_WHEEL_UP or mb.button_index == MOUSE_BUTTON_WHEEL_DOWN):
+			return
 		if mb.button_index == MOUSE_BUTTON_WHEEL_UP:
 			_editor_distance = clampf(_editor_distance - editor_zoom_step, editor_zoom_min, editor_zoom_max)
 			_apply_editor_camera_pose()

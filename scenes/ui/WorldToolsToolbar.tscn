@@ -1,11 +1,11 @@
 [gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/world_tools_toolbar.gd" id="1"]
-[ext_resource type="Texture2D" path="res://legacy/addons/terrain_3d/icons/terrain3d.svg" id="2"]
-[ext_resource type="Texture2D" path="res://legacy/addons/terrain_3d/icons/multimesh.svg" id="3"]
-[ext_resource type="Texture2D" path="res://legacy/addons/terrain_3d/icons/layers.svg" id="4"]
-[ext_resource type="Texture2D" path="res://legacy/addons/terrain_3d/icons/texture_paint.svg" id="5"]
-[ext_resource type="Texture2D" path="res://legacy/addons/terrain_3d/icons/height_slope.svg" id="6"]
+[ext_resource type="Texture2D" path="res://assets/ui/icons/000000/transparent/1x1/various-artists/infinity.svg" id="2"]
+[ext_resource type="Texture2D" path="res://assets/ui/icons/000000/transparent/1x1/lorc/sun-radiations.svg" id="3"]
+[ext_resource type="Texture2D" path="res://assets/ui/icons/000000/transparent/1x1/viscious-speed/abstract-030.svg" id="4"]
+[ext_resource type="Texture2D" path="res://assets/ui/icons/000000/transparent/1x1/lorc/raining.svg" id="5"]
+[ext_resource type="Texture2D" path="res://assets/ui/icons/000000/transparent/1x1/delapouite/fog.svg" id="6"]
 
 [node name="WorldToolsToolbar" type="PanelContainer"]
 custom_minimum_size = Vector2(72, 0)

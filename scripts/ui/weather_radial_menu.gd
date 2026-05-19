@@ -5,12 +5,12 @@ signal weather_selected(weather_id: String)
 signal time_menu_requested
 
 const WEATHER_ICONS: Dictionary = {
-	"time": "res://assets/icons/000000/transparent/1x1/lorc/hourglass.svg",
-	"normal": "res://assets/icons/000000/transparent/1x1/lorc/sun-radiations.svg",
-	"rain": "res://assets/icons/000000/transparent/1x1/lorc/raining.svg",
-	"snow": "res://assets/icons/000000/transparent/1x1/lorc/snowing.svg",
-	"foggy": "res://assets/icons/000000/transparent/1x1/delapouite/fog.svg",
-	"stormy": "res://assets/icons/000000/transparent/1x1/lorc/lightning-storm.svg",
+	"time": "res://assets/ui/icons/000000/transparent/1x1/lorc/hourglass.svg",
+	"normal": "res://assets/ui/icons/000000/transparent/1x1/lorc/sun-radiations.svg",
+	"rain": "res://assets/ui/icons/000000/transparent/1x1/lorc/raining.svg",
+	"snow": "res://assets/ui/icons/000000/transparent/1x1/lorc/snowing.svg",
+	"foggy": "res://assets/ui/icons/000000/transparent/1x1/delapouite/fog.svg",
+	"stormy": "res://assets/ui/icons/000000/transparent/1x1/lorc/lightning-storm.svg",
 }
 
 const WEATHER_LABELS: Dictionary = {

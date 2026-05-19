@@ -1,8 +1,0 @@
-[gd_scene format=3]
-
-[node name="stone_wall_arch_4m" type="Node3D" unique_id=165814732]
-metadata/piece_name = "wall_arch_4m"
-metadata/piece_kind = "arch"
-metadata/wall_variant = "stone"
-metadata/grid_snap_m = 0.5
-metadata/wall_height_m = 3.4

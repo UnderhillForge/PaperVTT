@@ -23,10 +23,10 @@ func _run():
 		return
 	
 	# Load grass texture (albedo)
-	var albedo = load("res://assets/textures/world/grass_02_2k/grass_02_base_2k.png")
-	var normal = load("res://assets/textures/world/grass_02_2k/grass_02_normal_gl_2k.png")
-	var roughness = load("res://assets/textures/world/grass_02_2k/grass_02_roughness_2k.png")
-	var height = load("res://assets/textures/world/grass_02_2k/grass_02_height_2k.png")
+	var albedo = load("res://assets/world/textures/world/grass_02_2k/grass_02_base_2k.png")
+	var normal = load("res://assets/world/textures/world/grass_02_2k/grass_02_normal_gl_2k.png")
+	var roughness = load("res://assets/world/textures/world/grass_02_2k/grass_02_roughness_2k.png")
+	var height = load("res://assets/world/textures/world/grass_02_2k/grass_02_height_2k.png")
 	
 	if not albedo:
 		push_error("Could not load grass albedo texture")
@@ -40,10 +40,10 @@ func _run():
 	
 	# Create a second texture set for cliff/rock
 	var texture_set2 = ClassDB.instantiate("TextureSetResource")
-	var albedo2 = load("res://assets/textures/world/cliff_rocks_02_2k/cliff_rocks_02_baseColor_2k.png")
-	var normal2 = load("res://assets/textures/world/cliff_rocks_02_2k/cliff_rocks_02_normal_gl_2k.png")
-	var roughness2 = load("res://assets/textures/world/cliff_rocks_02_2k/cliff_rocks_02_roughness_2k.png")
-	var height2 = load("res://assets/textures/world/cliff_rocks_02_2k/cliff_rocks_02_height_2k.png")
+	var albedo2 = load("res://assets/world/textures/world/cliff_rocks_02_2k/cliff_rocks_02_baseColor_2k.png")
+	var normal2 = load("res://assets/world/textures/world/cliff_rocks_02_2k/cliff_rocks_02_normal_gl_2k.png")
+	var roughness2 = load("res://assets/world/textures/world/cliff_rocks_02_2k/cliff_rocks_02_roughness_2k.png")
+	var height2 = load("res://assets/world/textures/world/cliff_rocks_02_2k/cliff_rocks_02_height_2k.png")
 	
 	if texture_set2:
 		texture_set2.set("name", "Cliff Rock")

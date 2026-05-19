@@ -7,8 +7,16 @@ class_name WorldBrush
 @export var min_terrain_height: float = -14.0
 @export var seed_initial_terrain: bool = true
 @export var auto_test_snow: bool = true
-@export var dirty_rect_border: int = 4
+@export var dirty_rect_border: int = 2
 @export var debug_visualize_dirty_rect: bool = false
+@export var debug_rebuild_logging: bool = false
+@export var adaptive_large_brush_ratio: float = 0.42
+@export var dirty_region_full_rebuild_ratio: float = 0.58
+@export var smooth_mode_post_smooth_enabled: bool = true
+@export var smooth_mode_post_smooth_strength: float = 0.12
+@export var terrain_texture_uv_repeat: float = 50.0
+
+const TERRAIN_BASE_ALBEDO_PATH: String = "res://assets/world/textures/world/grass_04_2k/grass_04_basecolor_2k.png"
 
 var _active_world_layer: int = 0
 var _mesh_instance: MeshInstance3D = null
@@ -25,7 +33,7 @@ var _layer_snow: Dictionary = {}
 var dirty_min: Vector2i = Vector2i.ZERO
 var dirty_max: Vector2i = Vector2i.ZERO
 var is_dirty: bool = false
-var _full_rebuild_mode: bool = true
+var _full_rebuild_mode: bool = false
 var _surface_ready: bool = false
 
 func _ready() -> void:
@@ -50,6 +58,11 @@ func get_full_rebuild_mode() -> bool:
 
 func get_world_layer() -> int:
 	return _active_world_layer
+
+func set_smooth_mode_options(post_smooth_enabled: bool, post_smooth_strength: float = -1.0) -> void:
+	smooth_mode_post_smooth_enabled = post_smooth_enabled
+	if post_smooth_strength >= 0.0:
+		smooth_mode_post_smooth_strength = clampf(post_smooth_strength, 0.0, 0.35)
 
 func set_brush_preview_enabled(enabled: bool) -> void:
 	_brush_preview_enabled = enabled
@@ -115,7 +128,19 @@ func sample_height(world_x: float, world_z: float) -> float:
 	var hx1: float = lerpf(h01, h11, tx)
 	return global_position.y + lerpf(hx0, hx1, tz)
 
-func apply_brush(tool_name: String, world_pos: Vector3, brush_size: float, brush_strength: float, flatten_height: float = 0.0, _cliff_mode: bool = false, _overhang_amount: float = 0.3) -> void:
+func get_smooth_falloff(distance: float, radius: float) -> float:
+	if radius <= 0.0:
+		return 0.0
+	var t: float = clampf(1.0 - (distance / radius), 0.0, 1.0)
+	return t * t * t * (t * (t * 6.0 - 15.0) + 10.0)
+
+func get_sharp_falloff(distance: float, radius: float) -> float:
+	if radius <= 0.0:
+		return 0.0
+	var t: float = clampf(1.0 - (distance / radius), 0.0, 1.0)
+	return t * t
+
+func apply_brush(tool_name: String, world_pos: Vector3, brush_size: float, brush_strength: float, flatten_height: float = 0.0, _cliff_mode: bool = false, _overhang_amount: float = 0.3, brush_softness: float = 0.42, brush_mode: String = "smooth") -> void:
 	_ensure_layer_data(_active_world_layer)
 	var heights: PackedFloat32Array = _layer_heights[_active_world_layer]
 	var paint: PackedFloat32Array = _layer_paint[_active_world_layer]
@@ -127,32 +152,39 @@ func apply_brush(tool_name: String, world_pos: Vector3, brush_size: float, brush
 	var half: float = terrain_size * 0.5
 	var grid_step: float = terrain_size / float(terrain_resolution)
 	var radius: float = maxf(brush_size, 0.5)
+	var influence_radius: float = radius + (grid_step * 0.5)
 	var min_x: int = maxi(0, int(floor(((local_center.x - radius) + half) / grid_step)))
 	var max_x: int = mini(terrain_resolution, int(ceil(((local_center.x + radius) + half) / grid_step)))
 	var min_z: int = maxi(0, int(floor(((local_center.z - radius) + half) / grid_step)))
 	var max_z: int = mini(terrain_resolution, int(ceil(((local_center.z + radius) + half) / grid_step)))
 	var n: int = terrain_resolution + 1
+	
+	# Keep regular LMB softer for natural hills while preserving Shift sharp mode.
+	var deformation_strength_multiplier: float = (0.65 + (0.35 * clampf(brush_softness, 0.0, 1.0))) if brush_mode == "smooth" else 1.0
+	var is_deformation_tool: bool = tool_name in ["raise", "lower", "smooth", "flatten"]
 
 	for z in range(min_z, max_z + 1):
 		var pz: float = -half + float(z) * grid_step
 		for x in range(min_x, max_x + 1):
 			var px: float = -half + float(x) * grid_step
 			var d: float = Vector2(px - local_center.x, pz - local_center.z).length()
-			if d > radius:
+			if d > influence_radius:
 				continue
-			var w: float = 1.0 - (d / radius)
-			w = w * w
+			var w: float = get_smooth_falloff(d, influence_radius) if brush_mode == "smooth" else get_sharp_falloff(d, influence_radius)
 			var idxv: int = _idx(x, z, n)
+			var applied_strength: float = brush_strength
+			if is_deformation_tool:
+				applied_strength *= deformation_strength_multiplier
 			match tool_name:
 				"raise":
-					heights[idxv] += brush_strength * w * 0.9
+					heights[idxv] += applied_strength * w * 0.9
 				"lower":
-					heights[idxv] -= brush_strength * w * 0.9
+					heights[idxv] -= applied_strength * w * 0.9
 				"smooth":
 					var avg: float = _neighbor_average(snapshot, x, z)
-					heights[idxv] = lerpf(heights[idxv], avg, clampf(brush_strength * w, 0.0, 1.0))
+					heights[idxv] = lerpf(heights[idxv], avg, clampf(applied_strength * w, 0.0, 1.0))
 				"flatten":
-					heights[idxv] = lerpf(heights[idxv], flatten_height, clampf(brush_strength * w, 0.0, 1.0))
+					heights[idxv] = lerpf(heights[idxv], flatten_height, clampf(applied_strength * w, 0.0, 1.0))
 				"paint":
 					paint[idxv] = clampf(paint[idxv] + brush_strength * w * 0.5, 0.0, 1.0)
 				"texturepaint":
@@ -172,6 +204,9 @@ func apply_brush(tool_name: String, world_pos: Vector3, brush_size: float, brush
 				_:
 					pass
 			heights[idxv] = clampf(heights[idxv], min_terrain_height, max_terrain_height)
+
+	if brush_mode == "smooth" and smooth_mode_post_smooth_enabled and tool_name in ["raise", "lower"]:
+		_apply_local_relax_pass(heights, min_x, max_x, min_z, max_z, influence_radius, local_center)
 
 	_layer_heights[_active_world_layer] = heights
 	_layer_paint[_active_world_layer] = paint
@@ -208,13 +243,8 @@ func _ensure_nodes() -> void:
 		_mesh_instance = MeshInstance3D.new()
 		_mesh_instance.name = "TerrainMesh"
 		add_child(_mesh_instance)
-	if _material == null:
-		_material = StandardMaterial3D.new()
-		_material.vertex_color_use_as_albedo = true
-		_material.roughness = 0.92
-		_material.metallic = 0.0
-		_material.cull_mode = BaseMaterial3D.CULL_DISABLED
-		_mesh_instance.material_override = _material
+	_ensure_terrain_material()
+	_apply_terrain_material_to_mesh()
 	if _brush_preview == null:
 		_brush_preview = MeshInstance3D.new()
 		_brush_preview.name = "BrushPreview"
@@ -232,6 +262,52 @@ func _ensure_nodes() -> void:
 		_brush_preview.material_override = ring_mat
 		_brush_preview.visible = false
 		add_child(_brush_preview)
+
+func _ensure_terrain_material() -> void:
+	if _material != null:
+		return
+	_material = StandardMaterial3D.new()
+	_material.name = "TerrainMaterial"
+	_material.vertex_color_use_as_albedo = false
+	var base_albedo: Texture2D = load(TERRAIN_BASE_ALBEDO_PATH) as Texture2D
+	if base_albedo != null:
+		_material.albedo_texture = base_albedo
+		_material.albedo_color = Color(1.0, 1.0, 1.0, 1.0)
+	else:
+		_material.albedo_color = Color(0.36, 0.45, 0.32, 1.0)
+	var repeat_scale: float = maxf(terrain_texture_uv_repeat, 1.0)
+	_material.uv1_scale = Vector3(repeat_scale, repeat_scale, 1.0)
+	_material.roughness = 0.92
+	_material.metallic = 0.0
+	_material.cull_mode = BaseMaterial3D.CULL_DISABLED
+
+
+func _apply_terrain_material_to_mesh() -> void:
+	if _mesh_instance == null:
+		return
+	_ensure_terrain_material()
+	if _material == null:
+		_material = StandardMaterial3D.new()
+		_material.name = "TerrainMaterialFallback"
+		_material.vertex_color_use_as_albedo = false
+		var fallback_albedo: Texture2D = load(TERRAIN_BASE_ALBEDO_PATH) as Texture2D
+		if fallback_albedo != null:
+			_material.albedo_texture = fallback_albedo
+			_material.albedo_color = Color(1.0, 1.0, 1.0, 1.0)
+		else:
+			_material.albedo_color = Color(0.36, 0.45, 0.32, 1.0)
+		var repeat_scale: float = maxf(terrain_texture_uv_repeat, 1.0)
+		_material.uv1_scale = Vector3(repeat_scale, repeat_scale, 1.0)
+		_material.roughness = 0.92
+		_material.metallic = 0.0
+		_material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	_mesh_instance.material_override = _material
+	if _mesh_instance.mesh is ArrayMesh:
+		var array_mesh: ArrayMesh = _mesh_instance.mesh as ArrayMesh
+		if array_mesh.get_surface_count() > 0:
+			array_mesh.surface_set_material(0, _material)
+	if debug_rebuild_logging:
+		print("Assigned terrain material: ", _material.name)
 
 func _ensure_layer_data(layer: int) -> void:
 	if _layer_heights.has(layer):
@@ -321,18 +397,41 @@ func _mark_dirty_rect(min_x: int, max_x: int, min_z: int, max_z: int) -> void:
 	dirty_max.y = maxi(dirty_max.y, expanded_max_z)
 
 
+func _apply_local_relax_pass(heights: PackedFloat32Array, min_x: int, max_x: int, min_z: int, max_z: int, influence_radius: float, local_center: Vector3) -> void:
+	var n: int = terrain_resolution + 1
+	var half: float = terrain_size * 0.5
+	var grid_step: float = terrain_size / float(terrain_resolution)
+	var strength: float = clampf(smooth_mode_post_smooth_strength, 0.0, 0.35)
+	if strength <= 0.0:
+		return
+	var snapshot: PackedFloat32Array = heights.duplicate()
+	for z in range(min_z, max_z + 1):
+		var pz: float = -half + float(z) * grid_step
+		for x in range(min_x, max_x + 1):
+			var px: float = -half + float(x) * grid_step
+			var d: float = Vector2(px - local_center.x, pz - local_center.z).length()
+			if d > influence_radius:
+				continue
+			var w: float = get_smooth_falloff(d, influence_radius)
+			if w <= 0.0:
+				continue
+			var idxv: int = _idx(x, z, n)
+			var avg: float = _neighbor_average(snapshot, x, z)
+			heights[idxv] = lerpf(heights[idxv], avg, strength * w)
+
+
 func _rebuild_after_stroke(radius: float, tool_name: String) -> void:
 	if _full_rebuild_mode:
-		print("Rebuild mode: full (force enabled) | tool: ", tool_name)
+		_log_rebuild("Rebuild mode: full (force enabled) | tool: %s" % tool_name)
 		rebuild_mesh()
 		return
 	var supports_dirty: bool = tool_name in ["raise", "lower", "smooth", "flatten", "paint", "texturepaint", "textureerase"]
 	if not supports_dirty:
-		print("Rebuild mode: full (tool requires full refresh) | tool: ", tool_name)
+		_log_rebuild("Rebuild mode: full (tool requires full refresh) | tool: %s" % tool_name)
 		rebuild_mesh()
 		return
-	if radius >= terrain_size * 0.30:
-		print("Rebuild mode: full (large brush) | radius: ", radius)
+	if radius >= terrain_size * clampf(adaptive_large_brush_ratio, 0.25, 0.80):
+		_log_rebuild("Rebuild mode: full (large brush) | radius: %s" % str(radius))
 		rebuild_mesh()
 		return
 	if not is_dirty:
@@ -340,16 +439,21 @@ func _rebuild_after_stroke(radius: float, tool_name: String) -> void:
 	var dirty_width: int = dirty_max.x - dirty_min.x + 1
 	var dirty_height: int = dirty_max.y - dirty_min.y + 1
 	if dirty_width <= 0 or dirty_height <= 0:
-		print("Rebuild mode: full (invalid dirty bounds)")
+		_log_rebuild("Rebuild mode: full (invalid dirty bounds)")
 		rebuild_mesh()
 		return
 	var dirty_vertices: int = dirty_width * dirty_height
 	var total_vertices: int = (terrain_resolution + 1) * (terrain_resolution + 1)
-	if dirty_vertices >= int(ceil(float(total_vertices) * 0.33)):
-		print("Rebuild mode: full (dirty region too large) | vertices: ", dirty_vertices, " / ", total_vertices)
+	if dirty_vertices >= int(ceil(float(total_vertices) * clampf(dirty_region_full_rebuild_ratio, 0.30, 0.90))):
+		_log_rebuild("Rebuild mode: full (dirty region too large) | vertices: %d / %d" % [dirty_vertices, total_vertices])
 		rebuild_mesh()
 		return
 	rebuild_dirty_mesh()
+
+
+func _log_rebuild(message: String) -> void:
+	if debug_rebuild_logging:
+		print(message)
 
 func _idx(x: int, z: int, stride: int) -> int:
 	return z * stride + x
@@ -369,9 +473,11 @@ func rebuild_mesh() -> void:
 	var vertices := PackedVector3Array()
 	var normals := PackedVector3Array()
 	var colors := PackedColorArray()
+	var uvs := PackedVector2Array()
 	vertices.resize(count)
 	normals.resize(count)
 	colors.resize(count)
+	uvs.resize(count)
 
 	for z in range(stride):
 		for x in range(stride):
@@ -379,6 +485,7 @@ func rebuild_mesh() -> void:
 			var px: float = -half + float(x) * step
 			var pz: float = -half + float(z) * step
 			vertices[i] = Vector3(px, heights[i], pz)
+			uvs[i] = Vector2(float(x) / float(terrain_resolution), float(z) / float(terrain_resolution))
 			var snow_amt: float = snow[i]
 			var water_amt: float = water[i]
 			var paint_amt: float = paint[i]
@@ -425,17 +532,20 @@ func rebuild_mesh() -> void:
 	arr[Mesh.ARRAY_VERTEX] = vertices
 	arr[Mesh.ARRAY_NORMAL] = normals
 	arr[Mesh.ARRAY_COLOR] = colors
+	arr[Mesh.ARRAY_TEX_UV] = uvs
 	arr[Mesh.ARRAY_INDEX] = indices
 
 	var mesh := ArrayMesh.new()
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr, Array(), Dictionary(), Mesh.ARRAY_FLAG_USE_DYNAMIC_UPDATE)
 	mesh.set_custom_aabb(AABB(Vector3(-half, min_terrain_height, -half), Vector3(terrain_size, max_terrain_height - min_terrain_height, terrain_size)))
 	_mesh_instance.mesh = mesh
+	_apply_terrain_material_to_mesh()
 	is_dirty = false
 	dirty_min = Vector2i.ZERO
 	dirty_max = Vector2i.ZERO
 	_surface_ready = true
-	print("Full rebuild: %.3f ms" % (float(Time.get_ticks_usec() - start_time) / 1000.0))
+	if debug_rebuild_logging:
+		print("Full rebuild: %.3f ms" % (float(Time.get_ticks_usec() - start_time) / 1000.0))
 
 
 func rebuild_dirty_mesh() -> void:
@@ -464,7 +574,8 @@ func rebuild_dirty_mesh() -> void:
 	var dirty_width: int = dirty_max.x - dirty_min.x + 1
 	var dirty_height: int = dirty_max.y - dirty_min.y + 1
 	var vertex_count: int = dirty_width * dirty_height
-	print("Dirty Rect: ", dirty_min, "->", dirty_max, " | Size: ", dirty_width, "×", dirty_height, " Vertices: ", vertex_count)
+	if debug_rebuild_logging:
+		print("Dirty Rect: ", dirty_min, "->", dirty_max, " | Size: ", dirty_width, "x", dirty_height, " Vertices: ", vertex_count)
 
 	for z in range(dirty_min.y, dirty_max.y + 1):
 		var row_count: int = dirty_max.x - dirty_min.x + 1
@@ -508,14 +619,17 @@ func rebuild_dirty_mesh() -> void:
 
 	var seam_start_time: int = Time.get_ticks_usec()
 	_update_dirty_border_seams(mesh, heights, paint, water, snow, stride, half, step, row_vertex_size, row_normal_size, row_color_size, normal_block_offset)
+	_apply_terrain_material_to_mesh()
 	var seam_time: int = Time.get_ticks_usec() - seam_start_time
 
-	print("Dirty Rect Update Applied: ", dirty_min, "->", dirty_max, " | main: ", Time.get_ticks_usec() - start_time - seam_time, "µs | seams: ", seam_time, "µs")
+	if debug_rebuild_logging:
+		print("Dirty Rect Update Applied: ", dirty_min, "->", dirty_max, " | main: ", Time.get_ticks_usec() - start_time - seam_time, "us | seams: ", seam_time, "us")
 
 	is_dirty = false
 	dirty_min = Vector2i.ZERO
 	dirty_max = Vector2i.ZERO
-	print("Dirty rebuild: %.3f ms" % (float(Time.get_ticks_usec() - start_time) / 1000.0))
+	if debug_rebuild_logging:
+		print("Dirty rebuild: %.3f ms" % (float(Time.get_ticks_usec() - start_time) / 1000.0))
 
 
 func _update_dirty_border_seams(mesh: ArrayMesh, heights: PackedFloat32Array, paint: PackedFloat32Array, water: PackedFloat32Array, snow: PackedFloat32Array, stride: int, half: float, step: float, row_vertex_size: int, row_normal_size: int, row_color_size: int, normal_block_offset: int) -> void:

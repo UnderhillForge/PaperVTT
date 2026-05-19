@@ -1,8 +1,0 @@
-[gd_scene format=3]
-
-[node name="tudor_foundation_straight_8m" type="Node3D" unique_id=239689609]
-metadata/piece_name = "foundation_straight_8m"
-metadata/piece_kind = "foundation_straight"
-metadata/wall_variant = "tudor"
-metadata/grid_snap_m = 0.5
-metadata/wall_height_m = 3.4

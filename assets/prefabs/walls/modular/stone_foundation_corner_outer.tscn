@@ -1,8 +1,0 @@
-[gd_scene format=3]
-
-[node name="stone_foundation_corner_outer" type="Node3D" unique_id=1498087430]
-metadata/piece_name = "foundation_corner_outer"
-metadata/piece_kind = "foundation_corner_outer"
-metadata/wall_variant = "stone"
-metadata/grid_snap_m = 0.5
-metadata/wall_height_m = 3.4

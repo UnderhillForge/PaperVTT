@@ -29,6 +29,10 @@ var _selected_prefab: String = ""
 var _current_tool: String = "stamp"
 var _brush_size: float = 10.0
 var _brush_strength: float = 0.25
+var _brush_softness: float = 0.42
+var _brush_mode: String = "smooth"  # "smooth" or "sharp" - controlled by Shift+LMB
+var _smooth_post_pass_enabled: bool = true
+var _smooth_post_pass_strength: float = 0.12
 var _flatten_height: float = 0.0
 var _grid_snap: bool = true
 var _is_tool_dragging: bool = false
@@ -93,7 +97,7 @@ var _perf_overlay_accum: float = 0.0
 var _lightweight_editor_mode: bool = false
 var _is_editor_runtime: bool = OS.has_feature("editor")
 
-const STROKE_INTERVAL_SEC: float = 1.0 / 90.0
+const STROKE_INTERVAL_SEC: float = 1.0 / 70.0
 const TEXTURE_STROKE_INTERVAL_SEC: float = 1.0 / 55.0
 const TEXTURE_STROKE_INTERVAL_PERF_SEC: float = 1.0 / 34.0
 const STAMP_DRAG_INTERVAL_SEC: float = 1.0 / 16.0
@@ -122,8 +126,8 @@ const PERF_OVERLAY_INTERVAL_SEC: float = 0.25
 const DISABLE_CUSTOM_POSTFX_DEFAULT: bool = true
 const ENABLE_TERRABRUSH_EDITOR_RUNTIME: bool = false
 const DEFAULT_DUNGEONDRAFT_MAP_PATH: String = "res://dd_testing/test1.dungeondraft_map"
-const IMPORT_WALL_TEXTURE_PATH: String = "res://assets/textures/materials/kenney_nature-kit/cliff_block_stone_NW.png"
-const IMPORT_FLOOR_TEXTURE_PATH: String = "res://assets/textures/materials/kenney_nature-kit/stone_smallFlatC.png"
+const IMPORT_WALL_TEXTURE_PATH: String = "res://assets/world/textures/materials/kenney_nature-kit/cliff_block_stone_NW.png"
+const IMPORT_FLOOR_TEXTURE_PATH: String = "res://assets/world/textures/materials/kenney_nature-kit/stone_smallFlatC.png"
 const IMPORT_LIGHT_HEIGHT_OFFSET: float = 1.9
 const DEFAULT_MAP_SAVE_PATH: String = "user://maps/papervtt_map.pvt"
 const WEATHER_NORMAL: String = "normal"
@@ -148,6 +152,11 @@ const AMBIENT_ENERGY_DAY_MAX: float = 0.58
 const AMBIENT_ENERGY_NIGHT_MIN: float = 0.34
 const AMBIENT_WARM_DAY: Color = Color(1.0, 0.9098, 0.7529, 1.0)
 const AMBIENT_COOL_NIGHT: Color = Color(0.50, 0.56, 0.70, 1.0)
+const BRUSH_RADIUS_MIN: float = 1.0
+const BRUSH_RADIUS_MAX: float = 80.0
+const BRUSH_RADIUS_WHEEL_STEP_MIN: float = 0.5
+const BRUSH_RADIUS_WHEEL_STEP_SCALE: float = 0.08
+const RADIUS_INDICATOR_DURATION_SEC: float = 0.85
 
 var _dungeondraft_importer: RefCounted = null
 var _dd_import_dialog: FileDialog = null
@@ -160,6 +169,9 @@ var _worldbrush_menu: Control = null
 var _worldbrush_hold_active: bool = false
 var _worldbrush_inspector: Control = null
 var _tool_name_display: Label = null
+var _radius_indicator_label: Label = null
+var _radius_indicator_ttl: float = 0.0
+var _brush_mode_label: Label = null
 var _dd_import_settings := {
 	"floor_raise_height": 0.15,
 	"wall_thickness_m": 0.2,
@@ -185,7 +197,7 @@ var _rain_particles: GPUParticles3D = null
 var _snow_particles: GPUParticles3D = null
 
 ## Environment inspector runtime state
-var _time_paused: bool = false
+var _time_paused: bool = true
 var _time_scale: float = 1.0
 var _lighting_override_enabled: bool = false
 var _lighting_override_color: Color = Color(1.0, 0.95, 0.86, 1.0)
@@ -200,7 +212,7 @@ var _weather_channel_intensity: Dictionary = {
 	"foggy": 0.0,
 	"stormy": 0.0,
 }
-var _terrain_full_rebuild_mode: bool = true
+var _terrain_full_rebuild_mode: bool = false
 var _debug_visualize_dirty_rect: bool = false
 var _lightning_enabled: bool = false
 var _lightning_interval: float = 18.0
@@ -224,6 +236,7 @@ func _ready() -> void:
 	_ensure_editor_ui_layout()
 	_ensure_worldbrush_menu()
 	_ensure_worldbrush_inspector()
+	_ensure_radius_indicator()
 	_update_tool_name_display()
 	if menu_bar != null:
 		menu_bar.action_requested.connect(_on_menu_action_requested)
@@ -889,9 +902,23 @@ func _process(delta: float) -> void:
 		_perf_overlay_accum = 0.0
 		_update_performance_overlay()
 	_update_live_previews()
+	_tick_radius_indicator(delta)
+
+	# Keep Shift->sharp switching responsive even if key events are missed while dragging.
+	if _is_tool_dragging and (_current_tool == "raise" or _current_tool == "lower"):
+		var target_mode: String = "sharp" if Input.is_key_pressed(KEY_SHIFT) else "smooth"
+		if target_mode != _brush_mode:
+			_update_brush_mode_visual_feedback()
+	
+	# Update brush mode indicator for raise/lower tools
+	if (_current_tool == "raise" or _current_tool == "lower") and _is_tool_dragging:
+		_show_brush_mode_indicator()
+	elif _brush_mode_label != null and _brush_mode_label.visible:
+		_hide_brush_mode_indicator()
+	
 	if _is_tool_dragging and _current_tool != "stamp":
 		_stroke_interval_accum += delta
-		var stroke_interval: float = STROKE_INTERVAL_SEC
+		var stroke_interval: float = _get_active_stroke_interval()
 		if _current_tool == "texturepaint" or _current_tool == "textureerase":
 			stroke_interval = TEXTURE_STROKE_INTERVAL_PERF_SEC if _texture_perf_mode else TEXTURE_STROKE_INTERVAL_SEC
 		while _stroke_interval_accum >= stroke_interval:
@@ -925,6 +952,12 @@ func _unhandled_input(event: InputEvent) -> void:
 	if _worldbrush_menu != null and _worldbrush_menu.has_method("is_open") and bool(_worldbrush_menu.call("is_open")):
 		if event is InputEventMouseMotion:
 			_worldbrush_menu.call("update_pointer", (event as InputEventMouseMotion).position)
+			get_viewport().set_input_as_handled()
+			return
+
+	if event is InputEventMouseButton:
+		var wheel_event: InputEventMouseButton = event as InputEventMouseButton
+		if wheel_event != null and wheel_event.pressed and wheel_event.ctrl_pressed and _handle_ctrl_wheel_radius(wheel_event):
 			get_viewport().set_input_as_handled()
 			return
 
@@ -992,6 +1025,12 @@ func _unhandled_input(event: InputEvent) -> void:
 				get_viewport().set_input_as_handled()
 				return
 
+	# Shift key press/release for brush mode preview feedback
+	if event is InputEventKey and event.keycode == KEY_SHIFT:
+		_update_brush_mode_visual_feedback()
+		get_viewport().set_input_as_handled()
+		return
+
 	if get_viewport().gui_get_hovered_control() != null:
 		return
 
@@ -1054,6 +1093,11 @@ func _unhandled_input(event: InputEvent) -> void:
 				_is_stamp_dragging = true
 				_stamp_drag_interval_accum = 0.0
 			else:
+				# Set brush mode based on Shift key for raise/lower tools
+				if event.shift_pressed and (_current_tool == "raise" or _current_tool == "lower"):
+					_brush_mode = "sharp"
+				else:
+					_brush_mode = "smooth"
 				_begin_tool_stroke()
 		else:
 			_is_stamp_dragging = false
@@ -1065,7 +1109,8 @@ func _unhandled_input(event: InputEvent) -> void:
 					_runtime_terrain_editor.end_stroke()
 
 	if event is InputEventMouseMotion and _is_tool_dragging:
-		_continue_tool_stroke()
+		# Timed stroke stepping in _process keeps sculpting smooth while avoiding over-updating.
+		pass
 	if event is InputEventMouseMotion and _is_stamp_dragging and _current_tool == "stamp":
 		_stamp_at_mouse(true)
 
@@ -1197,9 +1242,12 @@ func _on_tool_clear_requested() -> void:
 func _on_tool_setting_changed(setting_name: String, value: Variant) -> void:
 	match setting_name:
 		"brush_size":
-			_brush_size = float(value)
+			_set_brush_radius(float(value), false, false)
 		"brush_strength":
 			_brush_strength = float(value)
+		"brush_mode":
+			_brush_mode = String(value)
+			_update_brush_mode_visual_feedback()
 		"flatten_height":
 			_flatten_height = float(value)
 		"grid_snap":
@@ -1269,6 +1317,16 @@ func _on_tool_setting_changed(setting_name: String, value: Variant) -> void:
 			_selected_texture_id = String(value)
 			if _texture_painter != null:
 				_texture_painter.selected_texture_id = String(value)
+		"brush_softness":
+			_brush_softness = clampf(float(value), 0.0, 1.0)
+		"smooth_post_pass_enabled":
+			_smooth_post_pass_enabled = bool(value)
+			if _terrain_node != null and _terrain_node.has_method("set_smooth_mode_options"):
+				_terrain_node.call("set_smooth_mode_options", _smooth_post_pass_enabled, _smooth_post_pass_strength)
+		"smooth_post_pass_strength":
+			_smooth_post_pass_strength = clampf(float(value), 0.0, 0.35)
+			if _terrain_node != null and _terrain_node.has_method("set_smooth_mode_options"):
+				_terrain_node.call("set_smooth_mode_options", _smooth_post_pass_enabled, _smooth_post_pass_strength)
 		"cliff_mode":
 			_cliff_mode = bool(value)
 		"overhang_amount":
@@ -1419,7 +1477,8 @@ func _create_new_flat_map(_include_seed_content: bool = true) -> void:
 		_configure_visible_terrain()
 
 	if _runtime_terrain_editor.is_available():
-		_runtime_terrain_editor.bootstrap_new_map(Time.get_ticks_usec())
+		if _terrain_node != null and _terrain_node.has_method("initialize_new_map"):
+			_terrain_node.call("initialize_new_map", Time.get_ticks_usec())
 
 	if _grass_system != null and _grass_system.has_method("clear_all"):
 		_grass_system.call("clear_all")
@@ -1757,7 +1816,7 @@ func _setup_dungeondraft_import() -> void:
 	_dungeondraft_importer = DUNGEONDRAFT_IMPORTER_SCRIPT.new()
 	_import_prefab_paths.clear()
 	_import_prefab_key_to_path.clear()
-	_collect_prefabs("res://assets/prefabs", _import_prefab_paths)
+	_collect_prefabs("res://assets/world/models", _import_prefab_paths)
 	for prefab_path in _import_prefab_paths:
 		var key: String = prefab_path.get_file().get_basename().to_lower()
 		if not _import_prefab_key_to_path.has(key):
@@ -1853,7 +1912,7 @@ func _raise_terrain_for_imported_floor_tiles(floor_tiles: Array) -> void:
 		return
 	var raise_height: float = float(_dd_import_settings.get("floor_raise_height", 0.15))
 	var cell_size: float = float(_dd_import_settings.get("world_units_per_cell", 1.0))
-	_runtime_terrain_editor.set_tool("flatten", cell_size * 1.1, 1.0, raise_height)
+	_runtime_terrain_editor.set_tool("flatten", cell_size * 1.1, 1.0, raise_height, false, _overhang_amount)
 	for tile_variant in floor_tiles:
 		if not (tile_variant is Dictionary):
 			continue
@@ -1971,9 +2030,9 @@ func _match_prefab_for_dd_object(texture_path: String) -> String:
 	var key: String = texture_path.get_file().get_basename().to_lower()
 	if key.contains("wall_torch"):
 		var preferred := [
-			"res://assets/prefabs/props/core/torch_wall_mounted.tscn",
-			"res://assets/prefabs/props/torches/torch_mounted.tscn",
-			"res://assets/prefabs/props/torches/torch_lit.tscn"
+			"res://assets/world/models/props/core/torch_wall_mounted.tscn",
+			"res://assets/world/models/props/torches/torch_mounted.tscn",
+			"res://assets/world/models/props/torches/torch_lit.tscn"
 		]
 		for p in preferred:
 			if ResourceLoader.exists(p):
@@ -2542,7 +2601,7 @@ func _begin_tool_stroke() -> void:
 			_grass_system.call("apply_brush", _current_tool, hit as Vector3, _brush_size, _brush_strength)
 		return
 	if _current_tool == "texturepaint":
-		if _terrain_node != null and _texture_painter != null:
+		if _terrain_node != null:
 			if _terrain_node.has_method("begin_texture_stroke"):
 				_terrain_node.call("begin_texture_stroke", _texture_perf_mode, _brush_size)
 			var max_off: float = _texture_tile_size * 0.65
@@ -2554,8 +2613,7 @@ func _begin_tool_stroke() -> void:
 				_texture_stroke_shape_variant = randi_range(0, 2)
 			else:
 				_texture_stroke_shape_variant = 0
-			var tex_id = _texture_painter.selected_texture_id
-			var maps: Dictionary = _texture_painter.call("get_pbr_maps", tex_id, 1024)
+			var maps: Dictionary = _get_texture_maps(_selected_texture_id, 1024)
 			if not maps.is_empty() and maps.has("albedo"):
 				_terrain_node.call("apply_texture_brush", hit as Vector3, maps.get("albedo", null), maps.get("normal", null), maps.get("roughness", null), maps.get("height", null), maps.get("ao", null), _brush_size, _brush_strength, _texture_tile_size, _texture_density, _texture_edge_softness, _texture_coverage_limit, _texture_stroke_offset, _texture_stroke_rotation, _texture_stroke_scale, _texture_exposure, _texture_brush_shape_mode, _texture_shape_variation, _texture_stroke_seed, _texture_stroke_shape_variant)
 		return
@@ -2564,6 +2622,10 @@ func _begin_tool_stroke() -> void:
 			_terrain_node.call("apply_texture_erase_brush", hit as Vector3, _brush_size, _brush_strength, _texture_edge_softness)
 		return
 	_runtime_terrain_editor.set_tool(_current_tool, _brush_size, _brush_strength, _flatten_height, _cliff_mode, _overhang_amount)
+	if _runtime_terrain_editor.has_method("set_brush_falloff"):
+		_runtime_terrain_editor.call("set_brush_falloff", _brush_softness, _brush_mode)
+	if _terrain_node != null and _terrain_node.has_method("set_smooth_mode_options"):
+		_terrain_node.call("set_smooth_mode_options", _smooth_post_pass_enabled, _smooth_post_pass_strength)
 	_runtime_terrain_editor.begin_stroke(hit as Vector3)
 
 func _continue_tool_stroke() -> void:
@@ -2581,9 +2643,8 @@ func _continue_tool_stroke() -> void:
 				_grass_system.call("apply_brush", _current_tool, hit as Vector3, _brush_size, _brush_strength)
 		return
 	if _current_tool == "texturepaint":
-		if _terrain_node != null and _texture_painter != null:
-			var tex_id = _texture_painter.selected_texture_id
-			var maps: Dictionary = _texture_painter.call("get_pbr_maps", tex_id, 1024)
+		if _terrain_node != null:
+			var maps: Dictionary = _get_texture_maps(_selected_texture_id, 1024)
 			if not maps.is_empty() and maps.has("albedo"):
 				_terrain_node.call("apply_texture_brush", hit as Vector3, maps.get("albedo", null), maps.get("normal", null), maps.get("roughness", null), maps.get("height", null), maps.get("ao", null), _brush_size, _brush_strength, _texture_tile_size, _texture_density, _texture_edge_softness, _texture_coverage_limit, _texture_stroke_offset, _texture_stroke_rotation, _texture_stroke_scale, _texture_exposure, _texture_brush_shape_mode, _texture_shape_variation, _texture_stroke_seed, _texture_stroke_shape_variant)
 		return
@@ -2716,13 +2777,178 @@ func _is_character_control_active() -> bool:
 func _should_show_radius_preview() -> bool:
 	return _tool_uses_radius_preview(_current_tool) and not _is_character_control_active()
 
+func _handle_ctrl_wheel_radius(event: InputEventMouseButton) -> bool:
+	if not _tool_uses_radius_preview(_current_tool):
+		return false
+	if _is_character_control_active():
+		return false
+	if get_viewport().gui_get_hovered_control() != null:
+		return false
+	var direction: float = 0.0
+	if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+		direction = 1.0
+	elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+		direction = -1.0
+	else:
+		return false
+	var step: float = maxf(BRUSH_RADIUS_WHEEL_STEP_MIN, _brush_size * BRUSH_RADIUS_WHEEL_STEP_SCALE)
+	_set_brush_radius(_brush_size + (direction * step), true, true)
+	return true
+
+func _set_brush_radius(new_radius: float, show_status: bool = true, show_indicator: bool = true) -> void:
+	var clamped_radius: float = clampf(new_radius, BRUSH_RADIUS_MIN, BRUSH_RADIUS_MAX)
+	if is_equal_approx(clamped_radius, _brush_size):
+		return
+	_brush_size = clamped_radius
+	if _terrain_node != null and _terrain_node.has_method("set_brush_preview_radius"):
+		_terrain_node.call("set_brush_preview_radius", _brush_size)
+	if _worldbrush_inspector != null and _worldbrush_inspector.has_method("set_brush_size"):
+		_worldbrush_inspector.call("set_brush_size", _brush_size)
+	_update_active_tool_feedback()
+	if show_status:
+		_set_status("Brush radius: %.1f" % _brush_size)
+	if show_indicator:
+		_show_radius_indicator()
+	_refresh_brush_preview_at_mouse()
+
+func _refresh_brush_preview_at_mouse() -> void:
+	var hit: Variant = _get_mouse_world_position()
+	if hit != null:
+		_update_brush_preview(hit as Vector3)
+
+func _ensure_radius_indicator() -> void:
+	if _radius_indicator_label != null:
+		return
+	var root_ui: Control = get_node_or_null("EditorCanvas/RootUI") as Control
+	if root_ui == null:
+		return
+	_radius_indicator_label = Label.new()
+	_radius_indicator_label.name = "BrushRadiusIndicator"
+	_radius_indicator_label.visible = false
+	_radius_indicator_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_radius_indicator_label.z_index = 300
+	_radius_indicator_label.add_theme_font_size_override("font_size", 14)
+	_radius_indicator_label.add_theme_color_override("font_color", Color(0.84, 0.97, 1.0, 0.98))
+	_radius_indicator_label.add_theme_color_override("font_outline_color", Color(0.03, 0.09, 0.12, 0.95))
+	_radius_indicator_label.add_theme_constant_override("outline_size", 2)
+	root_ui.add_child(_radius_indicator_label)
+
+func _show_radius_indicator() -> void:
+	if _radius_indicator_label == null:
+		return
+	_radius_indicator_ttl = RADIUS_INDICATOR_DURATION_SEC
+	_radius_indicator_label.text = "Radius %.1f" % _brush_size
+	_radius_indicator_label.visible = true
+	_update_radius_indicator_position()
+
+func _tick_radius_indicator(delta: float) -> void:
+	if _radius_indicator_label == null:
+		return
+	if _radius_indicator_ttl <= 0.0:
+		if _radius_indicator_label.visible:
+			_radius_indicator_label.visible = false
+		return
+	if not _should_show_radius_preview():
+		_radius_indicator_ttl = 0.0
+		_radius_indicator_label.visible = false
+		return
+	_radius_indicator_ttl = maxf(0.0, _radius_indicator_ttl - delta)
+	if _radius_indicator_ttl > 0.0:
+		_update_radius_indicator_position()
+
+func _update_radius_indicator_position() -> void:
+	if _radius_indicator_label == null:
+		return
+	var mouse_pos: Vector2 = get_viewport().get_mouse_position()
+	var target: Vector2 = mouse_pos + Vector2(18.0, 20.0)
+	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
+	var label_size: Vector2 = _radius_indicator_label.size
+	target.x = clampf(target.x, 8.0, maxf(8.0, viewport_size.x - label_size.x - 8.0))
+	target.y = clampf(target.y, 8.0, maxf(8.0, viewport_size.y - label_size.y - 8.0))
+	_radius_indicator_label.position = target
+
+func _update_brush_mode_visual_feedback() -> void:
+	# Update brush preview colors based on current Shift key state
+	if _current_tool == "raise" or _current_tool == "lower":
+		if Input.is_key_pressed(KEY_SHIFT):
+			_brush_mode = "sharp"
+		else:
+			_brush_mode = "smooth"
+		if _worldbrush_inspector != null and _worldbrush_inspector.has_method("set_tool_state"):
+			_worldbrush_inspector.call("set_tool_state", {
+				"brush_mode": _brush_mode,
+				"brush_softness": _brush_softness,
+				"smooth_post_pass_enabled": _smooth_post_pass_enabled,
+				"smooth_post_pass_strength": _smooth_post_pass_strength,
+			})
+		_refresh_brush_preview_at_mouse()
+
+func _get_active_stroke_interval() -> float:
+	if _current_tool in ["raise", "lower", "smooth", "flatten"]:
+		if _brush_size >= 26.0:
+			return 1.0 / 36.0
+		if _brush_size >= 16.0:
+			return 1.0 / 48.0
+		if _brush_size >= 9.0:
+			return 1.0 / 58.0
+	return STROKE_INTERVAL_SEC
+
+func _ensure_brush_mode_label() -> void:
+	if _brush_mode_label != null:
+		return
+	
+	var root_ui: Control = get_node_or_null("EditorCanvas/RootUI")
+	if root_ui == null:
+		return
+	
+	_brush_mode_label = Label.new()
+	_brush_mode_label.name = "BrushModeIndicator"
+	_brush_mode_label.visible = false
+	_brush_mode_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_brush_mode_label.z_index = 299  # Just below radius indicator
+	_brush_mode_label.add_theme_font_size_override("font_size", 12)
+	_brush_mode_label.add_theme_color_override("font_color", Color(1.0, 0.7, 0.3, 0.95))
+	_brush_mode_label.add_theme_color_override("font_outline_color", Color(0.1, 0.06, 0.0, 0.95))
+	_brush_mode_label.add_theme_constant_override("outline_size", 2)
+	root_ui.add_child(_brush_mode_label)
+
+func _show_brush_mode_indicator() -> void:
+	_ensure_brush_mode_label()
+	if _brush_mode_label == null:
+		return
+	
+	var mode_text: String = "SHARP" if _brush_mode == "sharp" else "SMOOTH"
+	_brush_mode_label.text = mode_text
+	_brush_mode_label.visible = true
+	_update_brush_mode_indicator_position()
+
+func _hide_brush_mode_indicator() -> void:
+	if _brush_mode_label != null:
+		_brush_mode_label.visible = false
+
+func _update_brush_mode_indicator_position() -> void:
+	if _brush_mode_label == null:
+		return
+	
+	var root_ui: Control = get_node_or_null("EditorCanvas/RootUI")
+	if root_ui == null:
+		return
+	
+	if _radius_indicator_label == null or not _radius_indicator_label.visible:
+		_brush_mode_label.position = Vector2(20.0, get_viewport().get_visible_rect().size.y - 60.0)
+	else:
+		# Position below the radius indicator
+		var radius_pos: Vector2 = _radius_indicator_label.position
+		var radius_size: Vector2 = _radius_indicator_label.size
+		_brush_mode_label.position = radius_pos + Vector2(0.0, radius_size.y + 8.0)
+
 func _update_live_previews() -> void:
 	# Update terrain brush preview through terrain node if available
 	if _terrain_node != null and _terrain_node.has_method("update_brush_preview"):
 		_terrain_node.call("update_brush_preview", camera, get_viewport().get_mouse_position())
 		if _terrain_node.has_method("set_brush_preview_enabled"):
-			var show_brush: bool = _should_show_radius_preview()
-			_terrain_node.call("set_brush_preview_enabled", show_brush)
+			# Keep the built-in terrain decal preview disabled in favor of the volumetric sphere.
+			_terrain_node.call("set_brush_preview_enabled", false)
 
 	var hit: Variant = _get_mouse_world_position()
 	if hit == null:
@@ -2759,51 +2985,50 @@ func _update_stamp_preview(world_pos: Vector3) -> void:
 func _update_brush_preview(world_pos: Vector3) -> void:
 	if _brush_preview == null:
 		return
-	
-	# Hide preview if terrain node has its own preview (legacy support)
-	if _terrain_node != null and _terrain_node.has_method("update_brush_preview"):
-		_brush_preview.hide_preview()
-		return
-	
+
 	# Determine preview colors for tools that use a radius overlay.
-	var base_color: Color = Color(0.2, 0.8, 1.0, 0.25)  # Default cyan
-	var rim_color: Color = Color(0.4, 0.9, 1.0, 0.6)
+	var base_color: Color = Color(0.28, 0.82, 0.72, 0.07)
+	var rim_color: Color = Color(0.70, 0.98, 0.88, 0.88)
 	
 	match _current_tool:
-		# Terrain brushes - greenish tint
 		"raise", "lower", "smooth", "paint":
-			base_color = Color(0.3, 0.75, 0.2, 0.25)
-			rim_color = Color(0.5, 0.95, 0.4, 0.6)
-		# Flatten - yellow-green
+			base_color = Color(0.26, 0.84, 0.70, 0.07)
+			rim_color = Color(0.64, 0.99, 0.86, 0.88)
 		"flatten":
-			base_color = Color(0.7, 0.8, 0.2, 0.25)
-			rim_color = Color(0.9, 1.0, 0.4, 0.6)
-		# Water brushes - blue
+			base_color = Color(0.34, 0.86, 0.64, 0.07)
+			rim_color = Color(0.76, 1.0, 0.82, 0.86)
 		"waterpaint":
-			base_color = Color(0.2, 0.7, 1.0, 0.25)
-			rim_color = Color(0.4, 0.85, 1.0, 0.6)
-		# Snow paint - white
+			base_color = Color(0.16, 0.78, 1.0, 0.08)
+			rim_color = Color(0.54, 0.92, 1.0, 0.92)
 		"snowpaint":
-			base_color = Color(0.9, 0.95, 1.0, 0.25)
-			rim_color = Color(1.0, 1.0, 1.0, 0.6)
-		# Texture paint - purple-blue
+			base_color = Color(0.88, 0.95, 1.0, 0.09)
+			rim_color = Color(0.96, 1.0, 1.0, 0.90)
 		"texturepaint":
-			base_color = Color(0.6, 0.4, 0.95, 0.25)
-			rim_color = Color(0.8, 0.6, 1.0, 0.6)
-		# Grass - green
+			base_color = Color(0.66, 0.52, 0.96, 0.08)
+			rim_color = Color(0.86, 0.76, 1.0, 0.90)
+		"textureerase":
+			base_color = Color(0.56, 0.62, 0.92, 0.07)
+			rim_color = Color(0.76, 0.84, 0.98, 0.84)
 		"grasspaint", "grasserase":
-			base_color = Color(0.3, 0.75, 0.2, 0.25)
-			rim_color = Color(0.5, 0.95, 0.4, 0.6)
+			base_color = Color(0.36, 0.82, 0.38, 0.07)
+			rim_color = Color(0.66, 0.97, 0.58, 0.84)
+		"scatterpaint", "scattererase":
+			base_color = Color(0.89, 0.76, 0.38, 0.07)
+			rim_color = Color(0.99, 0.90, 0.62, 0.84)
+	
+	# Apply sharp mode visual feedback (warm red/orange tone)
+	if _brush_mode == "sharp" and (_current_tool == "raise" or _current_tool == "lower"):
+		rim_color = Color(1.0, 0.65, 0.35, 0.95)  # Orange/red for sharp mode
 	
 	if not _should_show_radius_preview():
 		_brush_preview.hide_preview()
 		return
 	
-	# Show and position the radius bubble.
+	# Show and position the volumetric radius bubble.
 	_brush_preview.show_preview()
 	_brush_preview.update_colors(base_color, rim_color)
 	_brush_preview.update_radius(_brush_size)
-	_brush_preview.global_position = world_pos + Vector3(0.0, 0.1, 0.0)
+	_brush_preview.update_world_position(world_pos)
 
 func _rotate_stamp_preview(delta_deg: float) -> void:
 	_stamp_rotation_deg = fmod(_stamp_rotation_deg + delta_deg + 360.0, 360.0)
@@ -2885,7 +3110,7 @@ func _seed_default_prefabs() -> void:
 
 func _choose_seed_prefabs() -> Array[String]:
 	var all: Array[String] = []
-	_collect_prefabs("res://assets/prefabs", all)
+	_collect_prefabs("res://assets/world/models", all)
 	if all.is_empty():
 		return []
 
@@ -3117,6 +3342,63 @@ func _get_terrabrush_editor_node() -> Node:
 		return null
 	return terrain_placeholder.find_child("TerraBrushEditor", true, false)
 
+func _get_texture_maps(texture_id: String, target_size: int = 1024) -> Dictionary:
+	if _texture_painter != null and _texture_painter.has_method("get_pbr_maps"):
+		var painter_texture_id: String = texture_id
+		if painter_texture_id.is_empty() and _texture_painter.has_method("get"):
+			painter_texture_id = String(_texture_painter.get("selected_texture_id"))
+		if painter_texture_id != "":
+			var painter_maps: Variant = _texture_painter.call("get_pbr_maps", painter_texture_id, target_size)
+			if painter_maps is Dictionary and not (painter_maps as Dictionary).is_empty():
+				return painter_maps
+	if texture_id.is_empty():
+		return {}
+
+	var texture_folder: String = texture_id
+	if not texture_folder.begins_with("res://"):
+		texture_folder = "res://assets/world/textures/world/%s" % texture_id
+	var texture_dir: DirAccess = DirAccess.open(texture_folder)
+	if texture_dir == null:
+		return {}
+
+	var maps: Dictionary = {}
+	texture_dir.list_dir_begin()
+	var file_name: String = texture_dir.get_next()
+	while file_name != "":
+		if texture_dir.current_is_dir() or file_name.begins_with("."):
+			file_name = texture_dir.get_next()
+			continue
+		var lower_name: String = file_name.to_lower()
+		var resource_path: String = "%s/%s" % [texture_folder, file_name]
+		if not lower_name.ends_with(".png") and not lower_name.ends_with(".jpg") and not lower_name.ends_with(".jpeg") and not lower_name.ends_with(".webp"):
+			file_name = texture_dir.get_next()
+			continue
+		if lower_name.find("color") != -1 or lower_name.find("basecolor") != -1 or lower_name.find("base_color") != -1 or lower_name.find("albedo") != -1:
+			maps["albedo"] = load(resource_path)
+		elif lower_name.find("normal") != -1:
+			maps["normal"] = load(resource_path)
+		elif lower_name.find("roughness") != -1:
+			maps["roughness"] = load(resource_path)
+		elif lower_name.find("height") != -1:
+			maps["height"] = load(resource_path)
+		elif lower_name.find("ambientocclusion") != -1 or lower_name.find("ambient_occlusion") != -1 or lower_name.find("ao") != -1:
+			maps["ao"] = load(resource_path)
+		file_name = texture_dir.get_next()
+	texture_dir.list_dir_end()
+
+	if not maps.has("albedo"):
+		texture_dir = DirAccess.open(texture_folder)
+		if texture_dir != null:
+			texture_dir.list_dir_begin()
+			file_name = texture_dir.get_next()
+			while file_name != "":
+				if not texture_dir.current_is_dir() and file_name.to_lower().ends_with(".png"):
+					maps["albedo"] = load("%s/%s" % [texture_folder, file_name])
+					break
+				file_name = texture_dir.get_next()
+			texture_dir.list_dir_end()
+	return maps
+
 func _ensure_worldbrush_menu() -> void:
 	if _worldbrush_menu != null:
 		return
@@ -3172,9 +3454,7 @@ func _ensure_worldbrush_inspector() -> void:
 	_sync_environment_inspector()
 
 func _on_inspector_brush_size_changed(size: float) -> void:
-	_brush_size = size
-	if _terrain_node != null and _terrain_node.has_method("set_brush_preview_radius"):
-		_terrain_node.call("set_brush_preview_radius", _brush_size)
+	_set_brush_radius(size, false, false)
 
 func _on_inspector_brush_strength_changed(strength: float) -> void:
 	_brush_strength = strength
@@ -3233,6 +3513,29 @@ func _update_worldbrush_inspector_for_tool(tool_name: String) -> void:
 		_worldbrush_inspector.call("set_brush_strength", _brush_strength)
 	if _worldbrush_inspector.has_method("set_active_layer"):
 		_worldbrush_inspector.call("set_active_layer", _active_world_layer)
+	if _worldbrush_inspector.has_method("set_tool_state"):
+		var toolbar_settings: Dictionary = world_tools.call("get_settings") if world_tools != null and world_tools.has_method("get_settings") else {}
+		_worldbrush_inspector.call("set_tool_state", {
+			"brush_mode": _brush_mode,
+			"brush_softness": _brush_softness,
+			"smooth_post_pass_enabled": _smooth_post_pass_enabled,
+			"smooth_post_pass_strength": _smooth_post_pass_strength,
+			"selected_texture_id": _selected_texture_id,
+			"world_layer": _active_world_layer,
+			"wall_type": String(toolbar_settings.get("wall_type", "stone")),
+			"wall_height": float(toolbar_settings.get("wall_height", 3.4)),
+			"wall_rect_mode": bool(toolbar_settings.get("wall_rect_mode", false)),
+			"wall_match_connected_heights": bool(toolbar_settings.get("wall_match_connected_heights", true)),
+			"wall_add_foundation": bool(toolbar_settings.get("wall_add_foundation", true)),
+			"wall_opening_height_snap": bool(toolbar_settings.get("wall_opening_height_snap", true)),
+			"wall_jitter": bool(toolbar_settings.get("wall_jitter", true)),
+			"river_width": float(toolbar_settings.get("river_width", _river_width)),
+			"river_flow_speed": float(toolbar_settings.get("river_flow_speed", _river_flow_speed)),
+			"river_average_depth": float(toolbar_settings.get("river_average_depth", _river_average_depth)),
+			"water_mode": String(toolbar_settings.get("water_mode", _water_mode)),
+		})
+	if _texture_painter != null and _worldbrush_inspector.has_method("set_texture_painter"):
+		_worldbrush_inspector.call("set_texture_painter", _texture_painter)
 
 func _update_tool_name_display() -> void:
 	if _tool_name_display == null:
@@ -3257,10 +3560,7 @@ func _update_tool_name_display() -> void:
 		_tool_name_display.text = "  ▸  " + display_text
 
 func _on_worldbrush_radius_changed(radius: float) -> void:
-	_brush_size = radius
-	if _terrain_node != null and _terrain_node.has_method("set_brush_preview_radius"):
-		_terrain_node.call("set_brush_preview_radius", _brush_size)
-	_set_status("Brush radius: %.1f" % _brush_size)
+	_set_brush_radius(radius, true, true)
 
 func _on_worldbrush_strength_changed(strength: float) -> void:
 	_brush_strength = clampf(strength, 0.05, 1.0)
