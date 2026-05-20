@@ -2,7 +2,7 @@
 class_name WallPieceGenerator
 extends Node
 
-const OUTPUT_DIR: String = "res://assets/prefabs/walls/modular"
+const OUTPUT_DIR: String = "res://assets/world/models/walls/modular"
 const WALL_HEIGHT_M: float = 3.4
 const WALL_THICKNESS_M: float = 0.22
 const GRID_SNAP_M: float = 0.5
@@ -31,9 +31,9 @@ const PIECES: Array[Dictionary] = [
 
 @export var auto_generate_on_ready: bool = false
 @export var generate_stone_variant: bool = true
-@export var tudor_material_path: String = "res://assets/materials/wall_material.tres"
-@export var stone_material_path: String = "res://assets/materials/foundation_material.tres"
-@export var window_prefab_path: String = "res://assets/prefabs/walls/tudor/tudor_window.tscn"
+@export var tudor_material_path: String = "res://assets/world/materials/wall_material.tres"
+@export var stone_material_path: String = "res://assets/world/materials/foundation_material.tres"
+@export var window_prefab_path: String = "res://assets/world/models/walls/tudor/tudor_window.tscn"
 
 func _ready() -> void:
 	if Engine.is_editor_hint() and auto_generate_on_ready:

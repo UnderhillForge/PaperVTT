@@ -1,0 +1,90 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/time_weather_panel.gd" id="1"]
+
+[node name="TimeWeatherPanel" type="Control"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+
+[node name="TriggerButton" type="Button" parent="."]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(36, 36)
+layout_mode = 0
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = -48.0
+offset_right = 48.0
+offset_bottom = -12.0
+grow_vertical = 0
+icon_alignment = 1
+flat = true
+
+[node name="TimePopup" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(248, 154)
+layout_mode = 0
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 58.0
+offset_top = -204.0
+offset_right = 306.0
+offset_bottom = -50.0
+grow_vertical = 0
+
+[node name="Margin" type="MarginContainer" parent="TimePopup"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 8
+
+[node name="Root" type="VBoxContainer" parent="TimePopup/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="TimePopupTitle" type="Label" parent="TimePopup/Margin/Root"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Time 08:00"
+
+[node name="TimeRow" type="VBoxContainer" parent="TimePopup/Margin/Root"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="TimeLabel" type="Label" parent="TimePopup/Margin/Root/TimeRow"]
+layout_mode = 2
+text = "Time of Day"
+
+[node name="TimeSlider" type="HSlider" parent="TimePopup/Margin/Root/TimeRow"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="TimeValue" type="Label" parent="TimePopup/Margin/Root/TimeRow"]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 2
+text = "08:00"
+
+[node name="DayLengthRow" type="VBoxContainer" parent="TimePopup/Margin/Root"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="DayLengthLabel" type="Label" parent="TimePopup/Margin/Root/DayLengthRow"]
+layout_mode = 2
+text = "Day Length"
+
+[node name="DayLengthSlider" type="HSlider" parent="TimePopup/Margin/Root/DayLengthRow"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="DayLengthValue" type="Label" parent="TimePopup/Margin/Root/DayLengthRow"]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 2
+text = "15.0 min"

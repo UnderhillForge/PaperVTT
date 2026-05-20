@@ -1,8 +1,8 @@
 [gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/characters/character_controller.gd" id="1"]
-[ext_resource type="PackedScene" path="res://assets/Character_Animations/Animations/gltf/Rig_Medium/Rig_Medium_MovementBasic.glb" id="2"]
-[ext_resource type="PackedScene" path="res://assets/Character_Animations/Animations/gltf/Rig_Medium/Rig_Medium_General.glb" id="3"]
+[ext_resource type="PackedScene" path="res://assets/characters/animations/gltf/Rig_Medium/Rig_Medium_MovementBasic.glb" id="2"]
+[ext_resource type="PackedScene" path="res://assets/characters/animations/gltf/Rig_Medium/Rig_Medium_General.glb" id="3"]
 [sub_resource type="CapsuleShape3D" id="1"]
 radius = 0.35
 height = 1.2

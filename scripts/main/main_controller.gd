@@ -1,10 +1,11 @@
 extends Node3D
 
-const TerrainRuntimeEditor = preload("res://scripts/services/terrain_runtime_editor.gd")
+signal sky_state_changed(time_hours: float, weather_id: String)
+
 const OriginShiftSystemScript: Script = preload("res://scripts/world/origin_shift_system.gd")
 const DistantHorizonSystemScript: Script = preload("res://scripts/world/distant_horizon_system.gd")
-const TerrainTexturePainterClass = preload("res://scripts/terrain/terrain_texture_painter.gd")
-const WaterSystemScript: Script = preload("res://scripts/water/water_system.gd")
+# TerrainTexturePainterClass — removed (legacy terrain migration)
+# WaterSystemScript — removed (legacy water migration)
 
 @onready var terrain_placeholder: Node3D = $Terrain
 @onready var camera: Camera3D = $Camera3D
@@ -14,17 +15,24 @@ const WaterSystemScript: Script = preload("res://scripts/water/water_system.gd")
 @onready var world_tools: PanelContainer = %WorldToolsToolbar
 @onready var asset_browser: PanelContainer = %AssetBrowser
 @onready var status_label: Label = %StatusLabel
-@onready var postfx_canvas: CanvasLayer = $PostProcessCanvas
+@onready var postfx_canvas: CanvasLayer = get_node_or_null("PostProcessCanvas") as CanvasLayer
 @onready var perf_label: Label = %PerfLabel
 @onready var viewport_hint: Label = $EditorCanvas/RootUI/Layout/Body/CenterSpacer/ViewportHint
 @onready var optimize_button: Button = %OptimizeButton
-@onready var sun_light: DirectionalLight3D = $Sun
+@onready var sky_3d: Node = get_node_or_null("Sky3D")
+@onready var sun_light: DirectionalLight3D = get_node_or_null("Sky3D/SunLight") as DirectionalLight3D
+@onready var time_weather_panel: Control = %TimeWeatherPanel
+@onready var time_of_day_lighting: Node = get_node_or_null("LightingManager")
 
-var _runtime_terrain_editor: TerrainRuntimeEditor = TerrainRuntimeEditor.new()
+var _runtime_terrain_editor = TerrainRuntimeEditor.new()
 var _selected_prefab: String = ""
 var _current_tool: String = "stamp"
 var _brush_size: float = 10.0
 var _brush_strength: float = 0.25
+var _brush_softness: float = 0.42
+var _brush_mode: String = "smooth"  # "smooth" or "sharp" - controlled by Shift+LMB
+var _smooth_post_pass_enabled: bool = true
+var _smooth_post_pass_strength: float = 0.12
 var _flatten_height: float = 0.0
 var _grid_snap: bool = true
 var _is_tool_dragging: bool = false
@@ -73,7 +81,7 @@ var _scatter_rotation_randomness: float = 180.0
 var _scatter_tilt: float = 8.0
 var _stamp_rotation_deg: float = 0.0
 var _stamp_preview: Node3D = null
-var _brush_preview: MeshInstance3D = null
+var _brush_preview: BrushPreview = null
 var _stroke_interval_accum: float = 0.0
 var _is_stamp_dragging: bool = false
 var _stamp_drag_interval_accum: float = 0.0
@@ -89,7 +97,7 @@ var _perf_overlay_accum: float = 0.0
 var _lightweight_editor_mode: bool = false
 var _is_editor_runtime: bool = OS.has_feature("editor")
 
-const STROKE_INTERVAL_SEC: float = 1.0 / 90.0
+const STROKE_INTERVAL_SEC: float = 1.0 / 70.0
 const TEXTURE_STROKE_INTERVAL_SEC: float = 1.0 / 55.0
 const TEXTURE_STROKE_INTERVAL_PERF_SEC: float = 1.0 / 34.0
 const STAMP_DRAG_INTERVAL_SEC: float = 1.0 / 16.0
@@ -98,12 +106,14 @@ const HORIZON_MOUNTAIN_PLACE_DISTANCE: float = 3000.0
 const MENU_BAR_SCRIPT: Script = preload("res://scripts/ui/main_menu_bar.gd")
 const TOOLBAR_SCENE: PackedScene = preload("res://scenes/ui/WorldToolsToolbar.tscn")
 const ASSET_BROWSER_SCENE: PackedScene = preload("res://scenes/ui/AssetBrowser.tscn")
-const CUSTOM_TERRAIN_SCENE: PackedScene = preload("res://scenes/terrain/CustomHeightmapTerrain.tscn")
+const WORLDBRUSH_RADIAL_MENU_SCRIPT: Script = preload("res://addons/worldbrush/ui/worldbrush_radial_menu.gd")
+const WORLDBRUSH_INSPECTOR_SCRIPT: Script = preload("res://addons/worldbrush/ui/worldbrush_inspector.gd")
+# CUSTOM_TERRAIN_SCENE — removed (legacy terrain migration)
 const DUNGEONDRAFT_IMPORTER_SCRIPT: Script = preload("res://scripts/import/dungeondraft_importer.gd")
-const GRASS_SYSTEM_SCRIPT: Script = preload("res://scripts/terrain/grass_system.gd")
-const SCATTER_SYSTEM_SCRIPT: Script = preload("res://scripts/scatter/scatter_system.gd")
+# GRASS_SYSTEM_SCRIPT — removed (legacy terrain migration)
+# SCATTER_SYSTEM_SCRIPT — removed (legacy scatter migration)
 const PLAYER_CHARACTER_SCENE: PackedScene = preload("res://scenes/characters/PlayerCharacter.tscn")
-const WALL_TOOL_SCRIPT: Script = preload("res://scripts/tools/wall_tool.gd")
+# WALL_TOOL_SCRIPT — removed (legacy wall migration)
 const USER_SCREENSHOT_PATH: String = "user://full_editor_screenshot.png"
 const RES_SCREENSHOT_PATH: String = "res://debug_full_editor.png"
 const PREFAB_VISIBILITY_END_NEAR: float = 170.0
@@ -114,19 +124,54 @@ const STARTER_TREE_CLUSTER_COUNT: int = 10
 const AUTO_DEBUG_SCREENSHOTS: bool = false
 const PERF_OVERLAY_INTERVAL_SEC: float = 0.25
 const DISABLE_CUSTOM_POSTFX_DEFAULT: bool = true
+const ENABLE_TERRABRUSH_EDITOR_RUNTIME: bool = false
 const DEFAULT_DUNGEONDRAFT_MAP_PATH: String = "res://dd_testing/test1.dungeondraft_map"
-const IMPORT_WALL_TEXTURE_PATH: String = "res://assets/textures/materials/kenney_nature-kit/cliff_block_stone_NW.png"
-const IMPORT_FLOOR_TEXTURE_PATH: String = "res://assets/textures/materials/kenney_nature-kit/stone_smallFlatC.png"
+const IMPORT_WALL_TEXTURE_PATH: String = "res://assets/world/textures/materials/kenney_nature-kit/cliff_block_stone_NW.png"
+const IMPORT_FLOOR_TEXTURE_PATH: String = "res://assets/world/textures/materials/kenney_nature-kit/stone_smallFlatC.png"
 const IMPORT_LIGHT_HEIGHT_OFFSET: float = 1.9
 const DEFAULT_MAP_SAVE_PATH: String = "user://maps/papervtt_map.pvt"
+const WEATHER_NORMAL: String = "normal"
+const WEATHER_RAIN: String = "rain"
+const WEATHER_SNOW: String = "snow"
+const WEATHER_FOGGY: String = "foggy"
+const WEATHER_STORMY: String = "stormy"
+const DEFAULT_SUNRISE_HOUR: float = 7.0
+const DEFAULT_SUNSET_HOUR: float = 19.0
+const BASELINE_SUNRISE_HOUR: float = 6.0
+const BASELINE_SUNSET_HOUR: float = 18.0
+const SKY_TIME_OFFSET_HOURS: float = (((DEFAULT_SUNRISE_HOUR - BASELINE_SUNRISE_HOUR) + (DEFAULT_SUNSET_HOUR - BASELINE_SUNSET_HOUR)) * 0.5)
+const DAY_START_HOUR: float = 7.0
+const DAY_END_HOUR: float = 19.0
+const AFTERNOON_START_HOUR: float = 10.0
+const AFTERNOON_END_HOUR: float = 16.0
+const DAY_SUN_ENERGY_MIN: float = 1.8
+const DAY_SUN_ENERGY_MAX: float = 2.5
+const NIGHT_MOON_ENERGY_MIN: float = 0.15
+const NIGHT_MOON_ENERGY_MAX: float = 0.4
+const AMBIENT_ENERGY_DAY_MAX: float = 0.58
+const AMBIENT_ENERGY_NIGHT_MIN: float = 0.34
+const AMBIENT_WARM_DAY: Color = Color(1.0, 0.9098, 0.7529, 1.0)
+const AMBIENT_COOL_NIGHT: Color = Color(0.50, 0.56, 0.70, 1.0)
+const BRUSH_RADIUS_MIN: float = 1.0
+const BRUSH_RADIUS_MAX: float = 80.0
+const BRUSH_RADIUS_WHEEL_STEP_MIN: float = 0.5
+const BRUSH_RADIUS_WHEEL_STEP_SCALE: float = 0.08
+const RADIUS_INDICATOR_DURATION_SEC: float = 0.85
 
 var _dungeondraft_importer: RefCounted = null
 var _dd_import_dialog: FileDialog = null
 var _import_prefab_paths: Array[String] = []
-var _wall_tool: RefCounted = WALL_TOOL_SCRIPT.new()
+var _wall_tool = null  # wall tool stub — legacy wall_tool.gd moved to legacy/
 var _import_prefab_key_to_path: Dictionary = {}
 var _import_wall_material: StandardMaterial3D = null
 var _import_floor_material: StandardMaterial3D = null
+var _worldbrush_menu: Control = null
+var _worldbrush_hold_active: bool = false
+var _worldbrush_inspector: Control = null
+var _tool_name_display: Label = null
+var _radius_indicator_label: Label = null
+var _radius_indicator_ttl: float = 0.0
+var _brush_mode_label: Label = null
 var _dd_import_settings := {
 	"floor_raise_height": 0.15,
 	"wall_thickness_m": 0.2,
@@ -142,8 +187,58 @@ var _current_map_path: String = DEFAULT_MAP_SAVE_PATH
 var _origin_shift_system: Node = null
 var _horizon_system: Node3D = null
 
+## Sky + weather state (network-ready and persisted with map data)
+var _sky_time_hours: float = 12.0
+var _sky_weather: String = "normal"
+var _sky_minutes_per_day: float = 15.0
+var _weather_tween: Tween = null
+var _weather_fx_root: Node3D = null
+var _rain_particles: GPUParticles3D = null
+var _snow_particles: GPUParticles3D = null
+
+## Environment inspector runtime state
+var _time_paused: bool = true
+var _time_scale: float = 1.0
+var _lighting_override_enabled: bool = false
+var _lighting_override_color: Color = Color(1.0, 0.95, 0.86, 1.0)
+var _lighting_override_energy: float = 2.2
+var _lighting_override_saturation: float = 1.0
+var _lighting_override_tint_strength: float = 0.65
+var _weather_intensity_global: float = 1.0
+var _weather_stacking_enabled: bool = false
+var _weather_channel_intensity: Dictionary = {
+	"rain": 0.0,
+	"snow": 0.0,
+	"foggy": 0.0,
+	"stormy": 0.0,
+}
+var _terrain_full_rebuild_mode: bool = false
+var _debug_visualize_dirty_rect: bool = false
+var _sculpt_mode_active: bool = false
+var _lightning_enabled: bool = false
+var _lightning_interval: float = 18.0
+var _lightning_intensity: float = 2.2
+var _lightning_random_variation: bool = true
+var _lightning_timer: float = 0.0
+var _lightning_flash_timer: float = 0.0
+var _lightning_flash_duration: float = 0.22
+
 func _ready() -> void:
+	# Fail-safe: keep post-process disabled until full startup completes.
+	if postfx_canvas != null and postfx_canvas.has_method("set_enabled"):
+		postfx_canvas.call("set_enabled", false)
+	_post_process_disabled = true
+	if camera != null:
+		camera.make_current()
+
+	_setup_sky3d()
+	_setup_time_weather_panel()
+
 	_ensure_editor_ui_layout()
+	_ensure_worldbrush_menu()
+	_ensure_worldbrush_inspector()
+	_ensure_radius_indicator()
+	_update_tool_name_display()
 	if menu_bar != null:
 		menu_bar.action_requested.connect(_on_menu_action_requested)
 	if world_tools != null:
@@ -169,39 +264,14 @@ func _ready() -> void:
 	var ok: bool = _runtime_terrain_editor.initialize(_terrain_node)
 	if ok:
 		_set_status("Custom heightmap terrain initialized")
+	elif ENABLE_TERRABRUSH_EDITOR_RUNTIME and _get_terrabrush_editor_node() != null:
+		_set_status("TerraBrushEditor ready (press V to toggle)")
 	else:
 		_set_status("Heightmap terrain unavailable; stamping remains active")
 
-	# Grass system — created at runtime, parented to terrain placeholder.
-	_grass_system = Node3D.new()
-	_grass_system.name = "GrassSystem"
-	_grass_system.set_script(GRASS_SYSTEM_SCRIPT)
-	terrain_placeholder.add_child(_grass_system)
-	_grass_system.call("initialize", Vector2(256.0, 256.0))
-
-	_scatter_system = Node3D.new()
-	_scatter_system.name = "ScatterSystem"
-	_scatter_system.set_script(SCATTER_SYSTEM_SCRIPT)
-	add_child(_scatter_system)
-	if _scatter_system.has_method("initialize"):
-		_scatter_system.call("initialize", _terrain_node, 256.0)
+	# Grass, scatter, and water systems moved to legacy/ — stubs remain in variables
 	
-	# Water System — manages rivers and water bodies
-	_water_system = Node.new()
-	_water_system.name = "WaterSystem"
-	_water_system.set_script(WaterSystemScript)
-	add_child(_water_system)
-	if _water_system.has_method("initialize"):
-		_water_system.call("initialize", self, _terrain_node)
-	if _water_system.has_method("set_current_layer"):
-		_water_system.call("set_current_layer", _active_world_layer)
-	if _water_system.has_method("set_water_mode"):
-		_water_system.call("set_water_mode", _water_mode)
-	
-	# Texture Painter — discovers available textures for painting
-	_texture_painter = TerrainTexturePainterClass.new()
-	if world_tools != null and world_tools.has_method("populate_texture_buttons"):
-		world_tools.call("populate_texture_buttons", _texture_painter)
+	# Texture Painter — removed (legacy terrain migration)
 	
 	_ensure_character_setup()
 
@@ -237,6 +307,580 @@ func _ready() -> void:
 	if DISABLE_CUSTOM_POSTFX_DEFAULT:
 		_set_post_process_disabled(true)
 
+func _setup_sky3d() -> void:
+	if sky_3d == null:
+		_set_status("Sky3D node missing in main scene")
+		return
+	if sky_3d.has_method("set"):
+		sky_3d.set("editor_time_enabled", false)
+		sky_3d.set("game_time_enabled", false)
+		sky_3d.set("update_interval", 0.05)
+
+	if sky_3d.has_signal("environment_changed") and not sky_3d.environment_changed.is_connected(_on_sky_environment_changed):
+		sky_3d.environment_changed.connect(_on_sky_environment_changed)
+
+	if camera != null:
+		_refresh_sky_camera_links()
+
+	var dome: Object = sky_3d.get("sky") as Object
+	if dome != null:
+		if _object_has_property(dome, "sun_disk_size"):
+			dome.set("sun_disk_size", 0.0025)
+		if _object_has_property(dome, "sun_disk_intensity"):
+			dome.set("sun_disk_intensity", 4.0)
+		if _object_has_property(dome, "moon_size"):
+			dome.set("moon_size", 0.006)
+	_apply_time_of_day(_sky_time_hours)
+	_apply_day_length(_sky_minutes_per_day)
+	_apply_weather_preset(_sky_weather, false)
+
+	sun_light = get_node_or_null("Sky3D/SunLight") as DirectionalLight3D
+
+
+func _setup_time_weather_panel() -> void:
+	if time_weather_panel == null:
+		return
+	_update_time_weather_visibility()
+	if time_weather_panel.has_signal("time_changed") and not time_weather_panel.time_changed.is_connected(_on_time_panel_changed):
+		time_weather_panel.time_changed.connect(_on_time_panel_changed)
+	if time_weather_panel.has_signal("weather_changed") and not time_weather_panel.weather_changed.is_connected(_on_weather_panel_changed):
+		time_weather_panel.weather_changed.connect(_on_weather_panel_changed)
+	if time_weather_panel.has_signal("day_length_changed") and not time_weather_panel.day_length_changed.is_connected(_on_day_length_panel_changed):
+		time_weather_panel.day_length_changed.connect(_on_day_length_panel_changed)
+	if time_weather_panel.has_method("set_time_hours"):
+		time_weather_panel.call("set_time_hours", _sky_time_hours)
+	if time_weather_panel.has_method("set_weather"):
+		time_weather_panel.call("set_weather", _sky_weather)
+	if time_weather_panel.has_method("set_day_length_minutes"):
+		time_weather_panel.call("set_day_length_minutes", _sky_minutes_per_day)
+
+
+func _update_time_weather_visibility() -> void:
+	if time_weather_panel == null:
+		return
+	time_weather_panel.visible = true
+
+
+func _on_time_panel_changed(time_hours: float) -> void:
+	_apply_time_of_day(time_hours)
+	emit_signal("sky_state_changed", _sky_time_hours, _sky_weather)
+
+
+func _on_weather_panel_changed(weather_id: String) -> void:
+	_apply_weather_preset(weather_id, true)
+
+
+func _on_day_length_panel_changed(minutes_per_day: float) -> void:
+	_apply_day_length(minutes_per_day)
+
+
+func _on_sky_environment_changed(_env: Environment) -> void:
+	_refresh_sky_camera_links()
+
+
+func _refresh_sky_camera_links() -> void:
+	if camera == null or sky_3d == null:
+		return
+	var env: Environment = sky_3d.get("environment") as Environment
+	if env != null:
+		camera.environment = env
+	var attributes: CameraAttributes = sky_3d.get("camera_attributes") as CameraAttributes
+	if attributes != null:
+		camera.attributes = attributes
+
+
+func _time_window_factor(time_hours: float, start_hour: float, end_hour: float) -> float:
+	var t: float = fposmod(time_hours, 24.0)
+	if t < start_hour or t > end_hour:
+		return 0.0
+	var mid: float = (start_hour + end_hour) * 0.5
+	var half_span: float = maxf((end_hour - start_hour) * 0.5, 0.001)
+	return clampf(1.0 - (absf(t - mid) / half_span), 0.0, 1.0)
+
+
+func _weather_light_multiplier(weather_id: String) -> float:
+	match weather_id:
+		WEATHER_RAIN:
+			return 0.82
+		WEATHER_SNOW:
+			return 0.86
+		WEATHER_FOGGY:
+			return 0.74
+		WEATHER_STORMY:
+			return 0.62
+		_:
+			return 1.0
+
+
+func _set_property_if_exists(obj: Object, property_name: String, value: Variant) -> void:
+	if obj == null:
+		return
+	if _object_has_property(obj, property_name):
+		obj.set(property_name, value)
+
+
+func _apply_environment_manager_overrides() -> void:
+	if time_of_day_lighting == null:
+		return
+	if time_of_day_lighting.has_method("set_lighting_override"):
+		time_of_day_lighting.call(
+			"set_lighting_override",
+			_lighting_override_enabled,
+			_lighting_override_color,
+			_lighting_override_energy,
+			_lighting_override_saturation,
+			_lighting_override_tint_strength
+		)
+	if time_of_day_lighting.has_method("set_weather_runtime"):
+		time_of_day_lighting.call(
+			"set_weather_runtime",
+			_weather_intensity_global,
+			_weather_stacking_enabled,
+			_weather_channel_intensity,
+			_sky_weather
+		)
+
+
+func _get_active_weather_ids() -> Array[String]:
+	if _weather_stacking_enabled:
+		var ids: Array[String] = []
+		for key_variant in _weather_channel_intensity.keys():
+			var key: String = String(key_variant)
+			if float(_weather_channel_intensity.get(key, 0.0)) > 0.01:
+				ids.append(key)
+		if ids.is_empty():
+			ids.append(_sky_weather)
+		return ids
+	return [_sky_weather]
+
+
+func _sync_environment_inspector() -> void:
+	if _worldbrush_inspector == null:
+		return
+	var env_state: Dictionary = {
+		"time_hours": _sky_time_hours,
+		"day_length_minutes": _sky_minutes_per_day,
+		"time_paused": _time_paused,
+		"time_scale": _time_scale,
+		"lighting_override_enabled": _lighting_override_enabled,
+		"lighting_override_color": _lighting_override_color,
+		"lighting_override_energy": _lighting_override_energy,
+		"lighting_override_saturation": _lighting_override_saturation,
+		"lighting_override_tint_strength": _lighting_override_tint_strength,
+		"weather_intensity_global": _weather_intensity_global,
+		"weather_stacking_enabled": _weather_stacking_enabled,
+		"weather_channels": _weather_channel_intensity,
+		"weather": _sky_weather,
+		"full_rebuild_mode": _terrain_full_rebuild_mode,
+		"debug_visualize_dirty_rect": _debug_visualize_dirty_rect,
+		"lightning_enabled": _lightning_enabled,
+		"lightning_interval": _lightning_interval,
+		"lightning_intensity": _lightning_intensity,
+		"lightning_random_variation": _lightning_random_variation,
+	}
+	if _worldbrush_inspector.has_method("set_environment_state"):
+		_worldbrush_inspector.call("set_environment_state", env_state)
+	if _worldbrush_inspector.has_method("set_environment_active_weather"):
+		_worldbrush_inspector.call("set_environment_active_weather", _get_active_weather_ids())
+
+
+func _tick_time_of_day(delta: float) -> void:
+	if _time_paused:
+		return
+	var day_seconds: float = maxf(_sky_minutes_per_day, 1.0) * 60.0
+	var hours_per_second: float = 24.0 / day_seconds
+	_apply_time_of_day(_sky_time_hours + delta * hours_per_second * _time_scale)
+
+
+func _trigger_lightning_flash() -> void:
+	_lightning_flash_duration = randf_range(0.14, 0.30) if _lightning_random_variation else 0.22
+	_lightning_flash_timer = _lightning_flash_duration
+
+
+func _tick_lightning(delta: float) -> void:
+	if not _lightning_enabled:
+		_lightning_flash_timer = 0.0
+		return
+
+	_lightning_timer -= delta
+	if _lightning_timer <= 0.0:
+		_trigger_lightning_flash()
+		var next_interval: float = _lightning_interval
+		if _lightning_random_variation:
+			next_interval *= randf_range(0.75, 1.35)
+		_lightning_timer = maxf(next_interval, 0.25)
+
+	if _lightning_flash_timer <= 0.0:
+		return
+
+	_lightning_flash_timer = maxf(0.0, _lightning_flash_timer - delta)
+	var p: float = _lightning_flash_timer / maxf(_lightning_flash_duration, 0.001)
+	var envelope: float = sin(p * PI)
+	if envelope <= 0.0:
+		return
+
+	var flash_energy: float = _lightning_intensity * envelope
+	if sun_light != null:
+		sun_light.light_energy += flash_energy
+
+	if sky_3d != null and sky_3d.has_method("get") and sky_3d.has_method("set"):
+		var base_exposure: float = float(sky_3d.get("tonemap_exposure"))
+		sky_3d.set("tonemap_exposure", base_exposure + (0.32 * flash_energy))
+
+
+func _apply_dynamic_lighting(time_hours: float) -> void:
+	_apply_environment_manager_overrides()
+	if time_of_day_lighting != null and time_of_day_lighting.has_method("update_lighting"):
+		time_of_day_lighting.call("update_lighting", time_hours)
+		return
+
+	if sky_3d == null:
+		return
+
+	var t: float = fposmod(time_hours, 24.0)
+	var day_factor: float = _time_window_factor(time_hours, DAY_START_HOUR, DAY_END_HOUR)
+	var afternoon_factor: float = _time_window_factor(time_hours, AFTERNOON_START_HOUR, AFTERNOON_END_HOUR)
+	var weather_mult: float = _weather_light_multiplier(_sky_weather)
+
+	var sun_energy: float = lerpf(NIGHT_MOON_ENERGY_MIN, 1.7, day_factor)
+	if t >= AFTERNOON_START_HOUR and t <= AFTERNOON_END_HOUR:
+		sun_energy = DAY_SUN_ENERGY_MIN + ((DAY_SUN_ENERGY_MAX - DAY_SUN_ENERGY_MIN) * afternoon_factor)
+	sun_energy = clampf(sun_energy * weather_mult, NIGHT_MOON_ENERGY_MIN, DAY_SUN_ENERGY_MAX)
+
+	var moon_energy: float = lerpf(NIGHT_MOON_ENERGY_MAX, NIGHT_MOON_ENERGY_MIN, day_factor)
+	var tonemap_exposure: float = 0.95 + (0.12 * day_factor) + (0.09 * afternoon_factor)
+	tonemap_exposure = lerpf(0.9, tonemap_exposure, weather_mult)
+
+	var ambient_energy: float = lerpf(AMBIENT_ENERGY_NIGHT_MIN, AMBIENT_ENERGY_DAY_MAX, day_factor)
+	ambient_energy += 0.03 * afternoon_factor
+	ambient_energy = clampf(ambient_energy, 0.25, 0.6)
+
+	_set_property_if_exists(sky_3d, "sun_energy", sun_energy)
+	_set_property_if_exists(sky_3d, "moon_energy", moon_energy)
+	_set_property_if_exists(sky_3d, "tonemap_exposure", tonemap_exposure)
+	_set_property_if_exists(sky_3d, "camera_exposure", 1.0 + (0.18 * day_factor) + (0.12 * afternoon_factor))
+	_set_property_if_exists(sky_3d, "skydome_energy", 1.0 + (0.22 * day_factor) + (0.2 * afternoon_factor))
+	_set_property_if_exists(sky_3d, "ambient_energy", ambient_energy)
+	_set_property_if_exists(sky_3d, "sky_contribution", lerpf(0.62, 0.78, day_factor))
+
+	var dome: Object = sky_3d.get("sky") as Object
+	_set_property_if_exists(dome, "sun_disk_intensity", lerpf(5.5, 10.5, day_factor) + (2.2 * afternoon_factor))
+
+	var env: Environment = sky_3d.get("environment") as Environment
+	if env != null:
+		env.ambient_light_color = AMBIENT_COOL_NIGHT.lerp(AMBIENT_WARM_DAY, day_factor)
+		env.ssao_enabled = true
+		env.ssao_intensity = lerpf(0.3, 0.42, day_factor)
+		env.ssao_radius = 1.2
+		env.ssao_power = 1.05
+
+	if postfx_canvas != null and postfx_canvas.has_method("set_daylight_factor"):
+		postfx_canvas.call("set_daylight_factor", clampf((day_factor * 0.6) + (afternoon_factor * 0.4), 0.0, 1.0))
+
+
+func _normalize_character_materials(root: Node) -> void:
+	if root == null:
+		return
+	for child in root.get_children():
+		_normalize_character_materials(child)
+	if root is not MeshInstance3D:
+		return
+
+	var mesh_node: MeshInstance3D = root as MeshInstance3D
+	var surface_count: int = mesh_node.get_surface_override_material_count()
+	for i in range(surface_count):
+		var src_mat: Material = mesh_node.get_active_material(i)
+		if not (src_mat is BaseMaterial3D):
+			continue
+		var tuned: BaseMaterial3D = src_mat as BaseMaterial3D
+		if not tuned.resource_local_to_scene:
+			tuned = tuned.duplicate() as BaseMaterial3D
+			tuned.resource_local_to_scene = true
+		tuned.metallic = 0.0
+		tuned.roughness = maxf(tuned.roughness, 0.8)
+		tuned.disable_receive_shadows = false
+		mesh_node.set_surface_override_material(i, tuned)
+
+
+func _apply_time_of_day(time_hours: float) -> void:
+	_sky_time_hours = fposmod(time_hours, 24.0)
+	if sky_3d != null and sky_3d.has_method("set"):
+		var sky_internal_time: float = fposmod(_sky_time_hours - SKY_TIME_OFFSET_HOURS, 24.0)
+		sky_3d.set("current_time", sky_internal_time)
+	_apply_dynamic_lighting(_sky_time_hours)
+	if time_weather_panel != null and time_weather_panel.has_method("set_time_hours"):
+		time_weather_panel.call("set_time_hours", _sky_time_hours)
+	_sync_environment_inspector()
+
+
+func _apply_day_length(minutes_per_day: float) -> void:
+	_sky_minutes_per_day = clampf(minutes_per_day, 1.0, 1440.0)
+	if sky_3d != null and sky_3d.has_method("set"):
+		sky_3d.set("minutes_per_day", _sky_minutes_per_day)
+	if time_weather_panel != null and time_weather_panel.has_method("set_day_length_minutes"):
+		time_weather_panel.call("set_day_length_minutes", _sky_minutes_per_day)
+	_sync_environment_inspector()
+
+
+func _build_weather_targets(weather_id: String) -> Dictionary:
+	match weather_id:
+		WEATHER_RAIN:
+			return {
+				"sky3d": {
+					"wind_speed": 5.0,
+					"cloud_intensity": 0.75,
+				},
+				"dome": {
+					"cumulus_coverage": 0.86,
+					"cirrus_coverage": 0.68,
+					"fog_density": 0.0034,
+					"fog_falloff": 2.0,
+				},
+			}
+		WEATHER_SNOW:
+			return {
+				"sky3d": {
+					"wind_speed": 2.8,
+					"cloud_intensity": 0.8,
+				},
+				"dome": {
+					"cumulus_coverage": 0.8,
+					"cirrus_coverage": 0.64,
+					"fog_density": 0.0048,
+					"fog_falloff": 1.7,
+				},
+			}
+		WEATHER_FOGGY:
+			return {
+				"sky3d": {
+					"wind_speed": 0.8,
+					"cloud_intensity": 0.7,
+				},
+				"dome": {
+					"cumulus_coverage": 0.58,
+					"cirrus_coverage": 0.35,
+					"fog_density": 0.0088,
+					"fog_falloff": 1.3,
+				},
+			}
+		WEATHER_STORMY:
+			return {
+				"sky3d": {
+					"wind_speed": 9.0,
+					"cloud_intensity": 0.68,
+				},
+				"dome": {
+					"cumulus_coverage": 0.97,
+					"cirrus_coverage": 0.9,
+					"fog_density": 0.0065,
+					"fog_falloff": 1.6,
+				},
+			}
+		_:
+			return {
+				"sky3d": {
+					"wind_speed": 1.2,
+					"cloud_intensity": 0.9,
+				},
+				"dome": {
+					"cumulus_coverage": 0.34,
+					"cirrus_coverage": 0.22,
+					"fog_density": 0.0008,
+					"fog_falloff": 3.0,
+				},
+			}
+
+
+func _apply_weather_targets(targets: Dictionary, animated: bool) -> void:
+	if _weather_tween != null:
+		_weather_tween.kill()
+	_weather_tween = null
+
+	var duration: float = 0.8 if animated else 0.0
+	if animated:
+		_weather_tween = get_tree().create_tween()
+		_weather_tween.set_parallel(true)
+
+	_apply_weather_property_group(sky_3d, targets.get("sky3d", {}), duration)
+	var dome: Object = null
+	if sky_3d != null:
+		dome = sky_3d.get("sky") as Object
+	_apply_weather_property_group(dome, targets.get("dome", {}), duration)
+
+
+func _apply_weather_property_group(target: Object, properties: Dictionary, duration: float) -> void:
+	if target == null or properties.is_empty():
+		return
+	for key_variant in properties.keys():
+		var key: String = String(key_variant)
+		var value: Variant = properties[key]
+		if not _object_has_property(target, key):
+			continue
+		if _weather_tween != null and duration > 0.0:
+			_weather_tween.tween_property(target, key, value, duration)
+		else:
+			target.set(key, value)
+
+
+func _object_has_property(obj: Object, property_name: String) -> bool:
+	for prop in obj.get_property_list():
+		if String(prop.get("name", "")) == property_name:
+			return true
+	return false
+
+
+func _apply_weather_preset(weather_id: String, animated: bool = true) -> void:
+	var normalized: String = weather_id.to_lower()
+	if normalized not in [WEATHER_NORMAL, WEATHER_RAIN, WEATHER_SNOW, WEATHER_FOGGY, WEATHER_STORMY]:
+		normalized = WEATHER_NORMAL
+	_sky_weather = normalized
+	if not _weather_stacking_enabled:
+		_weather_channel_intensity["rain"] = 1.0 if normalized == WEATHER_RAIN else 0.0
+		_weather_channel_intensity["snow"] = 1.0 if normalized == WEATHER_SNOW else 0.0
+		_weather_channel_intensity["foggy"] = 1.0 if normalized == WEATHER_FOGGY else 0.0
+		_weather_channel_intensity["stormy"] = 1.0 if normalized == WEATHER_STORMY else 0.0
+	elif normalized != WEATHER_NORMAL and float(_weather_channel_intensity.get(normalized, 0.0)) <= 0.01:
+		_weather_channel_intensity[normalized] = 1.0
+
+	var targets: Dictionary = _build_weather_targets(normalized)
+	_apply_weather_targets(targets, animated)
+	_apply_precipitation_fx(normalized)
+	_apply_dynamic_lighting(_sky_time_hours)
+
+	if time_weather_panel != null and time_weather_panel.has_method("set_weather"):
+		time_weather_panel.call("set_weather", _sky_weather)
+	_sync_environment_inspector()
+	emit_signal("sky_state_changed", _sky_time_hours, _sky_weather)
+
+
+func _ensure_weather_particles() -> void:
+	if _weather_fx_root == null:
+		_weather_fx_root = get_node_or_null("WeatherFX") as Node3D
+	if _weather_fx_root == null:
+		_weather_fx_root = Node3D.new()
+		_weather_fx_root.name = "WeatherFX"
+		add_child(_weather_fx_root)
+
+	if _rain_particles == null:
+		_rain_particles = _create_precip_particles("RainParticles", Color(0.75, 0.84, 0.95, 0.75), 6000, 1.7, 24.0, 34.0, 0.05, 0.1)
+		_weather_fx_root.add_child(_rain_particles)
+	if _snow_particles == null:
+		_snow_particles = _create_precip_particles("SnowParticles", Color(0.95, 0.98, 1.0, 0.9), 2200, 3.2, 2.8, 5.2, 0.08, 0.2)
+		_weather_fx_root.add_child(_snow_particles)
+
+
+func _create_precip_particles(particle_name: String, color: Color, amount: int, lifetime: float, velocity_min: float, velocity_max: float, scale_min: float, scale_max: float) -> GPUParticles3D:
+	var particles := GPUParticles3D.new()
+	particles.name = particle_name
+	particles.amount = amount
+	particles.lifetime = lifetime
+	particles.one_shot = false
+	particles.emitting = false
+	particles.position = Vector3(0.0, 45.0, 0.0)
+	particles.visibility_aabb = AABB(Vector3(-180.0, -60.0, -180.0), Vector3(360.0, 120.0, 360.0))
+
+	var process := ParticleProcessMaterial.new()
+	process.gravity = Vector3(0.0, -24.0, 0.0)
+	process.direction = Vector3(0.0, -1.0, 0.0)
+	process.spread = 4.0
+	process.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX
+	process.emission_box_extents = Vector3(170.0, 1.0, 170.0)
+	process.initial_velocity_min = velocity_min
+	process.initial_velocity_max = velocity_max
+	process.scale_min = scale_min
+	process.scale_max = scale_max
+	particles.process_material = process
+
+	var quad := QuadMesh.new()
+	quad.size = Vector2(0.06, 0.28)
+	particles.draw_pass_1 = quad
+
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.albedo_color = color
+	mat.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	particles.material_override = mat
+
+	return particles
+
+
+func _apply_precipitation_fx(weather_id: String) -> void:
+	_ensure_weather_particles()
+	if _rain_particles == null or _snow_particles == null:
+		return
+	var rain_intensity: float = _weather_intensity_global * float(_weather_channel_intensity.get("rain", 0.0))
+	var snow_intensity: float = _weather_intensity_global * float(_weather_channel_intensity.get("snow", 0.0))
+	var storm_intensity: float = _weather_intensity_global * float(_weather_channel_intensity.get("stormy", 0.0))
+
+	if not _weather_stacking_enabled:
+		rain_intensity = _weather_intensity_global if weather_id in [WEATHER_RAIN, WEATHER_STORMY] else 0.0
+		snow_intensity = _weather_intensity_global if weather_id == WEATHER_SNOW else 0.0
+		storm_intensity = _weather_intensity_global if weather_id == WEATHER_STORMY else 0.0
+
+	var rain_total: float = clampf(rain_intensity + storm_intensity, 0.0, 3.0)
+	var snow_total: float = clampf(snow_intensity, 0.0, 3.0)
+
+	_rain_particles.emitting = rain_total > 0.01
+	_snow_particles.emitting = snow_total > 0.01
+	_rain_particles.amount_ratio = clampf(rain_total / 3.0, 0.0, 1.0)
+	_snow_particles.amount_ratio = clampf(snow_total / 3.0, 0.0, 1.0)
+
+
+func _export_sky_state() -> Dictionary:
+	return {
+		"time_hours": _sky_time_hours,
+		"weather": _sky_weather,
+		"minutes_per_day": _sky_minutes_per_day,
+		"time_paused": _time_paused,
+		"time_scale": _time_scale,
+		"lighting_override_enabled": _lighting_override_enabled,
+		"lighting_override_color": _lighting_override_color,
+		"lighting_override_energy": _lighting_override_energy,
+		"lighting_override_saturation": _lighting_override_saturation,
+		"lighting_override_tint_strength": _lighting_override_tint_strength,
+		"weather_intensity_global": _weather_intensity_global,
+		"weather_stacking_enabled": _weather_stacking_enabled,
+		"weather_channels": _weather_channel_intensity,
+		"lightning_enabled": _lightning_enabled,
+		"lightning_interval": _lightning_interval,
+		"lightning_intensity": _lightning_intensity,
+		"lightning_random_variation": _lightning_random_variation,
+		"full_rebuild_mode": _terrain_full_rebuild_mode,
+	}
+
+
+func _import_sky_state(data: Dictionary) -> void:
+	_sky_time_hours = float(data.get("time_hours", _sky_time_hours))
+	_sky_weather = String(data.get("weather", _sky_weather))
+	_sky_minutes_per_day = float(data.get("minutes_per_day", _sky_minutes_per_day))
+	_time_paused = bool(data.get("time_paused", _time_paused))
+	_time_scale = clampf(float(data.get("time_scale", _time_scale)), 0.5, 10.0)
+	_lighting_override_enabled = bool(data.get("lighting_override_enabled", _lighting_override_enabled))
+	_lighting_override_color = data.get("lighting_override_color", _lighting_override_color)
+	_lighting_override_energy = clampf(float(data.get("lighting_override_energy", _lighting_override_energy)), 0.0, 5.0)
+	_lighting_override_saturation = clampf(float(data.get("lighting_override_saturation", _lighting_override_saturation)), -1.0, 2.0)
+	_lighting_override_tint_strength = clampf(float(data.get("lighting_override_tint_strength", _lighting_override_tint_strength)), 0.0, 1.0)
+	_weather_intensity_global = clampf(float(data.get("weather_intensity_global", _weather_intensity_global)), 0.0, 3.0)
+	_weather_stacking_enabled = bool(data.get("weather_stacking_enabled", _weather_stacking_enabled))
+	var loaded_channels: Dictionary = data.get("weather_channels", _weather_channel_intensity)
+	if loaded_channels is Dictionary:
+		_weather_channel_intensity = loaded_channels.duplicate(true)
+	_lightning_enabled = bool(data.get("lightning_enabled", _lightning_enabled))
+	_lightning_interval = clampf(float(data.get("lightning_interval", _lightning_interval)), 8.0, 60.0)
+	_lightning_intensity = clampf(float(data.get("lightning_intensity", _lightning_intensity)), 0.0, 5.0)
+	_lightning_random_variation = bool(data.get("lightning_random_variation", _lightning_random_variation))
+	_terrain_full_rebuild_mode = bool(data.get("full_rebuild_mode", _terrain_full_rebuild_mode))
+	_debug_visualize_dirty_rect = bool(data.get("debug_visualize_dirty_rect", _debug_visualize_dirty_rect))
+	_lightning_timer = 0.01
+	_apply_time_of_day(_sky_time_hours)
+	_apply_day_length(_sky_minutes_per_day)
+	_apply_weather_preset(_sky_weather, false)
+	_sync_environment_inspector()
+	if _terrain_node != null and _terrain_node.has_method("set_full_rebuild_mode"):
+		_terrain_node.call("set_full_rebuild_mode", _terrain_full_rebuild_mode)
+	emit_signal("sky_state_changed", _sky_time_hours, _sky_weather)
+
 func _exit_tree() -> void:
 	_runtime_terrain_editor.end_stroke()
 	_runtime_terrain_editor.dispose()
@@ -249,14 +893,33 @@ func _exit_tree() -> void:
 		_river_preview_node.queue_free()
 
 func _process(delta: float) -> void:
+	_tick_time_of_day(delta)
+	if _time_paused:
+		_apply_dynamic_lighting(_sky_time_hours)
+	_tick_lightning(delta)
+	_update_time_weather_visibility()
 	_perf_overlay_accum += delta
 	if _perf_overlay_accum >= PERF_OVERLAY_INTERVAL_SEC:
 		_perf_overlay_accum = 0.0
 		_update_performance_overlay()
 	_update_live_previews()
+	_tick_radius_indicator(delta)
+
+	# Keep Shift->sharp switching responsive even if key events are missed while dragging.
+	if _is_tool_dragging and (_current_tool == "raise" or _current_tool == "lower"):
+		var target_mode: String = "sharp" if Input.is_key_pressed(KEY_SHIFT) else "smooth"
+		if target_mode != _brush_mode:
+			_update_brush_mode_visual_feedback()
+	
+	# Update brush mode indicator for raise/lower tools
+	if (_current_tool == "raise" or _current_tool == "lower") and _is_tool_dragging:
+		_show_brush_mode_indicator()
+	elif _brush_mode_label != null and _brush_mode_label.visible:
+		_hide_brush_mode_indicator()
+	
 	if _is_tool_dragging and _current_tool != "stamp":
 		_stroke_interval_accum += delta
-		var stroke_interval: float = STROKE_INTERVAL_SEC
+		var stroke_interval: float = _get_active_stroke_interval()
 		if _current_tool == "texturepaint" or _current_tool == "textureerase":
 			stroke_interval = TEXTURE_STROKE_INTERVAL_PERF_SEC if _texture_perf_mode else TEXTURE_STROKE_INTERVAL_SEC
 		while _stroke_interval_accum >= stroke_interval:
@@ -274,6 +937,31 @@ func _process(delta: float) -> void:
 		_update_river_live_preview()
 
 func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.keycode == KEY_V:
+		var key_event: InputEventKey = event as InputEventKey
+		if key_event.pressed and not key_event.echo:
+			_worldbrush_hold_active = true
+			_open_worldbrush_radial_hold()
+			get_viewport().set_input_as_handled()
+			return
+		if not key_event.pressed and _worldbrush_hold_active:
+			_worldbrush_hold_active = false
+			_confirm_worldbrush_radial_hold()
+			get_viewport().set_input_as_handled()
+			return
+
+	if _worldbrush_menu != null and _worldbrush_menu.has_method("is_open") and bool(_worldbrush_menu.call("is_open")):
+		if event is InputEventMouseMotion:
+			_worldbrush_menu.call("update_pointer", (event as InputEventMouseMotion).position)
+			get_viewport().set_input_as_handled()
+			return
+
+	if event is InputEventMouseButton:
+		var wheel_event: InputEventMouseButton = event as InputEventMouseButton
+		if wheel_event != null and wheel_event.pressed and wheel_event.ctrl_pressed and _handle_ctrl_wheel_radius(wheel_event):
+			get_viewport().set_input_as_handled()
+			return
+
 	if _current_tool != "wall" and _route_input_to_characters(event):
 		get_viewport().set_input_as_handled()
 		return
@@ -338,6 +1026,12 @@ func _unhandled_input(event: InputEvent) -> void:
 				get_viewport().set_input_as_handled()
 				return
 
+	# Shift key press/release for brush mode preview feedback
+	if event is InputEventKey and event.keycode == KEY_SHIFT:
+		_update_brush_mode_visual_feedback()
+		get_viewport().set_input_as_handled()
+		return
+
 	if get_viewport().gui_get_hovered_control() != null:
 		return
 
@@ -400,6 +1094,11 @@ func _unhandled_input(event: InputEvent) -> void:
 				_is_stamp_dragging = true
 				_stamp_drag_interval_accum = 0.0
 			else:
+				# Set brush mode based on Shift key for raise/lower tools
+				if event.shift_pressed and (_current_tool == "raise" or _current_tool == "lower"):
+					_brush_mode = "sharp"
+				else:
+					_brush_mode = "smooth"
 				_begin_tool_stroke()
 		else:
 			_is_stamp_dragging = false
@@ -411,7 +1110,8 @@ func _unhandled_input(event: InputEvent) -> void:
 					_runtime_terrain_editor.end_stroke()
 
 	if event is InputEventMouseMotion and _is_tool_dragging:
-		_continue_tool_stroke()
+		# Timed stroke stepping in _process keeps sculpting smooth while avoiding over-updating.
+		pass
 	if event is InputEventMouseMotion and _is_stamp_dragging and _current_tool == "stamp":
 		_stamp_at_mouse(true)
 
@@ -513,6 +1213,16 @@ func _on_menu_action_requested(action: String) -> void:
 		"help_about", "app_about":
 			_show_about_dialog()
 
+func _apply_sculpt_mode_boost(enabled: bool) -> void:
+	if _sculpt_mode_active == enabled:
+		return
+	_sculpt_mode_active = enabled
+	if time_of_day_lighting != null and time_of_day_lighting.has_method("set_sculpt_boost"):
+		time_of_day_lighting.call("set_sculpt_boost", enabled)
+	if postfx_canvas != null and postfx_canvas.has_method("set_sculpt_mode"):
+		postfx_canvas.call("set_sculpt_mode", enabled)
+
+
 func _on_tool_changed(tool_name: String) -> void:
 	if _current_tool == "riverdraw" and tool_name != "riverdraw":
 		_finish_river_draw()
@@ -530,8 +1240,13 @@ func _on_tool_changed(tool_name: String) -> void:
 		_activate_wall_tool()
 	else:
 		_deactivate_wall_tool()
+	_apply_sculpt_mode_boost(tool_name in ["raise", "lower", "smooth", "flatten"])
 	_update_active_tool_feedback()
+	_update_worldbrush_inspector_for_tool(tool_name)
+	_update_tool_name_display()
 	_set_status("Active tool: %s" % _format_tool_name(tool_name))
+	if tool_name in ["raise", "lower", "smooth", "flatten", "paint"] and not _runtime_terrain_editor.is_available() and _get_terrabrush_editor_node() != null:
+		_set_status("Use V to enable TerraBrushEditor for terrain sculpting")
 
 func _on_tool_clear_requested() -> void:
 	_clear_active_tool("Cleared active tool")
@@ -539,9 +1254,12 @@ func _on_tool_clear_requested() -> void:
 func _on_tool_setting_changed(setting_name: String, value: Variant) -> void:
 	match setting_name:
 		"brush_size":
-			_brush_size = float(value)
+			_set_brush_radius(float(value), false, false)
 		"brush_strength":
 			_brush_strength = float(value)
+		"brush_mode":
+			_brush_mode = String(value)
+			_update_brush_mode_visual_feedback()
 		"flatten_height":
 			_flatten_height = float(value)
 		"grid_snap":
@@ -611,6 +1329,16 @@ func _on_tool_setting_changed(setting_name: String, value: Variant) -> void:
 			_selected_texture_id = String(value)
 			if _texture_painter != null:
 				_texture_painter.selected_texture_id = String(value)
+		"brush_softness":
+			_brush_softness = clampf(float(value), 0.0, 1.0)
+		"smooth_post_pass_enabled":
+			_smooth_post_pass_enabled = bool(value)
+			if _terrain_node != null and _terrain_node.has_method("set_smooth_mode_options"):
+				_terrain_node.call("set_smooth_mode_options", _smooth_post_pass_enabled, _smooth_post_pass_strength)
+		"smooth_post_pass_strength":
+			_smooth_post_pass_strength = clampf(float(value), 0.0, 0.35)
+			if _terrain_node != null and _terrain_node.has_method("set_smooth_mode_options"):
+				_terrain_node.call("set_smooth_mode_options", _smooth_post_pass_enabled, _smooth_post_pass_strength)
 		"cliff_mode":
 			_cliff_mode = bool(value)
 		"overhang_amount":
@@ -660,6 +1388,65 @@ func _on_tool_setting_changed(setting_name: String, value: Variant) -> void:
 			_water_mode = String(value)
 			if _water_system != null and _water_system.has_method("set_water_mode"):
 				_water_system.call("set_water_mode", _water_mode)
+		"time_hours":
+			_apply_time_of_day(float(value))
+		"day_length_minutes":
+			_apply_day_length(float(value))
+		"time_paused":
+			_time_paused = bool(value)
+		"time_scale":
+			_time_scale = clampf(float(value), 0.5, 10.0)
+		"lighting_override_enabled":
+			_lighting_override_enabled = bool(value)
+			_apply_dynamic_lighting(_sky_time_hours)
+		"lighting_override_color":
+			_lighting_override_color = value as Color
+			_apply_dynamic_lighting(_sky_time_hours)
+		"lighting_override_energy":
+			_lighting_override_energy = clampf(float(value), 0.0, 5.0)
+			_apply_dynamic_lighting(_sky_time_hours)
+		"lighting_override_saturation":
+			_lighting_override_saturation = clampf(float(value), -1.0, 2.0)
+			_apply_dynamic_lighting(_sky_time_hours)
+		"lighting_override_tint_strength":
+			_lighting_override_tint_strength = clampf(float(value), 0.0, 1.0)
+			_apply_dynamic_lighting(_sky_time_hours)
+		"weather_intensity_global":
+			_weather_intensity_global = clampf(float(value), 0.0, 3.0)
+			_apply_weather_preset(_sky_weather, false)
+		"weather_stacking_enabled":
+			_weather_stacking_enabled = bool(value)
+			_apply_weather_preset(_sky_weather, false)
+		"weather_channel_rain":
+			_weather_channel_intensity["rain"] = clampf(float(value), 0.0, 3.0)
+			_apply_weather_preset(_sky_weather, false)
+		"weather_channel_snow":
+			_weather_channel_intensity["snow"] = clampf(float(value), 0.0, 3.0)
+			_apply_weather_preset(_sky_weather, false)
+		"weather_channel_foggy":
+			_weather_channel_intensity["foggy"] = clampf(float(value), 0.0, 3.0)
+			_apply_weather_preset(_sky_weather, false)
+		"weather_channel_stormy":
+			_weather_channel_intensity["stormy"] = clampf(float(value), 0.0, 3.0)
+			_apply_weather_preset(_sky_weather, false)
+		"lightning_enabled":
+			_lightning_enabled = bool(value)
+			_lightning_timer = 0.01
+		"lightning_interval":
+			_lightning_interval = clampf(float(value), 8.0, 60.0)
+		"lightning_intensity":
+			_lightning_intensity = clampf(float(value), 0.0, 5.0)
+		"lightning_random_variation":
+			_lightning_random_variation = bool(value)
+		"full_rebuild_mode":
+			_terrain_full_rebuild_mode = bool(value)
+			if _terrain_node != null and _terrain_node.has_method("set_full_rebuild_mode"):
+				_terrain_node.call("set_full_rebuild_mode", _terrain_full_rebuild_mode)
+		"debug_visualize_dirty_rect":
+			_debug_visualize_dirty_rect = bool(value)
+			if _terrain_node != null and _terrain_node.has_method("set") and _terrain_node.has_property("debug_visualize_dirty_rect"):
+				_terrain_node.debug_visualize_dirty_rect = _debug_visualize_dirty_rect
+	_sync_environment_inspector()
 
 func _on_prefab_selected(prefab_path: String) -> void:
 	_selected_prefab = prefab_path
@@ -702,7 +1489,8 @@ func _create_new_flat_map(_include_seed_content: bool = true) -> void:
 		_configure_visible_terrain()
 
 	if _runtime_terrain_editor.is_available():
-		_runtime_terrain_editor.bootstrap_new_map(Time.get_ticks_usec())
+		if _terrain_node != null and _terrain_node.has_method("initialize_new_map"):
+			_terrain_node.call("initialize_new_map", Time.get_ticks_usec())
 
 	if _grass_system != null and _grass_system.has_method("clear_all"):
 		_grass_system.call("clear_all")
@@ -718,6 +1506,8 @@ func _create_new_flat_map(_include_seed_content: bool = true) -> void:
 	if camera_manager != null and camera_manager.has_method("set_top_down_default"):
 		camera_manager.call("set_top_down_default")
 
+	_apply_time_of_day(_sky_time_hours)
+	_apply_weather_preset(WEATHER_NORMAL, false)
 	_set_status("New map ready: blank flat terrain. Add terrain and assets with tools.")
 	if AUTO_DEBUG_SCREENSHOTS:
 		call_deferred("_capture_full_editor_screenshot", "new_map")
@@ -1038,7 +1828,7 @@ func _setup_dungeondraft_import() -> void:
 	_dungeondraft_importer = DUNGEONDRAFT_IMPORTER_SCRIPT.new()
 	_import_prefab_paths.clear()
 	_import_prefab_key_to_path.clear()
-	_collect_prefabs("res://assets/prefabs", _import_prefab_paths)
+	_collect_prefabs("res://assets/world/models", _import_prefab_paths)
 	for prefab_path in _import_prefab_paths:
 		var key: String = prefab_path.get_file().get_basename().to_lower()
 		if not _import_prefab_key_to_path.has(key):
@@ -1134,7 +1924,7 @@ func _raise_terrain_for_imported_floor_tiles(floor_tiles: Array) -> void:
 		return
 	var raise_height: float = float(_dd_import_settings.get("floor_raise_height", 0.15))
 	var cell_size: float = float(_dd_import_settings.get("world_units_per_cell", 1.0))
-	_runtime_terrain_editor.set_tool("flatten", cell_size * 1.1, 1.0, raise_height)
+	_runtime_terrain_editor.set_tool("flatten", cell_size * 1.1, 1.0, raise_height, false, _overhang_amount)
 	for tile_variant in floor_tiles:
 		if not (tile_variant is Dictionary):
 			continue
@@ -1237,10 +2027,10 @@ func _spawn_imported_objects(parent: Node3D, objects: Array) -> Dictionary:
 			skipped += 1
 			continue
 
-		var position: Vector3 = object_data.get("position", Vector3.ZERO)
+		var object_position: Vector3 = object_data.get("position", Vector3.ZERO)
 		var rotation_deg: float = rad_to_deg(float(object_data.get("rotation_rad", 0.0)))
-		var scale: Vector3 = object_data.get("scale", Vector3.ONE)
-		var placed_node: Node3D = _place_prefab_direct(prefab_path, position, rotation_deg, root, scale)
+		var object_scale: Vector3 = object_data.get("scale", Vector3.ONE)
+		var placed_node: Node3D = _place_prefab_direct(prefab_path, object_position, rotation_deg, root, object_scale)
 		if placed_node == null:
 			skipped += 1
 			continue
@@ -1252,9 +2042,9 @@ func _match_prefab_for_dd_object(texture_path: String) -> String:
 	var key: String = texture_path.get_file().get_basename().to_lower()
 	if key.contains("wall_torch"):
 		var preferred := [
-			"res://assets/prefabs/props/core/torch_wall_mounted.tscn",
-			"res://assets/prefabs/props/torches/torch_mounted.tscn",
-			"res://assets/prefabs/props/torches/torch_lit.tscn"
+			"res://assets/world/models/props/core/torch_wall_mounted.tscn",
+			"res://assets/world/models/props/torches/torch_mounted.tscn",
+			"res://assets/world/models/props/torches/torch_lit.tscn"
 		]
 		for p in preferred:
 			if ResourceLoader.exists(p):
@@ -1320,6 +2110,7 @@ func _ensure_character_setup() -> void:
 			child.selection_changed.connect(_on_character_selection_changed)
 		if child.has_method("initialize_controller"):
 			child.call("initialize_controller", camera, _terrain_node)
+		_normalize_character_materials(child)
 
 func _on_character_selection_changed(character: Node, selected: bool) -> void:
 	if selected:
@@ -1342,8 +2133,26 @@ func _has_active_character() -> bool:
 	return false
 
 func _switch_tool(tool_name: String) -> void:
-	if world_tools != null and world_tools.has_method("set_tool_from_action"):
+	var toolbar_supported: Dictionary = {
+		"select": true,
+		"raise": true,
+		"lower": true,
+		"smooth": true,
+		"flatten": true,
+		"paint": true,
+		"stamp": true,
+		"grasspaint": true,
+		"grasserase": true,
+		"wall": true,
+		"texturepaint": true,
+		"textureerase": true,
+		"riverdraw": true,
+		"horizonmountain": true,
+	}
+	if world_tools != null and world_tools.has_method("set_tool_from_action") and toolbar_supported.has(tool_name):
 		world_tools.call("set_tool_from_action", "tool_" + tool_name)
+		return
+	_on_tool_changed(tool_name)
 
 func _activate_wall_tool() -> void:
 	if _wall_tool == null:
@@ -1488,7 +2297,7 @@ func _ensure_editor_ui_layout() -> void:
 				world_tools.name = "WorldToolsToolbar"
 				body.add_child(world_tools)
 	if world_tools != null:
-		world_tools.visible = true
+		world_tools.visible = false
 
 	if asset_browser == null:
 		asset_browser = get_node_or_null("EditorCanvas/RootUI/Layout/Body/AssetBrowser") as PanelContainer
@@ -1501,7 +2310,15 @@ func _ensure_editor_ui_layout() -> void:
 				asset_browser.name = "AssetBrowser"
 				body2.add_child(asset_browser)
 	if asset_browser != null:
-		asset_browser.visible = true
+		asset_browser.visible = false
+	
+	# Hide FPS debug box and viewport hints
+	var perf_panel: Control = get_node_or_null("EditorCanvas/RootUI/Layout/Body/CenterSpacer/PerfPanel")
+	if perf_panel != null:
+		perf_panel.visible = false
+	var hint_label: Control = get_node_or_null("EditorCanvas/RootUI/Layout/Body/CenterSpacer/ViewportHint")
+	if hint_label != null:
+		hint_label.visible = false
 
 func _capture_full_editor_screenshot(reason: String = "manual") -> void:
 	if DisplayServer.get_name() == "headless":
@@ -1549,33 +2366,35 @@ func _capture_window_image() -> Image:
 	return screen_image.get_region(Rect2i(x0, y0, crop_w, crop_h))
 
 func _toggle_postfx() -> void:
-	if postfx_canvas.has_method("set_enabled"):
+	if postfx_canvas != null and postfx_canvas.has_method("set_enabled"):
 		postfx_canvas.call("set_enabled", not bool(postfx_canvas.get("enabled")))
 		_set_status("PostFX: %s" % ("On" if bool(postfx_canvas.get("enabled")) else "Off"))
-	else:
+	elif postfx_canvas != null:
 		postfx_canvas.visible = not postfx_canvas.visible
 		_set_status("PostFX visibility toggled")
+	else:
+		_set_status("PostFX unavailable in this build")
 
 func _set_performance_mode(enabled: bool) -> void:
 	_performance_mode = enabled
-	if postfx_canvas.has_method("set_performance_mode"):
+	if postfx_canvas != null and postfx_canvas.has_method("set_performance_mode"):
 		postfx_canvas.call("set_performance_mode", _performance_mode)
 	if _performance_mode:
 		_set_lightweight_postfx(true, false)
 	if not _performance_mode:
 		_set_ultra_performance_mode(false, false)
-	if not _post_process_disabled and postfx_canvas.has_method("set_enabled"):
+	if not _post_process_disabled and postfx_canvas != null and postfx_canvas.has_method("set_enabled"):
 		postfx_canvas.call("set_enabled", true)
 	_apply_editor_render_budget()
 	_set_status("Performance Mode: %s" % ("On" if _performance_mode else "Off"))
 
 func _set_ultra_performance_mode(enabled: bool, announce: bool = true) -> void:
 	_ultra_performance_mode = enabled
-	if postfx_canvas.has_method("set_ultra_performance_mode"):
+	if postfx_canvas != null and postfx_canvas.has_method("set_ultra_performance_mode"):
 		postfx_canvas.call("set_ultra_performance_mode", _ultra_performance_mode)
 	if _ultra_performance_mode:
 		_performance_mode = true
-		if postfx_canvas.has_method("set_performance_mode"):
+		if postfx_canvas != null and postfx_canvas.has_method("set_performance_mode"):
 			postfx_canvas.call("set_performance_mode", true)
 		_set_lightweight_postfx(true, false)
 	_apply_editor_render_budget()
@@ -1584,14 +2403,14 @@ func _set_ultra_performance_mode(enabled: bool, announce: bool = true) -> void:
 
 func _set_lightweight_postfx(enabled: bool, announce: bool = true) -> void:
 	_lightweight_postfx = enabled
-	if postfx_canvas.has_method("set_lightweight_mode"):
+	if postfx_canvas != null and postfx_canvas.has_method("set_lightweight_mode"):
 		postfx_canvas.call("set_lightweight_mode", _lightweight_postfx)
 	if announce:
 		_set_status("Lightweight PostFX: %s" % ("On" if _lightweight_postfx else "Off"))
 
 func _set_post_process_disabled(disabled: bool) -> void:
 	_post_process_disabled = disabled
-	if postfx_canvas.has_method("set_enabled"):
+	if postfx_canvas != null and postfx_canvas.has_method("set_enabled"):
 		postfx_canvas.call("set_enabled", not _post_process_disabled)
 	_apply_editor_render_budget()
 	_set_status("Post-Process: %s" % ("Disabled" if _post_process_disabled else "Enabled"))
@@ -1677,12 +2496,20 @@ func _update_active_tool_feedback() -> void:
 			viewport_hint.text = "Mode: Distant Mountain | LMB: click to place %dm away in that direction | Esc clears tool" % [int(HORIZON_MOUNTAIN_PLACE_DISTANCE)]
 		"riverdraw":
 			viewport_hint.text = "Mode: Water (%s) | [1]River [2]Lake [3]Fill | LMB place/edit | RMB/Esc finish river path | Width %.1f | Flow %.2f | Depth %.1f | Layer %d" % [_water_mode.capitalize(), _river_width, _river_flow_speed, _river_average_depth, _active_world_layer]
+		"waterpaint":
+			viewport_hint.text = "Mode: WorldBrush Water Paint | Hold LMB to carve + wet terrain | Brush %.1f | Strength %.2f | Layer %d" % [_brush_size, _brush_strength, _active_world_layer]
+		"snowpaint":
+			viewport_hint.text = "Mode: WorldBrush Snow Paint | Hold LMB to add snow | Brush %.1f | Strength %.2f | Layer %d" % [_brush_size, _brush_strength, _active_world_layer]
+		"snowerase":
+			viewport_hint.text = "Mode: WorldBrush Snow Erase | Hold LMB to remove snow | Brush %.1f | Strength %.2f | Layer %d" % [_brush_size, _brush_strength, _active_world_layer]
 		_:
 			viewport_hint.text = "Mode: %s" % _format_tool_name(_current_tool)
 
 
 func set_active_world_layer(layer: int) -> void:
 	_active_world_layer = layer
+	if _terrain_node != null and _terrain_node.has_method("set_world_layer"):
+		_terrain_node.call("set_world_layer", layer)
 	if _water_system != null and _water_system.has_method("set_current_layer"):
 		_water_system.call("set_current_layer", layer)
 	_update_active_tool_feedback()
@@ -1786,7 +2613,7 @@ func _begin_tool_stroke() -> void:
 			_grass_system.call("apply_brush", _current_tool, hit as Vector3, _brush_size, _brush_strength)
 		return
 	if _current_tool == "texturepaint":
-		if _terrain_node != null and _texture_painter != null:
+		if _terrain_node != null:
 			if _terrain_node.has_method("begin_texture_stroke"):
 				_terrain_node.call("begin_texture_stroke", _texture_perf_mode, _brush_size)
 			var max_off: float = _texture_tile_size * 0.65
@@ -1798,8 +2625,7 @@ func _begin_tool_stroke() -> void:
 				_texture_stroke_shape_variant = randi_range(0, 2)
 			else:
 				_texture_stroke_shape_variant = 0
-			var tex_id = _texture_painter.selected_texture_id
-			var maps: Dictionary = _texture_painter.call("get_pbr_maps", tex_id, 1024)
+			var maps: Dictionary = _get_texture_maps(_selected_texture_id, 1024)
 			if not maps.is_empty() and maps.has("albedo"):
 				_terrain_node.call("apply_texture_brush", hit as Vector3, maps.get("albedo", null), maps.get("normal", null), maps.get("roughness", null), maps.get("height", null), maps.get("ao", null), _brush_size, _brush_strength, _texture_tile_size, _texture_density, _texture_edge_softness, _texture_coverage_limit, _texture_stroke_offset, _texture_stroke_rotation, _texture_stroke_scale, _texture_exposure, _texture_brush_shape_mode, _texture_shape_variation, _texture_stroke_seed, _texture_stroke_shape_variant)
 		return
@@ -1808,6 +2634,10 @@ func _begin_tool_stroke() -> void:
 			_terrain_node.call("apply_texture_erase_brush", hit as Vector3, _brush_size, _brush_strength, _texture_edge_softness)
 		return
 	_runtime_terrain_editor.set_tool(_current_tool, _brush_size, _brush_strength, _flatten_height, _cliff_mode, _overhang_amount)
+	if _runtime_terrain_editor.has_method("set_brush_falloff"):
+		_runtime_terrain_editor.call("set_brush_falloff", _brush_softness, _brush_mode)
+	if _terrain_node != null and _terrain_node.has_method("set_smooth_mode_options"):
+		_terrain_node.call("set_smooth_mode_options", _smooth_post_pass_enabled, _smooth_post_pass_strength)
 	_runtime_terrain_editor.begin_stroke(hit as Vector3)
 
 func _continue_tool_stroke() -> void:
@@ -1825,9 +2655,8 @@ func _continue_tool_stroke() -> void:
 				_grass_system.call("apply_brush", _current_tool, hit as Vector3, _brush_size, _brush_strength)
 		return
 	if _current_tool == "texturepaint":
-		if _terrain_node != null and _texture_painter != null:
-			var tex_id = _texture_painter.selected_texture_id
-			var maps: Dictionary = _texture_painter.call("get_pbr_maps", tex_id, 1024)
+		if _terrain_node != null:
+			var maps: Dictionary = _get_texture_maps(_selected_texture_id, 1024)
 			if not maps.is_empty() and maps.has("albedo"):
 				_terrain_node.call("apply_texture_brush", hit as Vector3, maps.get("albedo", null), maps.get("normal", null), maps.get("roughness", null), maps.get("height", null), maps.get("ao", null), _brush_size, _brush_strength, _texture_tile_size, _texture_density, _texture_edge_softness, _texture_coverage_limit, _texture_stroke_offset, _texture_stroke_rotation, _texture_stroke_scale, _texture_exposure, _texture_brush_shape_mode, _texture_shape_variation, _texture_stroke_seed, _texture_stroke_shape_variant)
 		return
@@ -1938,34 +2767,201 @@ func _setup_preview_nodes() -> void:
 	add_child(_stamp_preview)
 	_stamp_preview.visible = false
 
-	_brush_preview = MeshInstance3D.new()
+	_brush_preview = BrushPreview.new()
 	_brush_preview.name = "BrushPreview"
-	var disc := QuadMesh.new()
-	disc.size = Vector2(2.0, 2.0)
-	_brush_preview.mesh = disc
-	var preview_shader := Shader.new()
-	preview_shader.code = """
-		shader_type spatial;
-		render_mode unshaded, cull_disabled, depth_draw_never;
-		
-		void fragment() {
-			vec2 p = UV * 2.0 - vec2(1.0);
-			float d = length(p);
-			float soft = smoothstep(1.0, 0.0, d);
-			float center = pow(soft, 2.2);
-			ALBEDO = vec3(0.12, 0.72, 1.0);
-			EMISSION = ALBEDO * (0.25 + center * 0.9);
-			ALPHA = clamp(center * 0.42, 0.0, 0.42);
-		}
-	"""
-	var preview_mat := ShaderMaterial.new()
-	preview_mat.shader = preview_shader
-	_brush_preview.material_override = preview_mat
-	_brush_preview.rotation_degrees = Vector3(-90.0, 0.0, 0.0)
 	add_child(_brush_preview)
 	_brush_preview.visible = false
 
+func _tool_uses_radius_preview(tool_name: String) -> bool:
+	match tool_name:
+		"raise", "lower", "smooth", "flatten", "paint", "grasspaint", "grasserase", "scatterpaint", "scattererase", "texturepaint", "textureerase", "waterpaint", "snowpaint":
+			return true
+		_:
+			return false
+
+func _is_character_control_active() -> bool:
+	if _has_active_character():
+		return true
+	if camera_manager != null and camera_manager.has_method("has_follow_target"):
+		return bool(camera_manager.call("has_follow_target"))
+	return false
+
+func _should_show_radius_preview() -> bool:
+	return _tool_uses_radius_preview(_current_tool) and not _is_character_control_active()
+
+func _handle_ctrl_wheel_radius(event: InputEventMouseButton) -> bool:
+	if not _tool_uses_radius_preview(_current_tool):
+		return false
+	if _is_character_control_active():
+		return false
+	if get_viewport().gui_get_hovered_control() != null:
+		return false
+	var direction: float = 0.0
+	if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+		direction = 1.0
+	elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+		direction = -1.0
+	else:
+		return false
+	var step: float = maxf(BRUSH_RADIUS_WHEEL_STEP_MIN, _brush_size * BRUSH_RADIUS_WHEEL_STEP_SCALE)
+	_set_brush_radius(_brush_size + (direction * step), true, true)
+	return true
+
+func _set_brush_radius(new_radius: float, show_status: bool = true, show_indicator: bool = true) -> void:
+	var clamped_radius: float = clampf(new_radius, BRUSH_RADIUS_MIN, BRUSH_RADIUS_MAX)
+	if is_equal_approx(clamped_radius, _brush_size):
+		return
+	_brush_size = clamped_radius
+	if _terrain_node != null and _terrain_node.has_method("set_brush_preview_radius"):
+		_terrain_node.call("set_brush_preview_radius", _brush_size)
+	if _worldbrush_inspector != null and _worldbrush_inspector.has_method("set_brush_size"):
+		_worldbrush_inspector.call("set_brush_size", _brush_size)
+	_update_active_tool_feedback()
+	if show_status:
+		_set_status("Brush radius: %.1f" % _brush_size)
+	if show_indicator:
+		_show_radius_indicator()
+	_refresh_brush_preview_at_mouse()
+
+func _refresh_brush_preview_at_mouse() -> void:
+	var hit: Variant = _get_mouse_world_position()
+	if hit != null:
+		_update_brush_preview(hit as Vector3)
+
+func _ensure_radius_indicator() -> void:
+	if _radius_indicator_label != null:
+		return
+	var root_ui: Control = get_node_or_null("EditorCanvas/RootUI") as Control
+	if root_ui == null:
+		return
+	_radius_indicator_label = Label.new()
+	_radius_indicator_label.name = "BrushRadiusIndicator"
+	_radius_indicator_label.visible = false
+	_radius_indicator_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_radius_indicator_label.z_index = 300
+	_radius_indicator_label.add_theme_font_size_override("font_size", 14)
+	_radius_indicator_label.add_theme_color_override("font_color", Color(0.84, 0.97, 1.0, 0.98))
+	_radius_indicator_label.add_theme_color_override("font_outline_color", Color(0.03, 0.09, 0.12, 0.95))
+	_radius_indicator_label.add_theme_constant_override("outline_size", 2)
+	root_ui.add_child(_radius_indicator_label)
+
+func _show_radius_indicator() -> void:
+	if _radius_indicator_label == null:
+		return
+	_radius_indicator_ttl = RADIUS_INDICATOR_DURATION_SEC
+	_radius_indicator_label.text = "Radius %.1f" % _brush_size
+	_radius_indicator_label.visible = true
+	_update_radius_indicator_position()
+
+func _tick_radius_indicator(delta: float) -> void:
+	if _radius_indicator_label == null:
+		return
+	if _radius_indicator_ttl <= 0.0:
+		if _radius_indicator_label.visible:
+			_radius_indicator_label.visible = false
+		return
+	if not _should_show_radius_preview():
+		_radius_indicator_ttl = 0.0
+		_radius_indicator_label.visible = false
+		return
+	_radius_indicator_ttl = maxf(0.0, _radius_indicator_ttl - delta)
+	if _radius_indicator_ttl > 0.0:
+		_update_radius_indicator_position()
+
+func _update_radius_indicator_position() -> void:
+	if _radius_indicator_label == null:
+		return
+	var mouse_pos: Vector2 = get_viewport().get_mouse_position()
+	var target: Vector2 = mouse_pos + Vector2(18.0, 20.0)
+	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
+	var label_size: Vector2 = _radius_indicator_label.size
+	target.x = clampf(target.x, 8.0, maxf(8.0, viewport_size.x - label_size.x - 8.0))
+	target.y = clampf(target.y, 8.0, maxf(8.0, viewport_size.y - label_size.y - 8.0))
+	_radius_indicator_label.position = target
+
+func _update_brush_mode_visual_feedback() -> void:
+	# Update brush preview colors based on current Shift key state
+	if _current_tool == "raise" or _current_tool == "lower":
+		if Input.is_key_pressed(KEY_SHIFT):
+			_brush_mode = "sharp"
+		else:
+			_brush_mode = "smooth"
+		if _worldbrush_inspector != null and _worldbrush_inspector.has_method("set_tool_state"):
+			_worldbrush_inspector.call("set_tool_state", {
+				"brush_mode": _brush_mode,
+				"brush_softness": _brush_softness,
+				"smooth_post_pass_enabled": _smooth_post_pass_enabled,
+				"smooth_post_pass_strength": _smooth_post_pass_strength,
+			})
+		_refresh_brush_preview_at_mouse()
+
+func _get_active_stroke_interval() -> float:
+	if _current_tool in ["raise", "lower", "smooth", "flatten"]:
+		if _brush_size >= 26.0:
+			return 1.0 / 36.0
+		if _brush_size >= 16.0:
+			return 1.0 / 48.0
+		if _brush_size >= 9.0:
+			return 1.0 / 58.0
+	return STROKE_INTERVAL_SEC
+
+func _ensure_brush_mode_label() -> void:
+	if _brush_mode_label != null:
+		return
+	
+	var root_ui: Control = get_node_or_null("EditorCanvas/RootUI")
+	if root_ui == null:
+		return
+	
+	_brush_mode_label = Label.new()
+	_brush_mode_label.name = "BrushModeIndicator"
+	_brush_mode_label.visible = false
+	_brush_mode_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_brush_mode_label.z_index = 299  # Just below radius indicator
+	_brush_mode_label.add_theme_font_size_override("font_size", 12)
+	_brush_mode_label.add_theme_color_override("font_color", Color(1.0, 0.7, 0.3, 0.95))
+	_brush_mode_label.add_theme_color_override("font_outline_color", Color(0.1, 0.06, 0.0, 0.95))
+	_brush_mode_label.add_theme_constant_override("outline_size", 2)
+	root_ui.add_child(_brush_mode_label)
+
+func _show_brush_mode_indicator() -> void:
+	_ensure_brush_mode_label()
+	if _brush_mode_label == null:
+		return
+	
+	var mode_text: String = "SHARP" if _brush_mode == "sharp" else "SMOOTH"
+	_brush_mode_label.text = mode_text
+	_brush_mode_label.visible = true
+	_update_brush_mode_indicator_position()
+
+func _hide_brush_mode_indicator() -> void:
+	if _brush_mode_label != null:
+		_brush_mode_label.visible = false
+
+func _update_brush_mode_indicator_position() -> void:
+	if _brush_mode_label == null:
+		return
+	
+	var root_ui: Control = get_node_or_null("EditorCanvas/RootUI")
+	if root_ui == null:
+		return
+	
+	if _radius_indicator_label == null or not _radius_indicator_label.visible:
+		_brush_mode_label.position = Vector2(20.0, get_viewport().get_visible_rect().size.y - 60.0)
+	else:
+		# Position below the radius indicator
+		var radius_pos: Vector2 = _radius_indicator_label.position
+		var radius_size: Vector2 = _radius_indicator_label.size
+		_brush_mode_label.position = radius_pos + Vector2(0.0, radius_size.y + 8.0)
+
 func _update_live_previews() -> void:
+	# Update terrain brush preview through terrain node if available
+	if _terrain_node != null and _terrain_node.has_method("update_brush_preview"):
+		_terrain_node.call("update_brush_preview", camera, get_viewport().get_mouse_position())
+		if _terrain_node.has_method("set_brush_preview_enabled"):
+			# Keep the built-in terrain decal preview disabled in favor of the volumetric sphere.
+			_terrain_node.call("set_brush_preview_enabled", false)
+
 	var hit: Variant = _get_mouse_world_position()
 	if hit == null:
 		if _stamp_preview != null:
@@ -2001,12 +2997,50 @@ func _update_stamp_preview(world_pos: Vector3) -> void:
 func _update_brush_preview(world_pos: Vector3) -> void:
 	if _brush_preview == null:
 		return
-	if _current_tool == "stamp" or _current_tool == "wall" or _current_tool.begins_with("scatter"):
-		_brush_preview.visible = false
+
+	# Determine preview colors for tools that use a radius overlay.
+	var base_color: Color = Color(0.28, 0.82, 0.72, 0.07)
+	var rim_color: Color = Color(0.70, 0.98, 0.88, 0.88)
+	
+	match _current_tool:
+		"raise", "lower", "smooth", "paint":
+			base_color = Color(0.26, 0.84, 0.70, 0.07)
+			rim_color = Color(0.64, 0.99, 0.86, 0.88)
+		"flatten":
+			base_color = Color(0.34, 0.86, 0.64, 0.07)
+			rim_color = Color(0.76, 1.0, 0.82, 0.86)
+		"waterpaint":
+			base_color = Color(0.16, 0.78, 1.0, 0.08)
+			rim_color = Color(0.54, 0.92, 1.0, 0.92)
+		"snowpaint":
+			base_color = Color(0.88, 0.95, 1.0, 0.09)
+			rim_color = Color(0.96, 1.0, 1.0, 0.90)
+		"texturepaint":
+			base_color = Color(0.66, 0.52, 0.96, 0.08)
+			rim_color = Color(0.86, 0.76, 1.0, 0.90)
+		"textureerase":
+			base_color = Color(0.56, 0.62, 0.92, 0.07)
+			rim_color = Color(0.76, 0.84, 0.98, 0.84)
+		"grasspaint", "grasserase":
+			base_color = Color(0.36, 0.82, 0.38, 0.07)
+			rim_color = Color(0.66, 0.97, 0.58, 0.84)
+		"scatterpaint", "scattererase":
+			base_color = Color(0.89, 0.76, 0.38, 0.07)
+			rim_color = Color(0.99, 0.90, 0.62, 0.84)
+	
+	# Apply sharp mode visual feedback (warm red/orange tone)
+	if _brush_mode == "sharp" and (_current_tool == "raise" or _current_tool == "lower"):
+		rim_color = Color(1.0, 0.65, 0.35, 0.95)  # Orange/red for sharp mode
+	
+	if not _should_show_radius_preview():
+		_brush_preview.hide_preview()
 		return
-	_brush_preview.visible = true
-	_brush_preview.global_position = world_pos + Vector3(0.0, 0.05, 0.0)
-	_brush_preview.scale = Vector3(_brush_size, 1.0, _brush_size)
+	
+	# Show and position the volumetric radius bubble.
+	_brush_preview.show_preview()
+	_brush_preview.update_colors(base_color, rim_color)
+	_brush_preview.update_radius(_brush_size)
+	_brush_preview.update_world_position(world_pos)
 
 func _rotate_stamp_preview(delta_deg: float) -> void:
 	_stamp_rotation_deg = fmod(_stamp_rotation_deg + delta_deg + 360.0, 360.0)
@@ -2088,7 +3122,7 @@ func _seed_default_prefabs() -> void:
 
 func _choose_seed_prefabs() -> Array[String]:
 	var all: Array[String] = []
-	_collect_prefabs("res://assets/prefabs", all)
+	_collect_prefabs("res://assets/world/models", all)
 	if all.is_empty():
 		return []
 
@@ -2130,15 +3164,15 @@ func _collect_prefabs(path: String, out: Array[String]) -> void:
 		return
 	dir.list_dir_begin()
 	while true:
-		var name := dir.get_next()
-		if name == "":
+		var entry_name := dir.get_next()
+		if entry_name == "":
 			break
-		if name.begins_with("."):
+		if entry_name.begins_with("."):
 			continue
-		var full := "%s/%s" % [path, name]
+		var full := "%s/%s" % [path, entry_name]
 		if dir.current_is_dir():
 			_collect_prefabs(full, out)
-		elif name.ends_with(".tscn"):
+		elif entry_name.ends_with(".tscn"):
 			out.append(full)
 	dir.list_dir_end()
 
@@ -2293,6 +3327,8 @@ func _spawn_starter_tree_cluster_multimesh(center: Vector3) -> void:
 func _sample_terrain_height(x: float, z: float) -> float:
 	if _terrain_node != null and _terrain_node.has_method("sample_height"):
 		return float(_terrain_node.call("sample_height", x, z))
+	if _terrain_node != null and _terrain_node.has_method("getHeightAtPosition"):
+		return float(_terrain_node.call("getHeightAtPosition", x, z, true))
 	if _terrain_node != null and _terrain_node.has_method("get_data"):
 		var data: Variant = _terrain_node.call("get_data")
 		if data != null and data is Object and (data as Object).has_method("get_height"):
@@ -2303,20 +3339,274 @@ func _sample_terrain_height(x: float, z: float) -> float:
 				return float(h)
 	return 0.0
 
-func _ensure_terrain_node() -> Node:
-	if CUSTOM_TERRAIN_SCENE != null:
-		var custom_node: Node = CUSTOM_TERRAIN_SCENE.instantiate()
-		if custom_node != null:
-			custom_node.name = "TerrainRuntime"
-			terrain_placeholder.add_child(custom_node)
-			return custom_node
+func _get_worldbrush_node() -> Node:
+	if terrain_placeholder == null:
+		return null
+	return terrain_placeholder.find_child("WorldBrush", true, false)
 
-	# Fallback to a visible plane so map editing flow still works if Terrain3D is unavailable.
+func _get_terrabrush_node() -> Node:
+	if terrain_placeholder == null:
+		return null
+	return terrain_placeholder.find_child("TerraBrush", true, false)
+
+func _get_terrabrush_editor_node() -> Node:
+	if terrain_placeholder == null:
+		return null
+	return terrain_placeholder.find_child("TerraBrushEditor", true, false)
+
+func _get_texture_maps(texture_id: String, target_size: int = 1024) -> Dictionary:
+	if _texture_painter != null and _texture_painter.has_method("get_pbr_maps"):
+		var painter_texture_id: String = texture_id
+		if painter_texture_id.is_empty() and _texture_painter.has_method("get"):
+			painter_texture_id = String(_texture_painter.get("selected_texture_id"))
+		if painter_texture_id != "":
+			var painter_maps: Variant = _texture_painter.call("get_pbr_maps", painter_texture_id, target_size)
+			if painter_maps is Dictionary and not (painter_maps as Dictionary).is_empty():
+				return painter_maps
+	if texture_id.is_empty():
+		return {}
+
+	var texture_folder: String = texture_id
+	if not texture_folder.begins_with("res://"):
+		texture_folder = "res://assets/world/textures/world/%s" % texture_id
+	var texture_dir: DirAccess = DirAccess.open(texture_folder)
+	if texture_dir == null:
+		return {}
+
+	var maps: Dictionary = {}
+	texture_dir.list_dir_begin()
+	var file_name: String = texture_dir.get_next()
+	while file_name != "":
+		if texture_dir.current_is_dir() or file_name.begins_with("."):
+			file_name = texture_dir.get_next()
+			continue
+		var lower_name: String = file_name.to_lower()
+		var resource_path: String = "%s/%s" % [texture_folder, file_name]
+		if not lower_name.ends_with(".png") and not lower_name.ends_with(".jpg") and not lower_name.ends_with(".jpeg") and not lower_name.ends_with(".webp"):
+			file_name = texture_dir.get_next()
+			continue
+		if lower_name.find("color") != -1 or lower_name.find("basecolor") != -1 or lower_name.find("base_color") != -1 or lower_name.find("albedo") != -1:
+			maps["albedo"] = load(resource_path)
+		elif lower_name.find("normal") != -1:
+			maps["normal"] = load(resource_path)
+		elif lower_name.find("roughness") != -1:
+			maps["roughness"] = load(resource_path)
+		elif lower_name.find("height") != -1:
+			maps["height"] = load(resource_path)
+		elif lower_name.find("ambientocclusion") != -1 or lower_name.find("ambient_occlusion") != -1 or lower_name.find("ao") != -1:
+			maps["ao"] = load(resource_path)
+		file_name = texture_dir.get_next()
+	texture_dir.list_dir_end()
+
+	if not maps.has("albedo"):
+		texture_dir = DirAccess.open(texture_folder)
+		if texture_dir != null:
+			texture_dir.list_dir_begin()
+			file_name = texture_dir.get_next()
+			while file_name != "":
+				if not texture_dir.current_is_dir() and file_name.to_lower().ends_with(".png"):
+					maps["albedo"] = load("%s/%s" % [texture_folder, file_name])
+					break
+				file_name = texture_dir.get_next()
+			texture_dir.list_dir_end()
+	return maps
+
+func _ensure_worldbrush_menu() -> void:
+	if _worldbrush_menu != null:
+		return
+	var root_ui: Control = get_node_or_null("EditorCanvas/RootUI") as Control
+	if root_ui == null:
+		return
+	var instance: Variant = WORLDBRUSH_RADIAL_MENU_SCRIPT.new()
+	if not (instance is Control):
+		return
+	_worldbrush_menu = instance as Control
+	_worldbrush_menu.name = "WorldBrushRadialMenu"
+	root_ui.add_child(_worldbrush_menu)
+	if _worldbrush_menu.has_signal("tool_selected"):
+		_worldbrush_menu.connect("tool_selected", Callable(self, "_on_worldbrush_tool_selected"))
+	if _worldbrush_menu.has_signal("radius_changed"):
+		_worldbrush_menu.connect("radius_changed", Callable(self, "_on_worldbrush_radius_changed"))
+	if _worldbrush_menu.has_signal("strength_changed"):
+		_worldbrush_menu.connect("strength_changed", Callable(self, "_on_worldbrush_strength_changed"))
+
+func _ensure_worldbrush_inspector() -> void:
+	if _worldbrush_inspector != null:
+		return
+	var layout: VBoxContainer = get_node_or_null("EditorCanvas/RootUI/Layout") as VBoxContainer
+	if layout == null:
+		return
+	var instance: Variant = WORLDBRUSH_INSPECTOR_SCRIPT.new()
+	if not (instance is Control):
+		return
+	_worldbrush_inspector = instance as Control
+	_worldbrush_inspector.name = "WorldBrushInspector"
+	# Add inspector directly to root for absolute positioning at far right
+	var root_ui: Control = get_node_or_null("EditorCanvas/RootUI")
+	if root_ui != null:
+		root_ui.add_child(_worldbrush_inspector)
+		_worldbrush_inspector.set_anchors_and_offsets_preset(Control.PRESET_RIGHT_WIDE)
+		_worldbrush_inspector.offset_right = 0
+		var panel_width: float = 420.0
+		if _worldbrush_inspector.has_method("get_panel_width"):
+			panel_width = float(_worldbrush_inspector.call("get_panel_width"))
+		_worldbrush_inspector.offset_left = -panel_width
+		_worldbrush_inspector.offset_top = 44  # Below menu bar
+		_worldbrush_inspector.offset_bottom = 0
+	if _worldbrush_inspector.has_signal("brush_size_changed"):
+		_worldbrush_inspector.connect("brush_size_changed", Callable(self, "_on_inspector_brush_size_changed"))
+	if _worldbrush_inspector.has_signal("brush_strength_changed"):
+		_worldbrush_inspector.connect("brush_strength_changed", Callable(self, "_on_inspector_brush_strength_changed"))
+	if _worldbrush_inspector.has_signal("layer_changed"):
+		_worldbrush_inspector.connect("layer_changed", Callable(self, "_on_inspector_layer_changed"))
+	if _worldbrush_inspector.has_signal("tool_setting_changed"):
+		_worldbrush_inspector.connect("tool_setting_changed", Callable(self, "_on_inspector_tool_setting_changed"))
+	if _worldbrush_inspector.has_signal("environment_setting_changed"):
+		_worldbrush_inspector.connect("environment_setting_changed", Callable(self, "_on_inspector_environment_setting_changed"))
+	_sync_environment_inspector()
+
+func _on_inspector_brush_size_changed(size: float) -> void:
+	_set_brush_radius(size, false, false)
+
+func _on_inspector_brush_strength_changed(strength: float) -> void:
+	_brush_strength = strength
+
+func _on_inspector_layer_changed(layer: int) -> void:
+	set_active_world_layer(layer)
+
+func _on_inspector_tool_setting_changed(setting: String, value: Variant) -> void:
+	_on_tool_setting_changed(setting, value)
+
+
+func _on_inspector_environment_setting_changed(setting: String, value: Variant) -> void:
+	_on_tool_setting_changed(setting, value)
+
+func _open_worldbrush_radial_hold() -> void:
+	_ensure_worldbrush_menu()
+	if _worldbrush_menu == null:
+		return
+	_worldbrush_menu.call("open_hold", get_viewport().get_mouse_position(), _current_tool, _brush_size, _brush_strength)
+
+func _confirm_worldbrush_radial_hold() -> void:
+	if _worldbrush_menu == null:
+		return
+	if _worldbrush_menu.has_method("confirm_current"):
+		_worldbrush_menu.call("confirm_current")
+
+func _on_worldbrush_tool_selected(tool_name: String) -> void:
+	_switch_tool(tool_name)
+	_update_worldbrush_inspector_for_tool(tool_name)
+	_update_tool_name_display()
+	_set_status("WorldBrush tool: %s" % _format_tool_name(tool_name))
+
+func _update_worldbrush_inspector_for_tool(tool_name: String) -> void:
+	if _worldbrush_inspector == null:
+		return
+	var icon_path: String = ""
+	match tool_name:
+		"raise":        icon_path = "res://addons/worldbrush/Assets/Icons/map_add.png"
+		"lower":        icon_path = "res://addons/worldbrush/Assets/Icons/map_remove.png"
+		"smooth":       icon_path = "res://addons/worldbrush/Assets/Icons/map_smooth.png"
+		"flatten":      icon_path = "res://addons/worldbrush/Assets/Icons/map_set_height.png"
+		"paint":        icon_path = "res://addons/worldbrush/Assets/Icons/paint.png"
+		"texturepaint": icon_path = "res://addons/worldbrush/Assets/Icons/paint_withdot.png"
+		"grasspaint":   icon_path = "res://addons/worldbrush/Assets/Icons/foliage_add.png"
+		"waterpaint":   icon_path = "res://addons/worldbrush/Assets/Icons/water_add.png"
+		"snowpaint":    icon_path = "res://addons/worldbrush/Assets/Icons/snow_add.png"
+		"riverdraw":    icon_path = "res://addons/worldbrush/Assets/Icons/flow_add.png"
+		"wall":         icon_path = "res://addons/worldbrush/Assets/Icons/lock_add.png"
+		"stamp":        icon_path = "res://addons/worldbrush/Assets/Icons/object_add.png"
+	if _worldbrush_inspector.has_method("set_tool"):
+		_worldbrush_inspector.call("set_tool", tool_name, icon_path)
+	# Sync current brush values into the inspector
+	if _worldbrush_inspector.has_method("set_brush_size"):
+		_worldbrush_inspector.call("set_brush_size", _brush_size)
+	if _worldbrush_inspector.has_method("set_brush_strength"):
+		_worldbrush_inspector.call("set_brush_strength", _brush_strength)
+	if _worldbrush_inspector.has_method("set_active_layer"):
+		_worldbrush_inspector.call("set_active_layer", _active_world_layer)
+	if _worldbrush_inspector.has_method("set_tool_state"):
+		var toolbar_settings: Dictionary = world_tools.call("get_settings") if world_tools != null and world_tools.has_method("get_settings") else {}
+		_worldbrush_inspector.call("set_tool_state", {
+			"brush_mode": _brush_mode,
+			"brush_softness": _brush_softness,
+			"smooth_post_pass_enabled": _smooth_post_pass_enabled,
+			"smooth_post_pass_strength": _smooth_post_pass_strength,
+			"selected_texture_id": _selected_texture_id,
+			"world_layer": _active_world_layer,
+			"wall_type": String(toolbar_settings.get("wall_type", "stone")),
+			"wall_height": float(toolbar_settings.get("wall_height", 3.4)),
+			"wall_rect_mode": bool(toolbar_settings.get("wall_rect_mode", false)),
+			"wall_match_connected_heights": bool(toolbar_settings.get("wall_match_connected_heights", true)),
+			"wall_add_foundation": bool(toolbar_settings.get("wall_add_foundation", true)),
+			"wall_opening_height_snap": bool(toolbar_settings.get("wall_opening_height_snap", true)),
+			"wall_jitter": bool(toolbar_settings.get("wall_jitter", true)),
+			"river_width": float(toolbar_settings.get("river_width", _river_width)),
+			"river_flow_speed": float(toolbar_settings.get("river_flow_speed", _river_flow_speed)),
+			"river_average_depth": float(toolbar_settings.get("river_average_depth", _river_average_depth)),
+			"water_mode": String(toolbar_settings.get("water_mode", _water_mode)),
+		})
+	if _texture_painter != null and _worldbrush_inspector.has_method("set_texture_painter"):
+		_worldbrush_inspector.call("set_texture_painter", _texture_painter)
+
+func _update_tool_name_display() -> void:
+	if _tool_name_display == null:
+		var menu_panel: Panel = get_node_or_null("EditorCanvas/RootUI/Layout/TopBar/MenuPanel") as Panel
+		if menu_panel == null:
+			return
+		_tool_name_display = Label.new()
+		_tool_name_display.name = "ToolNameDisplay"
+		_tool_name_display.custom_minimum_size = Vector2(280, 0)
+		_tool_name_display.add_theme_font_size_override("font_size", 13)
+		var bold_font = ThemeDB.fallback_font
+		if bold_font != null:
+			_tool_name_display.add_theme_font_override("font", bold_font)
+		_tool_name_display.add_theme_font_size_override("font_size", 14)
+		_tool_name_display.add_theme_color_override("font_color", Color(0.88, 0.92, 0.96, 1.0))
+		menu_panel.add_child(_tool_name_display)
+		menu_panel.move_child(_tool_name_display, 1)
+	if _tool_name_display != null:
+		var mode_text: String = "GM Mode" if not get_tree().paused else "Player Mode"
+		var tool_display_name: String = _format_tool_name(_current_tool)
+		var display_text: String = tool_display_name if tool_display_name != "None" else mode_text
+		_tool_name_display.text = "  ▸  " + display_text
+
+func _on_worldbrush_radius_changed(radius: float) -> void:
+	_set_brush_radius(radius, true, true)
+
+func _on_worldbrush_strength_changed(strength: float) -> void:
+	_brush_strength = clampf(strength, 0.05, 1.0)
+	_set_status("Brush strength: %.2f" % _brush_strength)
+
+func _ensure_terrain_node() -> Node:
+	var worldbrush_node: Node = _get_worldbrush_node()
+	if worldbrush_node != null:
+		if worldbrush_node.has_method("set_world_layer"):
+			worldbrush_node.call("set_world_layer", _active_world_layer)
+		if worldbrush_node.has_method("set_full_rebuild_mode"):
+			worldbrush_node.call("set_full_rebuild_mode", _terrain_full_rebuild_mode)
+		return worldbrush_node
+
+	var terrabrush_node: Node = _get_terrabrush_node()
+	if terrabrush_node != null:
+		return terrabrush_node
+
+	for child in terrain_placeholder.get_children():
+		child.queue_free()
+
+	# Runtime safe mode: TerraBrush native init currently crashes in libterrabrush.macos.debug.
+	# Keep editor stable with a simple fallback ground until the extension-side crash is resolved.
 	var ground := MeshInstance3D.new()
 	ground.name = "FallbackGround"
 	var plane := PlaneMesh.new()
 	plane.size = Vector2(256, 256)
 	ground.mesh = plane
+	var fallback_mat := StandardMaterial3D.new()
+	fallback_mat.albedo_color = Color(0.26, 0.30, 0.24, 1.0)
+	fallback_mat.roughness = 0.92
+	fallback_mat.metallic = 0.0
+	fallback_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	ground.material_override = fallback_mat
 	terrain_placeholder.add_child(ground)
 	return terrain_placeholder
 
@@ -2344,13 +3634,14 @@ func _save_map_to_path(path: String) -> bool:
 	var abs_dir: String = ProjectSettings.globalize_path(path.get_base_dir())
 	DirAccess.make_dir_recursive_absolute(abs_dir)
 	var data: Dictionary = {
-		"version": 2,
+		"version": 3,
 		"saved_at": Time.get_datetime_string_from_system(true, true),
 		"walls": {},
 		"scatter": {},
 		"stamps": [],
 		"terrain": {},
-		"horizon_mountains": []
+		"horizon_mountains": [],
+		"sky3d": {}
 	}
 	var wall_system: Node = _get_or_create_wall_system()
 	if wall_system != null and wall_system.has_method("save_data"):
@@ -2359,6 +3650,7 @@ func _save_map_to_path(path: String) -> bool:
 		data["scatter"] = _scatter_system.call("serialize_state")
 	data["stamps"] = _serialize_stamp_instances()
 	data["terrain"] = _serialize_terrain_data()
+	data["sky3d"] = _export_sky_state()
 	if _horizon_system != null and is_instance_valid(_horizon_system) and _horizon_system.has_method("serialize"):
 		data["horizon_mountains"] = _horizon_system.call("serialize")
 	var file := FileAccess.open(path, FileAccess.WRITE)
@@ -2389,6 +3681,7 @@ func _load_map_from_path(path: String) -> bool:
 	var stamp_data: Array = data.get("stamps", [])
 	var terrain_data: Dictionary = data.get("terrain", {})
 	var horizon_data: Array = data.get("horizon_mountains", [])
+	var sky_data: Dictionary = data.get("sky3d", {})
 	var wall_system: Node = _get_or_create_wall_system()
 	if wall_system != null and wall_system.has_method("load_data"):
 		wall_system.call("load_data", wall_data)
@@ -2396,6 +3689,7 @@ func _load_map_from_path(path: String) -> bool:
 		_scatter_system.call("load_state", scatter_data)
 	_deserialize_stamp_instances(stamp_data)
 	_deserialize_terrain_data(terrain_data)
+	_import_sky_state(sky_data)
 	if _horizon_system != null and is_instance_valid(_horizon_system) and _horizon_system.has_method("deserialize"):
 		_horizon_system.call("deserialize", horizon_data)
 	_set_status("Loaded map: %s" % path)

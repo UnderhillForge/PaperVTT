@@ -1,6 +1,6 @@
 extends CanvasLayer
 
-@export var enabled: bool = true
+@export var enabled: bool = false
 @export var main_camera_path: NodePath = NodePath("../Camera3D")
 @export var performance_mode: bool = false
 @export var ultra_performance_mode: bool = false
@@ -11,6 +11,8 @@ extends CanvasLayer
 
 var _capture_camera: Camera3D = null
 var _render_scale: float = 1.0
+var _daylight_factor: float = 0.0
+var _sculpt_mode: bool = false
 
 func _ready() -> void:
 	_viewport.disable_3d = false
@@ -61,6 +63,15 @@ func set_lightweight_mode(value: bool) -> void:
 	lightweight_mode = value
 	_apply_quality_preset()
 
+
+func set_sculpt_mode(sculpt_enabled: bool) -> void:
+	_sculpt_mode = sculpt_enabled
+	_apply_quality_preset()
+
+func set_daylight_factor(value: float) -> void:
+	_daylight_factor = clampf(value, 0.0, 1.0)
+	_apply_quality_preset()
+
 func _set_enabled(value: bool) -> void:
 	if _overlay.material is ShaderMaterial:
 		(_overlay.material as ShaderMaterial).set_shader_parameter("enabled", value)
@@ -72,6 +83,8 @@ func _apply_quality_preset() -> void:
 	if not (_overlay.material is ShaderMaterial):
 		return
 	var material := _overlay.material as ShaderMaterial
+	var base_outline_strength: float = 2.35
+	var base_line_darken: float = 0.085
 	if performance_mode:
 		if ultra_performance_mode:
 			material.set_shader_parameter("outline_thickness", 0.0)
@@ -80,27 +93,43 @@ func _apply_quality_preset() -> void:
 			material.set_shader_parameter("hatch_scale", 320.0)
 			material.set_shader_parameter("paper_strength", 0.0)
 			material.set_shader_parameter("line_darken", 0.0)
+			material.set_shader_parameter("daytime_brightness", 1.0)
+			material.set_shader_parameter("daytime_contrast", 1.0)
 			return
 		material.set_shader_parameter("outline_thickness", 2.6)
-		material.set_shader_parameter("outline_strength", 1.35)
+		base_outline_strength = 1.35
 		material.set_shader_parameter("hatch_opacity", 0.08)
 		material.set_shader_parameter("hatch_scale", 420.0)
 		material.set_shader_parameter("paper_strength", 0.01)
-		material.set_shader_parameter("line_darken", 0.02)
+		base_line_darken = 0.02
 	elif lightweight_mode:
 		material.set_shader_parameter("outline_thickness", 3.0)
-		material.set_shader_parameter("outline_strength", 1.7)
+		base_outline_strength = 1.7
 		material.set_shader_parameter("hatch_opacity", 0.12)
 		material.set_shader_parameter("hatch_scale", 500.0)
 		material.set_shader_parameter("paper_strength", 0.02)
-		material.set_shader_parameter("line_darken", 0.04)
+		base_line_darken = 0.04
 	else:
 		material.set_shader_parameter("outline_thickness", 4.0)
-		material.set_shader_parameter("outline_strength", 2.35)
+		base_outline_strength = 2.35
 		material.set_shader_parameter("hatch_opacity", 0.24)
 		material.set_shader_parameter("hatch_scale", 560.0)
 		material.set_shader_parameter("paper_strength", 0.05)
-		material.set_shader_parameter("line_darken", 0.085)
+		base_line_darken = 0.085
+
+	# Daylight softens line crush and raises tonal lift to keep afternoons bright.
+	var daytime_outline_strength: float = lerpf(base_outline_strength, base_outline_strength * 0.78, _daylight_factor)
+	var daytime_line_darken: float = lerpf(base_line_darken, base_line_darken * 0.65, _daylight_factor)
+
+	# Sculpt mode further reduces shadow crushing for maximum shape readability.
+	if _sculpt_mode:
+		daytime_outline_strength *= 0.68
+		daytime_line_darken *= 0.45
+
+	material.set_shader_parameter("outline_strength", daytime_outline_strength)
+	material.set_shader_parameter("line_darken", daytime_line_darken)
+	material.set_shader_parameter("daytime_brightness", lerpf(1.0, 1.07, _daylight_factor) + (0.06 if _sculpt_mode else 0.0))
+	material.set_shader_parameter("daytime_contrast", lerpf(1.0, 0.95, _daylight_factor) - (0.03 if _sculpt_mode else 0.0))
 
 func _sync_viewport_size() -> void:
 	var size: Vector2i = get_viewport().get_visible_rect().size

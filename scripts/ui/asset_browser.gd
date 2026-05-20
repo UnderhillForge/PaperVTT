@@ -52,8 +52,8 @@ var _preview_pending_capture_path: String = ""
 var _preview_pending_frames: int = 0
 
 const THUMB_SIZE: Vector2i = Vector2i(160, 160)
-const MANIFEST_PATH: String = "res://assets/library_manifest.json"
-const PREVIEW_ROOT_PATH: String = "res://assets/previews"
+const MANIFEST_PATH: String = "res://assets/world/library_manifest.json"
+const PREVIEW_ROOT_PATH: String = "res://assets/world/environment/previews"
 
 func _ready() -> void:
 	_search.text_changed.connect(_refresh_list)
@@ -129,7 +129,7 @@ func _on_category_pressed(category: String) -> void:
 
 func _scan_prefabs() -> void:
 	_prefab_paths.clear()
-	_walk_prefabs("res://assets/prefabs")
+	_walk_prefabs("res://assets/world/models")
 	_prefab_paths.sort()
 	_ensure_manifest_entries()
 
@@ -432,7 +432,7 @@ func _transform_aabb(aabb: AABB, xform: Transform3D) -> AABB:
 	return result
 
 func _default_display_name(path: String) -> String:
-	return path.trim_prefix("res://assets/prefabs/").trim_suffix(".tscn").trim_suffix(".glb").trim_suffix(".blend")
+	return path.trim_prefix("res://assets/world/models/").trim_suffix(".tscn").trim_suffix(".glb").trim_suffix(".blend")
 
 func _derive_category_from_path(path: String) -> String:
 	var lower: String = path.to_lower()
@@ -594,7 +594,7 @@ func _placeholder_texture() -> Texture2D:
 	return ImageTexture.create_from_image(img)
 
 func _preview_cache_path(prefab_path: String) -> String:
-	var rel: String = prefab_path.trim_prefix("res://assets/prefabs/").trim_suffix(".tscn").trim_suffix(".glb").trim_suffix(".blend")
+	var rel: String = prefab_path.trim_prefix("res://assets/world/models/").trim_suffix(".tscn").trim_suffix(".glb").trim_suffix(".blend")
 	return "%s/%s.png" % [PREVIEW_ROOT_PATH, rel]
 
 func _ensure_preview_folder() -> void:

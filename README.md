@@ -1,5 +1,7 @@
 # PaperVTT
 
+> **Note:** Project is transitioning to TerraBrush as the new terrain/water foundation. Old custom systems have been moved to `/legacy/` for reference.
+
 PaperVTT is a stylized 3D map editor for tabletop worldbuilding, with a long-term direction toward a full virtual tabletop workflow.
 
 Built in Godot, it focuses on fast terrain shaping, prefab stamping, smart wall authoring, and paint-style biome dressing (grass + scatter) with a pen-and-ink inspired look.

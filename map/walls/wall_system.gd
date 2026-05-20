@@ -2,12 +2,12 @@ class_name WallSystem
 extends Node3D
 
 const WallSegment = preload("res://map/walls/wall_segment.gd")
-const DEFAULT_WALL_MATERIAL_PATH: String = "res://assets/materials/wall_material.tres"
-const DEFAULT_FOUNDATION_MATERIAL_PATH: String = "res://assets/materials/foundation_material.tres"
-const DEFAULT_TUDOR_TEXTURE_DIR: String = "res://assets/textures/walls/tudor"
-const DEFAULT_TUDOR_WINDOW_TEXTURE_DIR: String = "res://assets/textures/walls/tudor_window"
-const DEFAULT_TUDOR_WINDOW_FRAME_TEXTURE_PATH: String = "res://assets/textures/walls/tudor_window/textures/tex_u1_v1_baseColor.jpeg"
-const DEFAULT_TUDOR_CORNER_TEXTURE_PATH: String = "res://assets/textures/walls/stylized_low-poly_wooden_beam/textures/Material_baseColor.png"
+const DEFAULT_WALL_MATERIAL_PATH: String = "res://assets/world/materials/wall_material.tres"
+const DEFAULT_FOUNDATION_MATERIAL_PATH: String = "res://assets/world/materials/foundation_material.tres"
+const DEFAULT_TUDOR_TEXTURE_DIR: String = "res://assets/world/textures/walls/tudor"
+const DEFAULT_TUDOR_WINDOW_TEXTURE_DIR: String = "res://assets/world/textures/walls/tudor_window"
+const DEFAULT_TUDOR_WINDOW_FRAME_TEXTURE_PATH: String = "res://assets/world/textures/walls/tudor_window/textures/tex_u1_v1_baseColor.jpeg"
+const DEFAULT_TUDOR_CORNER_TEXTURE_PATH: String = "res://assets/world/textures/walls/stylized_low-poly_wooden_beam/textures/Material_baseColor.png"
 const HEIGHT_NORMALIZE_EPSILON: float = 0.01
 
 @export var segments: Array[WallSegment] = []
@@ -22,7 +22,7 @@ const HEIGHT_NORMALIZE_EPSILON: float = 0.01
 @export var hand_drawn_jitter_degrees: float = 2.0
 @export var hand_drawn_jitter_offset: float = 0.045
 @export var wall_material: Material
-@export var modular_piece_base_path: String = "res://assets/prefabs/walls/modular"
+@export var modular_piece_base_path: String = "res://assets/world/models/walls/modular"
 @export var tudor_texture_dir: String = DEFAULT_TUDOR_TEXTURE_DIR
 @export var tudor_texture_paths: Array[String] = []
 @export var tudor_window_texture_dir: String = DEFAULT_TUDOR_WINDOW_TEXTURE_DIR
@@ -116,7 +116,7 @@ func undo_last_segment() -> bool:
 	rebuild_all()
 	return true
 
-func auto_register_prefabs(base_path: String = "res://assets/prefabs/walls") -> void:
+func auto_register_prefabs(base_path: String = "res://assets/world/models/walls") -> void:
 	_prefab_cache.clear()
 	var modular_abs: String = ProjectSettings.globalize_path(modular_piece_base_path)
 	if DirAccess.dir_exists_absolute(modular_abs):
@@ -1131,9 +1131,9 @@ func _place_window_in_gap(
 	tint: Color
 ) -> void:
 	# Try to load the Tudor window prefab
-	var tudor_window_scene_path: String = "res://assets/prefabs/walls/tudor/tudor_window.tscn"
-	var tudor_window_open_scene_path: String = "res://assets/prefabs/walls/tudor/tudor_window_open.tscn"
-	var tudor_window_gltf_path: String = "res://assets/textures/walls/tudor_window/scene.gltf"
+	var tudor_window_scene_path: String = "res://assets/world/models/walls/tudor/tudor_window.tscn"
+	var tudor_window_open_scene_path: String = "res://assets/world/models/walls/tudor/tudor_window_open.tscn"
+	var tudor_window_gltf_path: String = "res://assets/world/textures/walls/tudor_window/scene.gltf"
 	
 	var node: Node3D = null
 	var packed_scene: PackedScene = null
@@ -1260,9 +1260,9 @@ func _compute_local_aabb(node: Node, to_root: Transform3D) -> AABB:
 
 func _instantiate_tudor_window(window_pos: Vector3, center_y: float, yaw: float, width: float, height: float, sill: float, variant: String = "") -> void:
 	# Load and instantiate the Tudor window prefab in the gap
-	var tudor_window_scene_path: String = "res://assets/prefabs/walls/tudor/tudor_window.tscn"
-	var tudor_window_open_scene_path: String = "res://assets/prefabs/walls/tudor/tudor_window_open.tscn"
-	var tudor_window_gltf_path: String = "res://assets/textures/walls/tudor_window/scene.gltf"
+	var tudor_window_scene_path: String = "res://assets/world/models/walls/tudor/tudor_window.tscn"
+	var tudor_window_open_scene_path: String = "res://assets/world/models/walls/tudor/tudor_window_open.tscn"
+	var tudor_window_gltf_path: String = "res://assets/world/textures/walls/tudor_window/scene.gltf"
 	
 	var window_node: Node3D = null
 	

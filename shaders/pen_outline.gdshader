@@ -12,6 +12,8 @@ uniform float hatch_contrast : hint_range(0.2, 2.5, 0.01) = 2.2;
 uniform vec4 paper_tint : source_color = vec4(0.94, 0.92, 0.86, 1.0);
 uniform float paper_strength : hint_range(0.0, 1.0, 0.01) = 0.22;
 uniform float line_darken : hint_range(0.0, 0.6, 0.01) = 0.14;
+uniform float daytime_brightness : hint_range(0.6, 1.4, 0.01) = 1.0;
+uniform float daytime_contrast : hint_range(0.6, 1.4, 0.01) = 1.0;
 
 float luminance(vec3 c) {
 	return dot(c, vec3(0.299, 0.587, 0.114));
@@ -66,6 +68,9 @@ void fragment() {
 		vec3 paperized = mix(hatched_scene, hatched_scene * paper_tint.rgb, paper_strength * 0.35);
 		vec3 outlined = mix(paperized, outline_color.rgb, outline * outline_color.a * 0.28);
 		vec3 out_col = max(vec3(0.0), outlined * (1.0 - (outline * line_darken * 0.35)));
+		out_col = (out_col - vec3(0.5)) * daytime_contrast + vec3(0.5);
+		out_col *= daytime_brightness;
+		out_col = clamp(out_col, vec3(0.0), vec3(1.0));
 		COLOR = vec4(out_col, scene_col.a);
 	}
 }
