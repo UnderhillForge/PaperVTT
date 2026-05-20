@@ -3,6 +3,14 @@
 .vscode/
 
 # Keep asset folder structure, but ignore asset payloads
+assets/world/models/walls/modular/stone_wall_window_2m.glb
+assets/world/models/walls/modular/stone_wall_window_2m.glb.import
+assets/world/models/walls/modular/stone_wall_window_4m.glb
+assets/world/models/walls/modular/stone_wall_window_4m.glb.import
+assets/world/models/walls/modular/tudor_wall_window_2m.glb
+assets/world/models/walls/modular/tudor_wall_window_2m.glb.import
+assets/world/models/walls/modular/tudor_wall_window_4m.glb
+assets/world/models/walls/modular/tudor_wall_window_4m.glb.import
 
 
 # Local tooling / test content
