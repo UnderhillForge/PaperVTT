@@ -16,8 +16,25 @@ extends Node
 @export var spring_length_min: float = 3.5
 @export var spring_length_max: float = 12.0
 @export var spring_zoom_step: float = 0.5
-@export var manual_return_delay: float = 1.2
+@export var manual_return_delay: float = 0.12
 @export var auto_follow_blend_speed: float = 4.0
+@export var follow_pivot_blend_speed: float = 8.5
+@export var follow_turn_boost_speed: float = 13.0
+@export var follow_return_pitch_speed: float = 8.5
+@export var shoulder_yaw_offset_degrees: float = 8.0
+@export var shoulder_pitch_degrees: float = 5.0
+@export var shoulder_lateral_offset: float = 0.8
+@export var follow_height_offset: float = 2.8
+@export var follow_look_at_height: float = 1.2
+@export var follow_default_spring_length: float = 6.4
+@export var follow_slope_pitch_enabled: bool = true
+@export var follow_slope_probe_distance: float = 7.5
+@export var follow_slope_probe_back_distance: float = 1.5
+@export var follow_slope_min_drop: float = 0.20
+@export var follow_slope_pitch_sensitivity: float = 2.6
+@export var follow_slope_pitch_max_extra: float = 14.0
+@export var follow_slope_pitch_blend_speed: float = 6.5
+@export var auto_pivot_when_idle: bool = true
 @export var mouse_sensitivity: float = 0.18
 @export var pitch_min: float = -25.0
 @export var pitch_max: float = 60.0
@@ -38,6 +55,9 @@ var _right_dragging: bool = false
 var _editor_yaw_degrees: float = -45.0
 var _editor_pitch_degrees: float = 35.0
 var _editor_distance: float = 30.0
+var _follow_camera_defaults_applied: bool = false
+var _follow_slope_pitch_current: float = 0.0
+var _terrain_node_cache: Node = null
 
 const _RIGHT_DRAG_THRESHOLD: float = 4.0
 const _MOVE_SPEED_THRESHOLD: float = 0.35
@@ -47,6 +67,7 @@ const _EDITOR_PITCH_MAX: float = 84.0
 func _ready() -> void:
 	_initialize_editor_camera_defaults()
 	_initialize_top_down_camera_defaults()
+	_initialize_follow_camera_defaults()
 	_set_top_down_mode(true)
 
 func _input(event: InputEvent) -> void:
@@ -115,12 +136,9 @@ func _process(delta: float) -> void:
 	if _manual_look:
 		return
 
-	if _is_target_moving_forward():
-		var rot: Vector3 = _follow_camera.call("get_third_person_rotation_degrees")
-		var target_yaw: float = _yaw_behind_target(_active_target)
-		var yaw_diff: float = fmod(target_yaw - rot.y + 540.0, 360.0) - 180.0
-		rot.y += yaw_diff * clampf(auto_follow_blend_speed * delta, 0.0, 1.0)
-		_follow_camera.call("set_third_person_rotation_degrees", rot)
+	var should_pivot: bool = auto_pivot_when_idle or _is_target_moving() or _is_target_turning()
+	if should_pivot:
+		_apply_auto_follow_pivot(delta)
 
 func _handle_top_down_input(event: InputEvent) -> void:
 	if _top_down_camera == null:
@@ -268,7 +286,9 @@ func _set_follow_mode(target: Node3D) -> void:
 	_third_person_enabled = true
 	_manual_look = false
 	_manual_timer = 0.0
+	_follow_slope_pitch_current = 0.0
 	_restore_perspective()
+	_initialize_follow_camera_defaults()
 	if _follow_camera != null:
 		_follow_camera.call("set_follow_target", target)
 	_apply_view_priorities()
@@ -287,6 +307,87 @@ func _apply_manual_orbit(event: InputEventMouseMotion) -> void:
 	rot.x = clampf(rot.x - event.relative.y * mouse_sensitivity, pitch_min, pitch_max)
 	rot.y = wrapf(rot.y - event.relative.x * mouse_sensitivity, 0.0, 360.0)
 	_follow_camera.call("set_third_person_rotation_degrees", rot)
+
+
+func _apply_auto_follow_pivot(delta: float) -> void:
+	if _follow_camera == null or _active_target == null:
+		return
+	var rot: Vector3 = _follow_camera.call("get_third_person_rotation_degrees")
+	var target_yaw: float = _yaw_behind_target(_active_target) + shoulder_yaw_offset_degrees
+	var yaw_diff: float = _shortest_yaw_delta(target_yaw, rot.y)
+	var turn_lerp: float = clampf(absf(yaw_diff) / 70.0, 0.0, 1.0)
+	var moving_turn_boost: float = 1.0 if _is_target_moving() else 0.7
+	var yaw_blend_speed: float = lerpf(follow_pivot_blend_speed, follow_turn_boost_speed, turn_lerp) * moving_turn_boost
+	rot.y += yaw_diff * clampf(yaw_blend_speed * delta, 0.0, 1.0)
+	var slope_extra_pitch: float = _compute_follow_slope_extra_pitch(delta)
+	var target_pitch: float = shoulder_pitch_degrees + slope_extra_pitch
+	var pitch_diff: float = target_pitch - rot.x
+	rot.x += pitch_diff * clampf(follow_return_pitch_speed * delta, 0.0, 1.0)
+	rot.x = clampf(rot.x, pitch_min, pitch_max)
+	_follow_camera.call("set_third_person_rotation_degrees", rot)
+
+func _compute_follow_slope_extra_pitch(delta: float) -> float:
+	if not follow_slope_pitch_enabled:
+		_follow_slope_pitch_current = 0.0
+		return 0.0
+	if _active_target == null or not is_instance_valid(_active_target):
+		_follow_slope_pitch_current = 0.0
+		return 0.0
+	if not _is_target_moving_forward():
+		# Ease back toward neutral pitch on flat/uphill/idle movement.
+		_follow_slope_pitch_current = lerpf(
+			_follow_slope_pitch_current,
+			0.0,
+			clampf(follow_slope_pitch_blend_speed * maxf(delta, 0.0001), 0.0, 1.0)
+		)
+		return _follow_slope_pitch_current
+
+	var terrain_node: Node = _get_active_terrain_node()
+	if terrain_node == null:
+		_follow_slope_pitch_current = 0.0
+		return 0.0
+
+	var forward: Vector3 = -_active_target.global_basis.z
+	forward.y = 0.0
+	if forward.length_squared() < 0.0001:
+		return _follow_slope_pitch_current
+	forward = forward.normalized()
+
+	var base_pos: Vector3 = _active_target.global_position - (forward * maxf(follow_slope_probe_back_distance, 0.0))
+	var ahead_pos: Vector3 = _active_target.global_position + (forward * maxf(follow_slope_probe_distance, 0.5))
+	var base_h: float = float(terrain_node.call("sample_height", base_pos.x, base_pos.z))
+	var ahead_h: float = float(terrain_node.call("sample_height", ahead_pos.x, ahead_pos.z))
+
+	# Positive drop means the terrain ahead is lower than where the character is now.
+	var drop: float = base_h - ahead_h
+	var target_extra: float = 0.0
+	if drop > follow_slope_min_drop:
+		target_extra = clampf(
+			(drop - follow_slope_min_drop) * maxf(follow_slope_pitch_sensitivity, 0.0),
+			0.0,
+			maxf(follow_slope_pitch_max_extra, 0.0)
+		)
+
+	_follow_slope_pitch_current = lerpf(
+		_follow_slope_pitch_current,
+		target_extra,
+		clampf(follow_slope_pitch_blend_speed * maxf(delta, 0.0001), 0.0, 1.0)
+	)
+	return _follow_slope_pitch_current
+
+func _get_active_terrain_node() -> Node:
+	if _terrain_node_cache != null and is_instance_valid(_terrain_node_cache) and _terrain_node_cache.has_method("sample_height"):
+		return _terrain_node_cache
+	var chunked_terrain: Node = get_node_or_null("../Terrain/ChunkedWorldBrush")
+	if chunked_terrain != null and chunked_terrain.has_method("sample_height"):
+		_terrain_node_cache = chunked_terrain
+		return _terrain_node_cache
+	var worldbrush_terrain: Node = get_node_or_null("../Terrain/WorldBrushRuntimeRoot/WorldBrush")
+	if worldbrush_terrain != null and worldbrush_terrain.has_method("sample_height"):
+		_terrain_node_cache = worldbrush_terrain
+		return _terrain_node_cache
+	_terrain_node_cache = null
+	return null
 
 func _adjust_spring_length(delta_len: float) -> void:
 	if _follow_camera == null:
@@ -320,13 +421,23 @@ func _is_target_moving_forward() -> bool:
 	# Only auto-rotate camera behind character when moving mostly forward.
 	return planar_vel.dot(char_forward) > 0.25
 
+func _is_target_turning() -> bool:
+	if _follow_camera == null or _active_target == null:
+		return false
+	var rot: Vector3 = _follow_camera.call("get_third_person_rotation_degrees")
+	var target_yaw: float = _yaw_behind_target(_active_target) + shoulder_yaw_offset_degrees
+	return absf(_shortest_yaw_delta(target_yaw, rot.y)) > 8.0
+
+func _shortest_yaw_delta(target_yaw: float, current_yaw: float) -> float:
+	return fmod(target_yaw - current_yaw + 540.0, 360.0) - 180.0
+
 func _yaw_behind_target(target: Node3D) -> float:
 	var forward: Vector3 = -target.global_basis.z
 	forward.y = 0.0
 	if forward.length_squared() < 0.0001:
 		return float(_follow_camera.call("get_third_person_rotation_degrees").y)
 	forward = forward.normalized()
-	return rad_to_deg(atan2(-forward.x, -forward.z))
+	return fmod(rad_to_deg(atan2(-forward.x, -forward.z)) + 180.0, 360.0)
 
 func _apply_view_priorities() -> void:
 	if _top_down_camera != null:
@@ -399,6 +510,24 @@ func _initialize_top_down_camera_defaults() -> void:
 		var current_size: float = float(_top_down_camera.call("get_size"))
 		if current_size < top_down_size_min:
 			_top_down_camera.call("set_size", clampf(72.0, top_down_size_min, top_down_size_max))
+	# Tighten depth planes for orthographic top-down — dramatically improves
+	# depth-buffer precision and eliminates z-fighting artefacts at chunk seams.
+	if _camera != null:
+		_camera.near = 5.0
+		_camera.far = 300.0
+
+func _initialize_follow_camera_defaults() -> void:
+	if _follow_camera == null:
+		return
+	if _follow_camera_defaults_applied:
+		return
+	if _follow_camera.has_method("set_follow_offset"):
+		_follow_camera.call("set_follow_offset", Vector3(shoulder_lateral_offset, follow_height_offset, 0.0))
+	if _follow_camera.has_method("set_look_at_offset"):
+		_follow_camera.call("set_look_at_offset", Vector3(0.0, follow_look_at_height, 0.0))
+	if _follow_camera.has_method("set_spring_length"):
+		_follow_camera.call("set_spring_length", clampf(follow_default_spring_length, spring_length_min, spring_length_max))
+	_follow_camera_defaults_applied = true
 
 func _apply_editor_camera_pose() -> void:
 	if _editor_camera == null or _camera_focus == null:
@@ -434,3 +563,6 @@ func _restore_perspective() -> void:
 		return
 	_camera.projection = Camera3D.PROJECTION_PERSPECTIVE
 	_camera.fov = 70.0
+	# Restore full near/far range for perspective views.
+	_camera.near = 0.05
+	_camera.far = 4000.0

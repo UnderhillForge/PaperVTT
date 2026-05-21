@@ -4,6 +4,8 @@ signal action_requested(action: String)
 
 var _next_id: int = 1
 var _id_to_action: Dictionary = {}
+var _action_to_id: Dictionary = {}
+var _id_to_popup: Dictionary = {}
 
 func _ready() -> void:
 	set_flat(true)
@@ -58,6 +60,10 @@ func _ready() -> void:
 		{"label": "Toggle Performance Mode", "action": "config_toggle_performance_mode"},
 		{"label": "Toggle Ultra Performance", "action": "config_toggle_ultra_performance_mode"},
 		{"label": "Toggle Lightweight PostFX", "action": "config_toggle_light_postfx"},
+		{"label": "Use Chunked Terrain", "action": "config_toggle_chunked_terrain", "checkable": true},
+		{"label": "Debug Draw Chunk Borders", "action": "config_toggle_chunk_borders", "checkable": true},
+		{"label": "Debug Chunk Borders (Red)", "action": "config_toggle_chunk_borders_red", "checkable": true},
+		{"label": "Highlight Problem Borders", "action": "config_toggle_chunk_borders_highlight", "checkable": true},
 		{"separator": true},
 		{"label": "Editor Settings", "action": "config_editor"},
 		{"label": "Input Settings", "action": "config_input"}
@@ -91,8 +97,26 @@ func _add_menu(title: String, items: Array) -> void:
 			continue
 		var item_id := _next_id
 		_next_id += 1
-		popup.add_item(String(entry.get("label", "")), item_id)
-		_id_to_action[item_id] = String(entry.get("action", ""))
+		if bool(entry.get("checkable", false)):
+			popup.add_check_item(String(entry.get("label", "")), item_id)
+		else:
+			popup.add_item(String(entry.get("label", "")), item_id)
+		var action: String = String(entry.get("action", ""))
+		_id_to_action[item_id] = action
+		_action_to_id[action] = item_id
+		_id_to_popup[item_id] = popup
+
+func set_action_checked(action: String, checked: bool) -> void:
+	if not _action_to_id.has(action):
+		return
+	var item_id: int = int(_action_to_id[action])
+	var popup: PopupMenu = _id_to_popup.get(item_id, null) as PopupMenu
+	if popup == null:
+		return
+	var item_index: int = popup.get_item_index(item_id)
+	if item_index < 0:
+		return
+	popup.set_item_checked(item_index, checked)
 
 func _on_menu_id_pressed(item_id: int) -> void:
 	if not _id_to_action.has(item_id):

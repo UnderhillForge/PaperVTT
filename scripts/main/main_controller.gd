@@ -24,6 +24,11 @@ const DistantHorizonSystemScript: Script = preload("res://scripts/world/distant_
 @onready var time_weather_panel: Control = %TimeWeatherPanel
 @onready var time_of_day_lighting: Node = get_node_or_null("LightingManager")
 
+@export var use_chunked_terrain: bool = true
+@export var debug_draw_chunk_borders: bool = false
+@export var debug_draw_chunk_borders_red: bool = false
+@export var debug_highlight_problem_borders: bool = false
+
 var _runtime_terrain_editor = TerrainRuntimeEditor.new()
 var _selected_prefab: String = ""
 var _current_tool: String = "stamp"
@@ -106,8 +111,10 @@ const HORIZON_MOUNTAIN_PLACE_DISTANCE: float = 3000.0
 const MENU_BAR_SCRIPT: Script = preload("res://scripts/ui/main_menu_bar.gd")
 const TOOLBAR_SCENE: PackedScene = preload("res://scenes/ui/WorldToolsToolbar.tscn")
 const ASSET_BROWSER_SCENE: PackedScene = preload("res://scenes/ui/AssetBrowser.tscn")
+const WORLDBRUSH_RUNTIME_ROOT_SCENE: PackedScene = preload("res://scenes/terrain/WorldBrushRuntimeRoot.tscn")
 const WORLDBRUSH_RADIAL_MENU_SCRIPT: Script = preload("res://addons/worldbrush/ui/worldbrush_radial_menu.gd")
 const WORLDBRUSH_INSPECTOR_SCRIPT: Script = preload("res://addons/worldbrush/ui/worldbrush_inspector.gd")
+const CHUNKED_WORLDBRUSH_SCRIPT: Script = preload("res://addons/worldbrush/chunked_worldbrush.gd")
 # CUSTOM_TERRAIN_SCENE — removed (legacy terrain migration)
 const DUNGEONDRAFT_IMPORTER_SCRIPT: Script = preload("res://scripts/import/dungeondraft_importer.gd")
 # GRASS_SYSTEM_SCRIPT — removed (legacy terrain migration)
@@ -237,10 +244,13 @@ func _ready() -> void:
 	_ensure_editor_ui_layout()
 	_ensure_worldbrush_menu()
 	_ensure_worldbrush_inspector()
+	if postfx_canvas != null and postfx_canvas.has_signal("ppf_import_completed"):
+		postfx_canvas.connect("ppf_import_completed", Callable(self, "_on_postfx_ppf_import_completed"))
 	_ensure_radius_indicator()
 	_update_tool_name_display()
 	if menu_bar != null:
 		menu_bar.action_requested.connect(_on_menu_action_requested)
+		_sync_configuration_menu_state()
 	if world_tools != null:
 		world_tools.tool_changed.connect(_on_tool_changed)
 		world_tools.setting_changed.connect(_on_tool_setting_changed)
@@ -477,11 +487,16 @@ func _sync_environment_inspector() -> void:
 		"lightning_interval": _lightning_interval,
 		"lightning_intensity": _lightning_intensity,
 		"lightning_random_variation": _lightning_random_variation,
+		"postfx": postfx_canvas.call("get_live_postfx_state") if postfx_canvas != null and postfx_canvas.has_method("get_live_postfx_state") else {},
 	}
 	if _worldbrush_inspector.has_method("set_environment_state"):
 		_worldbrush_inspector.call("set_environment_state", env_state)
+	if _worldbrush_inspector.has_method("set_postfx_state") and postfx_canvas != null and postfx_canvas.has_method("get_live_postfx_state"):
+		_worldbrush_inspector.call("set_postfx_state", postfx_canvas.call("get_live_postfx_state"))
 	if _worldbrush_inspector.has_method("set_environment_active_weather"):
 		_worldbrush_inspector.call("set_environment_active_weather", _get_active_weather_ids())
+	if _worldbrush_inspector.has_method("set_postfx_preview_texture") and postfx_canvas != null and postfx_canvas.has_method("get_preview_texture"):
+		_worldbrush_inspector.call("set_postfx_preview_texture", postfx_canvas.call("get_preview_texture"))
 
 
 func _tick_time_of_day(delta: float) -> void:
@@ -1208,6 +1223,14 @@ func _on_menu_action_requested(action: String) -> void:
 			_set_ultra_performance_mode(not _ultra_performance_mode)
 		"config_toggle_light_postfx":
 			_set_lightweight_postfx(not _lightweight_postfx)
+		"config_toggle_chunked_terrain":
+			_set_use_chunked_terrain(not use_chunked_terrain)
+		"config_toggle_chunk_borders":
+			_set_debug_draw_chunk_borders(not debug_draw_chunk_borders)
+		"config_toggle_chunk_borders_red":
+			_set_debug_draw_chunk_borders_red(not debug_draw_chunk_borders_red)
+		"config_toggle_chunk_borders_highlight":
+			_set_debug_highlight_problem_borders(not debug_highlight_problem_borders)
 		"file_quit":
 			get_tree().quit()
 		"help_about", "app_about":
@@ -1446,7 +1469,64 @@ func _on_tool_setting_changed(setting_name: String, value: Variant) -> void:
 			_debug_visualize_dirty_rect = bool(value)
 			if _terrain_node != null and _terrain_node.has_method("set") and _terrain_node.has_property("debug_visualize_dirty_rect"):
 				_terrain_node.debug_visualize_dirty_rect = _debug_visualize_dirty_rect
+		"postfx_effect":
+			if postfx_canvas != null and postfx_canvas.has_method("set_effect_value") and value is Dictionary:
+				var effect_data: Dictionary = value
+				var effect_name: String = String(effect_data.get("name", ""))
+				if effect_name != "":
+					_ensure_postfx_live_preview_mode()
+					postfx_canvas.call("set_effect_value", effect_name, effect_data.get("value"))
+		"postfx_apply_preset":
+			if postfx_canvas != null and postfx_canvas.has_method("apply_builtin_preset"):
+				_ensure_postfx_live_preview_mode()
+				var preset_ok: bool = bool(postfx_canvas.call("apply_builtin_preset", String(value)))
+				_set_status("PostFX preset: %s" % ("Applied" if preset_ok else "Unknown"))
+		"postfx_apply_custom_shader":
+			if postfx_canvas != null and postfx_canvas.has_method("apply_custom_shader_code"):
+				_ensure_postfx_live_preview_mode()
+				var shader_ok: bool = bool(postfx_canvas.call("apply_custom_shader_code", String(value)))
+				_set_status("Custom PostFX shader: %s" % ("Applied" if shader_ok else "Rejected"))
+		"postfx_save_local", "postfx_export_local":
+			if postfx_canvas != null and postfx_canvas.has_method("save_ppf") and value is Dictionary:
+				var save_data: Dictionary = value
+				var save_ok: bool = bool(postfx_canvas.call(
+					"save_ppf",
+					String(save_data.get("path", "")),
+					String(save_data.get("name", "Untitled PostFX")),
+					String(save_data.get("author", "")),
+					String(save_data.get("description", "")),
+					String(save_data.get("custom_shader_code", ""))
+				))
+				_set_status(".ppf %s" % ("saved" if save_ok else "save failed"))
+		"postfx_load_local":
+			if postfx_canvas != null and postfx_canvas.has_method("load_ppf"):
+				var load_ok: bool = bool(postfx_canvas.call("load_ppf", String(value)))
+				if load_ok and _post_process_disabled:
+					_set_post_process_disabled(false)
+				_set_status(".ppf %s" % ("loaded" if load_ok else "load failed"))
+		"postfx_import_url":
+			if postfx_canvas != null and postfx_canvas.has_method("import_ppf_from_url"):
+				postfx_canvas.call("import_ppf_from_url", String(value))
+				_set_status("Importing .ppf from URL...")
 	_sync_environment_inspector()
+
+
+func _on_postfx_ppf_import_completed(success: bool, message: String) -> void:
+	if success and _post_process_disabled:
+		_set_post_process_disabled(false)
+	_set_status("PostFX import: %s" % message)
+
+
+func _ensure_postfx_live_preview_mode() -> void:
+	if _post_process_disabled:
+		_set_post_process_disabled(false)
+	# Leave optimization mode for postfx authoring so slider changes are clearly visible.
+	if _ultra_performance_mode:
+		_set_ultra_performance_mode(false, false)
+	if _performance_mode:
+		_set_performance_mode(false)
+	if _lightweight_postfx:
+		_set_lightweight_postfx(false, false)
 
 func _on_prefab_selected(prefab_path: String) -> void:
 	_selected_prefab = prefab_path
@@ -1469,6 +1549,8 @@ func _on_optimize_button_pressed() -> void:
 	_apply_editor_optimization_preset(true)
 
 func _create_new_flat_map(_include_seed_content: bool = true) -> void:
+	_terrain_node = _ensure_terrain_node()
+	var terrain_editor_ready: bool = _runtime_terrain_editor.initialize(_terrain_node)
 	for child in stamp_root.get_children():
 		child.queue_free()
 	var wall_system: Node = get_node_or_null("WallSystem")
@@ -1488,7 +1570,7 @@ func _create_new_flat_map(_include_seed_content: bool = true) -> void:
 			_terrain_node.call("set_mesh_size", 128 if _lightweight_editor_mode else 512)
 		_configure_visible_terrain()
 
-	if _runtime_terrain_editor.is_available():
+	if terrain_editor_ready:
 		if _terrain_node != null and _terrain_node.has_method("initialize_new_map"):
 			_terrain_node.call("initialize_new_map", Time.get_ticks_usec())
 
@@ -1851,11 +1933,25 @@ func _build_import_material(texture_path: String, fallback_color: Color) -> Stan
 	var mat := StandardMaterial3D.new()
 	mat.uv1_scale = Vector3(1.0, 1.0, 1.0)
 	mat.albedo_color = fallback_color
-	var tex: Texture2D = load(texture_path) as Texture2D
+	var tex: Texture2D = _load_texture2d_or_null(texture_path)
 	if tex != null:
 		mat.albedo_texture = tex
 		mat.uv1_scale = Vector3(2.2, 2.2, 1.0)
 	return mat
+
+func _load_texture2d_or_null(path: String) -> Texture2D:
+	var ext: String = path.get_extension().to_lower()
+	if ext in ["png", "jpg", "jpeg", "webp", "bmp", "tga", "hdr", "exr"]:
+		var image := Image.new()
+		var err: Error = image.load(path)
+		if err == OK and not image.is_empty():
+			return ImageTexture.create_from_image(image)
+
+	var tex: Texture2D = ResourceLoader.load(path, "Texture2D") as Texture2D
+	if tex != null:
+		return tex
+
+	return null
 
 func _begin_dungeondraft_import() -> void:
 	if DisplayServer.get_name() == "headless":
@@ -3344,6 +3440,11 @@ func _get_worldbrush_node() -> Node:
 		return null
 	return terrain_placeholder.find_child("WorldBrush", true, false)
 
+func _get_chunked_worldbrush_node() -> Node:
+	if terrain_placeholder == null:
+		return null
+	return terrain_placeholder.find_child("ChunkedWorldBrush", true, false)
+
 func _get_terrabrush_node() -> Node:
 	if terrain_placeholder == null:
 		return null
@@ -3579,7 +3680,33 @@ func _on_worldbrush_strength_changed(strength: float) -> void:
 	_set_status("Brush strength: %.2f" % _brush_strength)
 
 func _ensure_terrain_node() -> Node:
+	if use_chunked_terrain:
+		var chunked_node: Node = _get_chunked_worldbrush_node()
+		if chunked_node == null:
+			for child in terrain_placeholder.get_children():
+				child.queue_free()
+			var chunked_root := Node3D.new()
+			chunked_root.name = "ChunkedWorldBrush"
+			chunked_root.set_script(CHUNKED_WORLDBRUSH_SCRIPT)
+			terrain_placeholder.add_child(chunked_root)
+			chunked_node = chunked_root
+		if chunked_node != null and chunked_node.has_method("set_world_layer"):
+			chunked_node.call("set_world_layer", _active_world_layer)
+		if chunked_node != null and chunked_node.has_method("set_full_rebuild_mode"):
+			chunked_node.call("set_full_rebuild_mode", _terrain_full_rebuild_mode)
+		if chunked_node != null and chunked_node.has_method("set_debug_draw_chunk_borders"):
+			chunked_node.call("set_debug_draw_chunk_borders", debug_draw_chunk_borders)
+		if chunked_node != null and chunked_node.has_method("set_debug_draw_chunk_borders_red"):
+			chunked_node.call("set_debug_draw_chunk_borders_red", debug_draw_chunk_borders_red)
+		return chunked_node
+
 	var worldbrush_node: Node = _get_worldbrush_node()
+	if worldbrush_node == null and WORLDBRUSH_RUNTIME_ROOT_SCENE != null and terrain_placeholder != null:
+		for child in terrain_placeholder.get_children():
+			child.queue_free()
+		var runtime_root: Node = WORLDBRUSH_RUNTIME_ROOT_SCENE.instantiate()
+		terrain_placeholder.add_child(runtime_root)
+		worldbrush_node = _get_worldbrush_node()
 	if worldbrush_node != null:
 		if worldbrush_node.has_method("set_world_layer"):
 			worldbrush_node.call("set_world_layer", _active_world_layer)
@@ -3609,6 +3736,39 @@ func _ensure_terrain_node() -> Node:
 	ground.material_override = fallback_mat
 	terrain_placeholder.add_child(ground)
 	return terrain_placeholder
+
+func _set_use_chunked_terrain(enabled: bool) -> void:
+	use_chunked_terrain = enabled
+	_sync_configuration_menu_state()
+	_set_status("Chunked Terrain: %s. Create a new map to test this backend safely." % ("On" if use_chunked_terrain else "Off"))
+
+func _set_debug_draw_chunk_borders(enabled: bool) -> void:
+	debug_draw_chunk_borders = enabled
+	if _terrain_node != null and _terrain_node.has_method("set_debug_draw_chunk_borders"):
+		_terrain_node.call("set_debug_draw_chunk_borders", debug_draw_chunk_borders)
+	_sync_configuration_menu_state()
+	_set_status("Chunk Border Debug: %s" % ("On" if debug_draw_chunk_borders else "Off"))
+
+func _set_debug_draw_chunk_borders_red(enabled: bool) -> void:
+	debug_draw_chunk_borders_red = enabled
+	if _terrain_node != null and _terrain_node.has_method("set_debug_draw_chunk_borders_red"):
+		_terrain_node.call("set_debug_draw_chunk_borders_red", debug_draw_chunk_borders_red)
+	_sync_configuration_menu_state()
+	_set_status("Chunk Border Debug Red: %s" % ("On" if debug_draw_chunk_borders_red else "Off"))
+
+func _set_debug_highlight_problem_borders(enabled: bool) -> void:
+	debug_highlight_problem_borders = enabled
+	if _terrain_node != null and _terrain_node.has_method("set_debug_highlight_problem_borders"):
+		_terrain_node.call("set_debug_highlight_problem_borders", debug_highlight_problem_borders)
+	_sync_configuration_menu_state()
+	_set_status("Highlight Problem Borders: %s" % ("On" if debug_highlight_problem_borders else "Off"))
+
+func _sync_configuration_menu_state() -> void:
+	if menu_bar != null and menu_bar.has_method("set_action_checked"):
+		menu_bar.call("set_action_checked", "config_toggle_chunked_terrain", use_chunked_terrain)
+		menu_bar.call("set_action_checked", "config_toggle_chunk_borders", debug_draw_chunk_borders)
+		menu_bar.call("set_action_checked", "config_toggle_chunk_borders_red", debug_draw_chunk_borders_red)
+		menu_bar.call("set_action_checked", "config_toggle_chunk_borders_highlight", debug_highlight_problem_borders)
 
 func _focus_camera_on_seed_content() -> void:
 	if camera_manager == null:

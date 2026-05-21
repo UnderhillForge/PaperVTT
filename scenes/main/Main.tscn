@@ -21,6 +21,9 @@ duration = 0.35
 transition = 2
 ease = 1
 
+[sub_resource type="SphereShape3D" id="7"]
+radius = 0.48
+
 [sub_resource type="Resource" id="5"]
 script = ExtResource("10")
 projection = 1
@@ -84,7 +87,9 @@ follow_damping = true
 follow_distance = 5.2
 vertical_rotation_offset = 0.4
 spring_length = 5.2
-margin = 0.4
+collision_mask = 1
+shape = SubResource("7")
+margin = 0.52
 look_at_offset = Vector3(0, 0.6, 0)
 
 [node name="TopDown2DView" type="Node3D" parent="." unique_id=645560637 node_paths=PackedStringArray("follow_target")]
