@@ -101,7 +101,7 @@ terrain:apply_brush("raise", world_pos, 15.0, 0.7)
 ```
 
 - **Parameters**:
-  - `tool_name` (string): One of: `"raise"`, `"lower"`, `"smooth"`, `"flatten"`, `"paint"`, `"texturepaint"`, `"textureerase"`, `"waterpaint"`, `"watererase"`, `"snowpaint"`, `"snowerase"`
+  - `tool_name` (string): One of: `"raise"`, `"lower"`, `"smooth"`, `"flatten"`, `"texturepaint"`, `"waterpaint"`, `"watererase"`, `"snowpaint"`, `"snowerase"`
   - `world_pos` (Vector3): World-space coordinates where brush is applied
   - `brush_size` (float): Brush radius in world units (1.0-50.0 typical)
   - `brush_strength` (float): Intensity multiplier (0.0-1.0 typical)
@@ -449,7 +449,7 @@ local TERRAIN = {
     MIN_HEIGHT = -14.0,
     BRUSH_TOOLS = {
         "raise", "lower", "smooth", "flatten",
-        "paint", "texturepaint", "textureerase",
+    "texturepaint",
         "waterpaint", "watererase",
         "snowpaint", "snowerase"
     }

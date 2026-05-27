@@ -40,7 +40,7 @@ class_name CameraRig
 
 var follow_target: Node3D = null
 var yaw_degrees: float = 0.0
-var pitch_degrees: float = 30.0
+var pitch_degrees: float = 15.0
 var is_manual_looking: bool = false
 var manual_look_timeout: float = 0.0
 
@@ -59,7 +59,7 @@ func set_follow_target(target: Node3D) -> void:
 		char_forward.y = 0.0
 		if char_forward.length_squared() > 0.001:
 			char_forward = char_forward.normalized()
-			yaw_degrees = rad_to_deg(atan2(-char_forward.x, -char_forward.z))
+			yaw_degrees = fmod(rad_to_deg(atan2(-char_forward.x, -char_forward.z)) + 180.0, 360.0)
 
 
 func clear_follow_target() -> void:
@@ -130,7 +130,7 @@ func _update_follow_behavior(delta: float) -> void:
 		char_forward.y = 0.0
 		if char_forward.length_squared() > 0.001:
 			char_forward = char_forward.normalized()
-			var target_yaw := rad_to_deg(atan2(-char_forward.x, -char_forward.z))
+			var target_yaw := fmod(rad_to_deg(atan2(-char_forward.x, -char_forward.z)) + 180.0, 360.0)
 
 			# Faster orbit while moving, slower drift while idle
 			var orbit_speed := orbit_return_speed if is_moving else orbit_return_speed_idle

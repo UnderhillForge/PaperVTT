@@ -11,6 +11,7 @@ signal selection_changed(character: CharacterController, selected: bool)
 @export var gravity_multiplier: float = 1.0
 @export var click_stop_distance: float = 0.2
 @export var rotate_speed: float = 10.0
+@export var manual_turn_speed_degrees: float = 180.0
 @export var move_mode: int = 0 # 0 = camera_relative, 1 = world_axes
 @export var extra_animation_scenes: Array[PackedScene] = []
 @export var preferred_idle_animation: String = ""
@@ -96,11 +97,14 @@ func _physics_process(delta: float) -> void:
 	var input_dir: Vector2 = _get_move_input() if _is_selected else Vector2.ZERO
 	var desired_dir: Vector3 = Vector3.ZERO
 	var has_move_intent: bool = false
+	var manual_steering_active: bool = false
 
 	if input_dir != Vector2.ZERO:
 		_has_move_target = false
-		desired_dir = _input_to_world_dir(input_dir)
-		has_move_intent = desired_dir.length() > _MOVE_INTENT_THRESHOLD
+		manual_steering_active = true
+		_apply_manual_turn(input_dir.x, delta)
+		desired_dir = _input_to_character_dir(input_dir)
+		has_move_intent = absf(input_dir.y) > _MOVE_INTENT_THRESHOLD
 	elif _has_move_target:
 		desired_dir = _target_move_dir()
 		has_move_intent = desired_dir.length() > _MOVE_INTENT_THRESHOLD
@@ -118,10 +122,30 @@ func _physics_process(delta: float) -> void:
 
 	move_and_slide()
 	_snap_to_terrain_if_available()
-	_update_facing(delta)
+	if not manual_steering_active:
+		_update_facing(delta)
 	_update_animation_state(run_pressed, has_move_intent)
 	_update_selection_shadow_transform()
 	_update_selection_feedback(delta)
+
+
+func _apply_manual_turn(turn_input: float, delta: float) -> void:
+	if absf(turn_input) < 0.001:
+		return
+	rotation.y -= deg_to_rad(manual_turn_speed_degrees) * turn_input * delta
+
+
+func _input_to_character_dir(input_dir: Vector2) -> Vector3:
+	# Character-relative steering: Up/Down drives along current facing; Left/Right only turns.
+	if absf(input_dir.y) < 0.001:
+		return Vector3.ZERO
+	var forward: Vector3 = _model_root.global_basis.z if _model_root != null else global_basis.z
+	forward.y = 0.0
+	if forward.length_squared() < 0.0001:
+		forward = Vector3.FORWARD
+	else:
+		forward = forward.normalized()
+	return forward * input_dir.y
 
 func deselect() -> void:
 	_set_selected(false)
@@ -367,11 +391,11 @@ func _resolve_animation_name(preferred: String, exact_candidates: Array[String],
 	for candidate in exact_candidates:
 		if _anim_player.has_animation(candidate):
 			return candidate
-	for name in _anim_player.get_animation_list():
-		var lower: String = String(name).to_lower()
+	for animation_name in _anim_player.get_animation_list():
+		var lower: String = String(animation_name).to_lower()
 		for token in contains_candidates:
 			if lower.contains(token):
-				return name
+				return String(animation_name)
 	return ""
 
 func _merge_extra_animation_scenes() -> void:

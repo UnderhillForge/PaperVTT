@@ -53,7 +53,7 @@ var _preview_pending_frames: int = 0
 
 const THUMB_SIZE: Vector2i = Vector2i(160, 160)
 const MANIFEST_PATH: String = "res://assets/world/library_manifest.json"
-const PREVIEW_ROOT_PATH: String = "res://assets/world/environment/previews"
+const PREVIEW_ROOT_PATH: String = "user://asset_previews"
 
 func _ready() -> void:
 	_search.text_changed.connect(_refresh_list)

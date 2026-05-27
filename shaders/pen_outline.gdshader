@@ -14,6 +14,20 @@ uniform float paper_strength : hint_range(0.0, 1.0, 0.01) = 0.22;
 uniform float line_darken : hint_range(0.0, 0.6, 0.01) = 0.14;
 uniform float daytime_brightness : hint_range(0.6, 1.4, 0.01) = 1.0;
 uniform float daytime_contrast : hint_range(0.6, 1.4, 0.01) = 1.0;
+uniform float saturation : hint_range(0.0, 2.0, 0.01) = 1.0;
+uniform float contrast : hint_range(0.5, 2.0, 0.01) = 1.0;
+uniform float vignette_strength : hint_range(0.0, 1.0, 0.01) = 0.25;
+uniform float vignette_softness : hint_range(0.05, 1.0, 0.01) = 0.55;
+uniform float bloom_strength : hint_range(0.0, 1.0, 0.01) = 0.12;
+uniform vec4 color_tint : source_color = vec4(1.0, 1.0, 1.0, 1.0);
+uniform float tint_strength : hint_range(0.0, 1.0, 0.01) = 0.0;
+uniform bool outlines_layer_enabled = false;
+uniform vec4 outlines_layer_color : source_color = vec4(0.01, 0.01, 0.01, 1.0);
+uniform float outlines_layer_thickness : hint_range(0.5, 8.0, 0.1) = 2.2;
+uniform float outlines_layer_depth_sensitivity : hint_range(0.0, 8.0, 0.01) = 1.6;
+uniform float outlines_layer_depth_threshold : hint_range(0.001, 0.35, 0.001) = 0.055;
+uniform float outlines_layer_normal_sensitivity : hint_range(0.0, 8.0, 0.01) = 1.3;
+uniform float outlines_layer_opacity : hint_range(0.0, 1.0, 0.01) = 0.48;
 
 float luminance(vec3 c) {
 	return dot(c, vec3(0.299, 0.587, 0.114));
@@ -68,6 +82,60 @@ void fragment() {
 		vec3 paperized = mix(hatched_scene, hatched_scene * paper_tint.rgb, paper_strength * 0.35);
 		vec3 outlined = mix(paperized, outline_color.rgb, outline * outline_color.a * 0.28);
 		vec3 out_col = max(vec3(0.0), outlined * (1.0 - (outline * line_darken * 0.35)));
+
+		vec2 bloom_px = TEXTURE_PIXEL_SIZE * 2.0;
+		vec3 bloom_sample = texture(TEXTURE, uv + vec2(bloom_px.x, 0.0)).rgb;
+		bloom_sample += texture(TEXTURE, uv + vec2(-bloom_px.x, 0.0)).rgb;
+		bloom_sample += texture(TEXTURE, uv + vec2(0.0, bloom_px.y)).rgb;
+		bloom_sample += texture(TEXTURE, uv + vec2(0.0, -bloom_px.y)).rgb;
+		bloom_sample *= 0.25;
+		out_col = mix(out_col, out_col + bloom_sample * 0.22, bloom_strength);
+
+		if (outlines_layer_enabled && outlines_layer_opacity > 0.001) {
+			vec2 o_px = TEXTURE_PIXEL_SIZE * outlines_layer_thickness;
+			float o_tl = luminance(texture(TEXTURE, uv + vec2(-o_px.x, -o_px.y)).rgb);
+			float o_tc = luminance(texture(TEXTURE, uv + vec2(0.0, -o_px.y)).rgb);
+			float o_tr = luminance(texture(TEXTURE, uv + vec2(o_px.x, -o_px.y)).rgb);
+			float o_ml = luminance(texture(TEXTURE, uv + vec2(-o_px.x, 0.0)).rgb);
+			float o_mc = luminance(texture(TEXTURE, uv).rgb);
+			float o_mr = luminance(texture(TEXTURE, uv + vec2(o_px.x, 0.0)).rgb);
+			float o_bl = luminance(texture(TEXTURE, uv + vec2(-o_px.x, o_px.y)).rgb);
+			float o_bc = luminance(texture(TEXTURE, uv + vec2(0.0, o_px.y)).rgb);
+			float o_br = luminance(texture(TEXTURE, uv + vec2(o_px.x, o_px.y)).rgb);
+
+			float d_h = (o_tr + 2.0 * o_mr + o_br - (o_tl + 2.0 * o_ml + o_bl)) * 0.25;
+			float d_v = (o_tl + 2.0 * o_tc + o_tr - (o_bl + 2.0 * o_bc + o_br)) * 0.25;
+			float depth_edge = length(vec2(d_h, d_v)) * outlines_layer_depth_sensitivity;
+			float depth_mask = smoothstep(
+				outlines_layer_depth_threshold,
+				outlines_layer_depth_threshold * 2.8,
+				depth_edge
+			);
+
+			float n_h = abs(o_mr - o_ml);
+			float n_v = abs(o_bc - o_tc);
+			float n_diag = abs(o_tl - o_br) + abs(o_tr - o_bl);
+			float normal_edge = ((n_h + n_v) * 0.5 + n_diag * 0.25 + abs(o_mc - o_tc) * 0.2) * outlines_layer_normal_sensitivity;
+			float normal_mask = smoothstep(
+				outlines_layer_depth_threshold * 0.65,
+				outlines_layer_depth_threshold * 2.1,
+				normal_edge
+			);
+
+			float outline_layer = clamp(max(depth_mask, normal_mask), 0.0, 1.0) * outlines_layer_opacity;
+			out_col = mix(out_col, outlines_layer_color.rgb, outline_layer * outlines_layer_color.a);
+		}
+
+		float lum2 = luminance(out_col);
+		out_col = mix(vec3(lum2), out_col, saturation);
+		out_col = (out_col - vec3(0.5)) * contrast + vec3(0.5);
+		out_col = mix(out_col, out_col * color_tint.rgb, tint_strength * color_tint.a);
+
+		vec2 centered = uv * 2.0 - 1.0;
+		float dist = length(centered);
+		float vig = smoothstep(vignette_softness, 1.0, dist);
+		out_col *= (1.0 - vig * vignette_strength);
+
 		out_col = (out_col - vec3(0.5)) * daytime_contrast + vec3(0.5);
 		out_col *= daytime_brightness;
 		out_col = clamp(out_col, vec3(0.0), vec3(1.0));

@@ -246,13 +246,13 @@ func apply_brush(
 - `"lower"` — Lower terrain
 - `"smooth"` — Smooth with neighbor average
 - `"flatten"` — Flatten to target height
-- `"paint"` — Paint color (0–1 grayscale)
 - `"texturepaint"` — Paint texture with strength modulation
-- `"textureerase"` — Erase texture (reduce paint value)
 - `"waterpaint"` — Carve water basin (lowers, wets, paints)
 - `"watererase"` — Remove water (raise, dry, unpaint)
 - `"snowpaint"` — Add snow coverage (0–1)
 - `"snowerase"` — Remove snow
+
+Texture erase is exposed via `apply_texture_erase_brush(...)` rather than a direct `apply_brush` tool name.
 
 **Usage**:
 ```gdscript
@@ -313,7 +313,7 @@ func apply_texture_erase_brush(
 ```
 - **Parameters**: (See `apply_texture_brush`)
 - **Returns**: `void`
-- **Description**: Erase texture paint; calls `apply_brush("textureerase", ...)`.
+- **Description**: Erase texture paint from all active texture channels at the brush location.
 
 ```gdscript
 func end_texture_stroke() -> void

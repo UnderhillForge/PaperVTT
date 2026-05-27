@@ -1,8 +1,0 @@
-[gd_scene format=3]
-
-[node name="stone_wall_window_2m" type="Node3D" unique_id=633840094]
-metadata/piece_name = "wall_window_2m"
-metadata/piece_kind = "window"
-metadata/wall_variant = "stone"
-metadata/grid_snap_m = 0.5
-metadata/wall_height_m = 3.4

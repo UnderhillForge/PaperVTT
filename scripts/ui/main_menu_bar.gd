@@ -40,7 +40,6 @@ func _ready() -> void:
 		{"label": "Lower", "action": "tool_lower"},
 		{"label": "Smooth", "action": "tool_smooth"},
 		{"label": "Flatten", "action": "tool_flatten"},
-		{"label": "Paint", "action": "tool_paint"},
 		{"label": "Stamp Prefab", "action": "tool_stamp"},
 		{"label": "Smart Wall", "action": "tool_wall"}
 	])

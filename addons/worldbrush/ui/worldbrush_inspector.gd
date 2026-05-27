@@ -3,6 +3,7 @@ class_name WorldBrushInspector
 
 const GM_AUDIO_PANEL_SCRIPT: Script = preload("res://addons/paper_vtt/audio/gm_audio_panel.gd")
 const ENVIRONMENT_PANEL_SCRIPT: Script = preload("res://scripts/ui/EnvironmentPanel.gd")
+const POSTFX_PANEL_SCRIPT: Script = preload("res://scripts/ui/PostFxPanel.gd")
 
 signal brush_size_changed(size: float)
 signal brush_strength_changed(strength: float)
@@ -24,7 +25,7 @@ const HEADER_ICON_SIZE: int = 24
 const COLLAPSE_ICON_MAX_WIDTH: int = 18
 const INSPECTOR_ICON_PATH: String = "res://assets/ui/icons/000000/transparent/1x1/various-artists/infinity.svg"
 const COLLAPSE_ICON_PATH: String = "res://assets/ui/icons/000000/transparent/1x1/viscious-speed/abstract-030.svg"
-const WORLD_TEXTURE_ROOT: String = "res://assets/world/textures/world"
+const WORLD_TEXTURE_ROOT: String = "res://assets/world/textures"
 const TEXTURE_TILE_SIZE: int = 66
 const TEXTURE_GRID_GAP: int = 4
 const TEXTURE_GRID_MIN_COLUMNS: int = 3
@@ -44,6 +45,7 @@ var _collapse_button: Button = null
 var _custom_options_container: VBoxContainer = null
 var _audio_panel: Control = null
 var _environment_panel: Control = null
+var _postfx_panel: Control = null
 var _is_collapsed: bool = false
 var _updating_ui: bool = false
 
@@ -297,6 +299,27 @@ func _build_ui() -> void:
 	if _environment_panel == null:
 		environment_tab.add_child(_make_label("Environment panel unavailable."))
 
+	var pfx_tab := MarginContainer.new()
+	pfx_tab.name = "PFX"
+	pfx_tab.add_theme_constant_override("margin_left", 0)
+	pfx_tab.add_theme_constant_override("margin_right", 0)
+	pfx_tab.add_theme_constant_override("margin_top", 0)
+	pfx_tab.add_theme_constant_override("margin_bottom", 0)
+	_tab_container.add_child(pfx_tab)
+	_tab_container.set_tab_title(3, "PFX")
+
+	if POSTFX_PANEL_SCRIPT != null:
+		var pfx_instance: Variant = POSTFX_PANEL_SCRIPT.new()
+		if pfx_instance is Control:
+			_postfx_panel = pfx_instance as Control
+			_postfx_panel.visible = true
+			pfx_tab.add_child(_postfx_panel)
+			if _postfx_panel.has_signal("environment_setting_changed"):
+				_postfx_panel.connect("environment_setting_changed", Callable(self, "_on_environment_setting_changed"))
+
+	if _postfx_panel == null:
+		pfx_tab.add_child(_make_label("PFX panel unavailable."))
+
 	_tab_container.current_tab = 0
 	_set_collapsed(false)
 	_update_custom_options()
@@ -317,6 +340,11 @@ func _update_custom_options() -> void:
 	var brush_softness: float = clampf(float(_tool_state.get("brush_softness", 0.42)), 0.0, 1.0)
 	var smooth_post_pass_enabled: bool = bool(_tool_state.get("smooth_post_pass_enabled", true))
 	var smooth_post_pass_strength: float = clampf(float(_tool_state.get("smooth_post_pass_strength", 0.12)), 0.0, 0.35)
+	var texture_tile_size: float = clampf(float(_tool_state.get("texture_tile_size", 8.0)), 1.0, 32.0)
+	var texture_erase_mode: bool = bool(_tool_state.get("texture_erase_mode", false))
+	var texture_stamp_mode: bool = bool(_tool_state.get("texture_stamp_mode", false))
+	var texture_stamp_overlap: float = clampf(float(_tool_state.get("texture_stamp_overlap", 0.28)), 0.0, 0.95)
+	var texture_stamp_scatter: float = clampf(float(_tool_state.get("texture_stamp_scatter", 0.32)), 0.0, 1.0)
 	var selected_texture_id: String = String(_tool_state.get("selected_texture_id", _current_selected_texture))
 	var wall_type: String = String(_tool_state.get("wall_type", "stone"))
 	var wall_height: float = float(_tool_state.get("wall_height", 3.4))
@@ -394,6 +422,28 @@ func _update_custom_options() -> void:
 		_custom_options_container.add_child(_make_label("Texture Picker"))
 		_custom_options_container.add_child(_texture_grid)
 		populate_texture_buttons(_texture_preview_painter)
+		_custom_options_container.add_child(_make_label("Texture Scale (m / tile)"))
+		var texture_scale_slider := _make_slider(1.0, 32.0, texture_tile_size, 0.1)
+		texture_scale_slider.value_changed.connect(func(v: float) -> void: tool_setting_changed.emit("texture_tile_size", v))
+		_custom_options_container.add_child(texture_scale_slider)
+		var erase_mode_check := CheckBox.new()
+		erase_mode_check.text = "Erase / Subtract Mode"
+		erase_mode_check.button_pressed = texture_erase_mode
+		erase_mode_check.toggled.connect(func(v: bool) -> void: tool_setting_changed.emit("texture_erase_mode", v))
+		_custom_options_container.add_child(erase_mode_check)
+		var stamp_mode_check := CheckBox.new()
+		stamp_mode_check.text = "Stamp Mode"
+		stamp_mode_check.button_pressed = texture_stamp_mode
+		stamp_mode_check.toggled.connect(func(v: bool) -> void: tool_setting_changed.emit("texture_stamp_mode", v))
+		_custom_options_container.add_child(stamp_mode_check)
+		_custom_options_container.add_child(_make_label("Stamp Overlap"))
+		var overlap_slider := _make_slider(0.0, 0.95, texture_stamp_overlap, 0.01)
+		overlap_slider.value_changed.connect(func(v: float) -> void: tool_setting_changed.emit("texture_stamp_overlap", v))
+		_custom_options_container.add_child(overlap_slider)
+		_custom_options_container.add_child(_make_label("Stamp Scatter"))
+		var scatter_slider := _make_slider(0.0, 1.0, texture_stamp_scatter, 0.01)
+		scatter_slider.value_changed.connect(func(v: float) -> void: tool_setting_changed.emit("texture_stamp_scatter", v))
+		_custom_options_container.add_child(scatter_slider)
 
 	if _current_tool == "waterpaint" or _current_tool == "riverdraw":
 		_custom_options_container.add_child(_make_label("Water Settings"))
@@ -492,6 +542,90 @@ func _update_custom_options() -> void:
 	if _current_tool == "stamp":
 		_custom_options_container.add_child(_make_label("Prefab placement uses the selected asset browser item."))
 
+	if _current_tool == "boundary":
+		_custom_options_container.add_child(_make_label("Cliff Line Tool"))
+		var selected_boundary = _tool_state.get("boundary_selected", null)
+		if selected_boundary == null:
+			_custom_options_container.add_child(_make_label("Draw mode active - click terrain to place points\nDouble-click or Enter to finish line\nRight-click to cancel current line"))
+		else:
+			# Label / Name
+			_custom_options_container.add_child(_make_label("Cliff Line Name"))
+			var name_edit := LineEdit.new()
+			name_edit.placeholder_text = "Cliff Line"
+			name_edit.text = String(selected_boundary.get("label", "Cliff Line"))
+			name_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			name_edit.text_changed.connect(func(v: String) -> void: tool_setting_changed.emit("boundary_label", v))
+			_custom_options_container.add_child(name_edit)
+			# Material dropdown
+			_custom_options_container.add_child(_make_label("Face Material"))
+			var material_option := OptionButton.new()
+			material_option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			var materials := ["rock", "stone", "dirt", "gravel"]
+			var current_material: String = String(selected_boundary.get("face_material", "rock"))
+			for i in range(materials.size()):
+				var mat_name: String = materials[i]
+				material_option.add_item(mat_name.capitalize())
+				material_option.set_item_metadata(i, mat_name)
+				if mat_name == current_material:
+					material_option.select(i)
+			material_option.item_selected.connect(func(index: int) -> void:
+				var md: Variant = material_option.get_item_metadata(index)
+				tool_setting_changed.emit("boundary_material", String(md) if md is String else "rock")
+			)
+			_custom_options_container.add_child(material_option)
+			# Steepness slider
+			_custom_options_container.add_child(_make_label("Steepness (0 deg = slope, 90 deg = cliff)"))
+			var steep_slider := _make_slider(0.0, 90.0, float(selected_boundary.get("steepness", 80.0)), 1.0)
+			steep_slider.value_changed.connect(func(v: float) -> void: tool_setting_changed.emit("boundary_steepness", v))
+			_custom_options_container.add_child(steep_slider)
+			# Raise height slider
+			_custom_options_container.add_child(_make_label("Raise Height (m)"))
+			var height_slider := _make_slider(0.0, 40.0, float(selected_boundary.get("raise_height", 8.0)), 0.1)
+			height_slider.value_changed.connect(func(v: float) -> void: tool_setting_changed.emit("boundary_raise_height", v))
+			_custom_options_container.add_child(height_slider)
+			# Face width
+			_custom_options_container.add_child(_make_label("Width of Face (m)"))
+			var width_slider := _make_slider(0.5, 15.0, float(selected_boundary.get("wall_brush_width", 3.5)), 0.1)
+			width_slider.value_changed.connect(func(v: float) -> void: tool_setting_changed.emit("boundary_wall_brush_width", v))
+			_custom_options_container.add_child(width_slider)
+			# Direction selector
+			_custom_options_container.add_child(_make_label("Direction (Raised Side)"))
+			var direction_row := HBoxContainer.new()
+			var side_option := OptionButton.new()
+			side_option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			side_option.add_item("Left of line")
+			side_option.set_item_metadata(0, 1)
+			side_option.add_item("Right of line")
+			side_option.set_item_metadata(1, -1)
+			var current_side: int = int(selected_boundary.get("raise_side", 1))
+			side_option.select(0 if current_side >= 0 else 1)
+			side_option.item_selected.connect(func(index: int) -> void:
+				var md: Variant = side_option.get_item_metadata(index)
+				tool_setting_changed.emit("boundary_direction", int(md))
+			)
+			direction_row.add_child(side_option)
+			var flip_btn := Button.new()
+			flip_btn.text = "Flip"
+			flip_btn.pressed.connect(func() -> void:
+				var md: Variant = side_option.get_item_metadata(side_option.selected)
+				var side_now: int = int(md)
+				tool_setting_changed.emit("boundary_direction", -side_now)
+			)
+			direction_row.add_child(flip_btn)
+			_custom_options_container.add_child(direction_row)
+			# Apply / Delete buttons
+			var btn_row := HBoxContainer.new()
+			var apply_btn := Button.new()
+			apply_btn.text = "Apply Cliff"
+			apply_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			apply_btn.pressed.connect(func() -> void: tool_setting_changed.emit("boundary_apply", true))
+			btn_row.add_child(apply_btn)
+			var del_btn := Button.new()
+			del_btn.text = "Delete"
+			del_btn.pressed.connect(func() -> void: tool_setting_changed.emit("boundary_delete", true))
+			btn_row.add_child(del_btn)
+			_custom_options_container.add_child(btn_row)
+
 	if _custom_options_container.get_child_count() == 0:
 		_custom_options_container.add_child(_make_label("No additional options for this tool."))
 
@@ -501,7 +635,7 @@ func _update_custom_options() -> void:
 
 func _tool_uses_base_brush_controls(tool_name: String) -> bool:
 	match tool_name:
-		"raise", "lower", "smooth", "paint", "flatten", "texturepaint", "waterpaint", "snowpaint", "grasspaint":
+		"raise", "lower", "smooth", "flatten", "texturepaint", "waterpaint", "snowpaint", "grasspaint":
 			return true
 		_:
 			return false
@@ -596,6 +730,18 @@ func set_environment_active_weather(active_weathers: Array[String]) -> void:
 	if _environment_panel != null and _environment_panel.has_method("set_active_weather"):
 		_environment_panel.call("set_active_weather", active_weathers)
 
+
+func set_postfx_preview_texture(texture: Texture2D) -> void:
+	if _postfx_panel != null and _postfx_panel.has_method("set_postfx_preview_texture"):
+		_postfx_panel.call("set_postfx_preview_texture", texture)
+	if _environment_panel != null and _environment_panel.has_method("set_postfx_preview_texture"):
+		_environment_panel.call("set_postfx_preview_texture", texture)
+
+
+func set_postfx_state(state: Dictionary) -> void:
+	if _postfx_panel != null and _postfx_panel.has_method("set_postfx_state"):
+		_postfx_panel.call("set_postfx_state", state)
+
 func populate_texture_buttons(painter: RefCounted) -> void:
 	_texture_preview_painter = painter
 	if _texture_grid == null:
@@ -678,31 +824,44 @@ func _update_selected_texture_preview(texture_id: String) -> void:
 
 func _collect_texture_entries() -> Array[Dictionary]:
 	var entries: Array[Dictionary] = []
-	var root_dir: DirAccess = DirAccess.open(WORLD_TEXTURE_ROOT)
-	if root_dir == null:
-		return entries
-	root_dir.list_dir_begin()
-	var folder_name: String = root_dir.get_next()
-	while folder_name != "":
-		if root_dir.current_is_dir() and not folder_name.begins_with("."):
-			var folder_path: String = "%s/%s" % [WORLD_TEXTURE_ROOT, folder_name]
-			var preview_path: String = _find_texture_preview_path(folder_path)
-			entries.append({
-				"id": folder_path,
-				"display_name": _format_texture_display_name(folder_name),
-				"preview_path": preview_path,
-			})
-		folder_name = root_dir.get_next()
-	root_dir.list_dir_end()
+	_collect_texture_entries_recursive(WORLD_TEXTURE_ROOT, entries, 0)
 	entries.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		return String(a.get("display_name", "")).naturalnocasecmp_to(String(b.get("display_name", ""))) < 0
 	)
 	return entries
 
+func _collect_texture_entries_recursive(folder_path: String, entries: Array[Dictionary], depth: int) -> void:
+	if depth > 3:
+		return
+	var dir: DirAccess = DirAccess.open(folder_path)
+	if dir == null:
+		return
+	dir.list_dir_begin()
+	var name: String = dir.get_next()
+	while name != "":
+		if not dir.current_is_dir() and not name.begins_with("."):
+			var lower_name: String = name.to_lower()
+			if lower_name.ends_with(".png") or lower_name.ends_with(".jpg") or lower_name.ends_with(".jpeg") or lower_name.ends_with(".webp"):
+				var texture_path: String = "%s/%s" % [folder_path, name]
+				entries.append({
+					"id": texture_path,
+					"display_name": _format_texture_display_name(texture_path.trim_prefix(WORLD_TEXTURE_ROOT + "/")),
+					"preview_path": texture_path,
+				})
+		elif dir.current_is_dir() and not name.begins_with("."):
+			_collect_texture_entries_recursive("%s/%s" % [folder_path, name], entries, depth + 1)
+		name = dir.get_next()
+	dir.list_dir_end()
+
 func _find_texture_preview_path(texture_id: String) -> String:
-	var folder_path: String = texture_id
-	if not folder_path.begins_with("res://"):
-		folder_path = "%s/%s" % [WORLD_TEXTURE_ROOT, texture_id]
+	var resolved_path: String = texture_id
+	if not resolved_path.begins_with("res://"):
+		resolved_path = "%s/%s" % [WORLD_TEXTURE_ROOT, texture_id]
+	var lower_resolved_path: String = resolved_path.to_lower()
+	if (lower_resolved_path.ends_with(".png") or lower_resolved_path.ends_with(".jpg") or lower_resolved_path.ends_with(".jpeg") or lower_resolved_path.ends_with(".webp")) and ResourceLoader.exists(resolved_path):
+		return resolved_path
+
+	var folder_path: String = resolved_path
 	var texture_dir: DirAccess = DirAccess.open(folder_path)
 	if texture_dir == null:
 		return ""
@@ -742,10 +901,51 @@ func _load_texture_preview(path: String) -> Texture2D:
 func _format_texture_display_name(texture_id: String) -> String:
 	if texture_id.is_empty():
 		return "Selected: none"
-	var name_part: String = texture_id.get_file()
-	if name_part.is_empty():
-		name_part = texture_id
-	return name_part.replace("_", " ").capitalize()
+	var normalized_id: String = texture_id
+	if normalized_id.begins_with(WORLD_TEXTURE_ROOT + "/"):
+		normalized_id = normalized_id.trim_prefix(WORLD_TEXTURE_ROOT + "/")
+	elif normalized_id.begins_with("res://"):
+		normalized_id = normalized_id.trim_prefix("res://")
+
+	var parts: PackedStringArray = normalized_id.split("/", false)
+	if parts.is_empty():
+		return _format_texture_name_part(texture_id)
+	if parts.size() == 1:
+		return _format_texture_name_part(parts[0])
+
+	var category_name: String = _format_texture_name_part(parts[parts.size() - 2])
+	var set_name: String = _format_texture_name_part(parts[parts.size() - 1])
+	return "%s / %s" % [category_name, set_name]
+
+func _format_texture_name_part(part: String) -> String:
+	var clean_part: String = part
+	var lower_part: String = clean_part.to_lower()
+	if lower_part.ends_with(".png") or lower_part.ends_with(".jpg") or lower_part.ends_with(".jpeg") or lower_part.ends_with(".webp"):
+		var ext_index: int = clean_part.rfind(".")
+		if ext_index > 0:
+			clean_part = clean_part.substr(0, ext_index)
+	var normalized: String = clean_part.replace("_", " ").replace("-", " ").strip_edges()
+	if normalized.is_empty():
+		return part
+	var words: PackedStringArray = normalized.split(" ", false)
+	for i in words.size():
+		var w: String = words[i]
+		if w.is_empty():
+			continue
+		words[i] = _normalize_texture_token(w)
+	return " ".join(words)
+
+func _normalize_texture_token(token: String) -> String:
+	var lower: String = token.to_lower()
+	if lower.length() > 1 and lower.ends_with("k"):
+		var number_part: String = lower.substr(0, lower.length() - 1)
+		if number_part.is_valid_int():
+			return "%sK" % number_part
+	match lower:
+		"png", "jpg", "jpeg", "webp", "ao", "dx", "gl", "pbr", "uv", "uvs", "lod", "id", "hdr", "hdri":
+			return lower.to_upper()
+		_:
+			return token.substr(0, 1).to_upper() + token.substr(1)
 
 func _on_wall_type_selected(index: int) -> void:
 	if _tool_state.is_empty():
@@ -761,7 +961,6 @@ func _format_tool_label(tool_name: String) -> String:
 		"lower": return "Lower Terrain"
 		"smooth": return "Smooth Terrain"
 		"flatten": return "Flatten Height"
-		"paint": return "Terrain Paint"
 		"texturepaint": return "Texture Paint"
 		"waterpaint": return "Water Paint"
 		"snowpaint": return "Snow Paint"
@@ -770,4 +969,5 @@ func _format_tool_label(tool_name: String) -> String:
 		"stamp": return "Place Objects"
 		"grasspaint": return "Paint Foliage"
 		"select": return "Select / None"
+		"boundary": return "Cliff Line"
 		_: return tool_name.capitalize()

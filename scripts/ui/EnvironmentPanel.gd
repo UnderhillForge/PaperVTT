@@ -36,6 +36,35 @@ var _lightning_random_check: CheckBox = null
 var _full_rebuild_check: CheckBox = null
 var _debug_visualize_dirty_rect_check: CheckBox = null
 
+var _postfx_preview: TextureRect = null
+var _postfx_outline_slider: HSlider = null
+var _postfx_outline_value: Label = null
+var _postfx_contrast_slider: HSlider = null
+var _postfx_contrast_value: Label = null
+var _postfx_saturation_slider: HSlider = null
+var _postfx_saturation_value: Label = null
+var _postfx_vignette_slider: HSlider = null
+var _postfx_vignette_value: Label = null
+var _postfx_bloom_slider: HSlider = null
+var _postfx_bloom_value: Label = null
+var _postfx_tint_slider: HSlider = null
+var _postfx_tint_value: Label = null
+var _postfx_tint_picker: ColorPickerButton = null
+var _postfx_outlines_layer_enable: CheckBox = null
+var _postfx_outlines_layer_thickness_slider: HSlider = null
+var _postfx_outlines_layer_depth_threshold_slider: HSlider = null
+var _postfx_outlines_layer_depth_sensitivity_slider: HSlider = null
+var _postfx_outlines_layer_normal_sensitivity_slider: HSlider = null
+var _postfx_outlines_layer_opacity_slider: HSlider = null
+var _postfx_outlines_layer_color_picker: ColorPickerButton = null
+var _postfx_preset_option: OptionButton = null
+var _ppf_name_edit: LineEdit = null
+var _ppf_author_edit: LineEdit = null
+var _ppf_description_edit: LineEdit = null
+var _ppf_path_edit: LineEdit = null
+var _ppf_remote_url_edit: LineEdit = null
+var _postfx_shader_code: TextEdit = null
+
 var _updating_ui: bool = false
 var _active_weathers: Array[String] = ["normal"]
 
@@ -253,6 +282,296 @@ func _ready() -> void:
 	root.add_child(_lightning_random_check)
 
 	root.add_child(HSeparator.new())
+	root.add_child(_make_section_title("Live Post-Process Editor"))
+
+	var preview_label := _make_label("Live Preview")
+	root.add_child(preview_label)
+	_postfx_preview = TextureRect.new()
+	_postfx_preview.custom_minimum_size = Vector2(220, 140)
+	_postfx_preview.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_postfx_preview.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	_postfx_preview.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	root.add_child(_postfx_preview)
+
+	var preset_row := HBoxContainer.new()
+	preset_row.add_child(_make_label("Preset"))
+	_postfx_preset_option = OptionButton.new()
+	_postfx_preset_option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	for name in ["Graphic Novel", "Graphic Novel Outlines", "Pen & Ink Outlines", "Watercolor", "Cinematic", "Horror", "Dreamy"]:
+		_postfx_preset_option.add_item(name)
+	preset_row.add_child(_postfx_preset_option)
+	var apply_preset_btn := Button.new()
+	apply_preset_btn.text = "Apply"
+	apply_preset_btn.pressed.connect(func() -> void:
+		var selected: String = _postfx_preset_option.get_item_text(_postfx_preset_option.selected)
+		environment_setting_changed.emit("postfx_apply_preset", selected)
+	)
+	preset_row.add_child(apply_preset_btn)
+	var quick_preset_btn := Button.new()
+	quick_preset_btn.text = "Apply Graphic Novel Preset"
+	quick_preset_btn.pressed.connect(func() -> void:
+		environment_setting_changed.emit("postfx_apply_preset", "Graphic Novel Outlines")
+	)
+	preset_row.add_child(quick_preset_btn)
+	root.add_child(preset_row)
+
+	var outline_row := HBoxContainer.new()
+	outline_row.add_child(_make_label("Outline Strength"))
+	_postfx_outline_value = _make_value_label("2.35")
+	outline_row.add_child(_postfx_outline_value)
+	root.add_child(outline_row)
+	_postfx_outline_slider = _make_slider(0.0, 6.0, 2.35, 0.01)
+	_postfx_outline_slider.value_changed.connect(func(v: float) -> void:
+		_postfx_outline_value.text = "%.2f" % v
+		if _updating_ui:
+			return
+		environment_setting_changed.emit("postfx_effect", {"name": "outline_strength", "value": v})
+	)
+	root.add_child(_postfx_outline_slider)
+
+	var contrast_row := HBoxContainer.new()
+	contrast_row.add_child(_make_label("Contrast"))
+	_postfx_contrast_value = _make_value_label("1.00")
+	contrast_row.add_child(_postfx_contrast_value)
+	root.add_child(contrast_row)
+	_postfx_contrast_slider = _make_slider(0.5, 2.0, 1.0, 0.01)
+	_postfx_contrast_slider.value_changed.connect(func(v: float) -> void:
+		_postfx_contrast_value.text = "%.2f" % v
+		if _updating_ui:
+			return
+		environment_setting_changed.emit("postfx_effect", {"name": "contrast", "value": v})
+	)
+	root.add_child(_postfx_contrast_slider)
+
+	var saturation_row := HBoxContainer.new()
+	saturation_row.add_child(_make_label("Saturation"))
+	_postfx_saturation_value = _make_value_label("1.00")
+	saturation_row.add_child(_postfx_saturation_value)
+	root.add_child(saturation_row)
+	_postfx_saturation_slider = _make_slider(0.0, 2.0, 1.0, 0.01)
+	_postfx_saturation_slider.value_changed.connect(func(v: float) -> void:
+		_postfx_saturation_value.text = "%.2f" % v
+		if _updating_ui:
+			return
+		environment_setting_changed.emit("postfx_effect", {"name": "saturation", "value": v})
+	)
+	root.add_child(_postfx_saturation_slider)
+
+	var vignette_row := HBoxContainer.new()
+	vignette_row.add_child(_make_label("Vignette"))
+	_postfx_vignette_value = _make_value_label("0.25")
+	vignette_row.add_child(_postfx_vignette_value)
+	root.add_child(vignette_row)
+	_postfx_vignette_slider = _make_slider(0.0, 1.0, 0.25, 0.01)
+	_postfx_vignette_slider.value_changed.connect(func(v: float) -> void:
+		_postfx_vignette_value.text = "%.2f" % v
+		if _updating_ui:
+			return
+		environment_setting_changed.emit("postfx_effect", {"name": "vignette_strength", "value": v})
+	)
+	root.add_child(_postfx_vignette_slider)
+
+	var bloom_row := HBoxContainer.new()
+	bloom_row.add_child(_make_label("Bloom"))
+	_postfx_bloom_value = _make_value_label("0.12")
+	bloom_row.add_child(_postfx_bloom_value)
+	root.add_child(bloom_row)
+	_postfx_bloom_slider = _make_slider(0.0, 1.0, 0.12, 0.01)
+	_postfx_bloom_slider.value_changed.connect(func(v: float) -> void:
+		_postfx_bloom_value.text = "%.2f" % v
+		if _updating_ui:
+			return
+		environment_setting_changed.emit("postfx_effect", {"name": "bloom_strength", "value": v})
+	)
+	root.add_child(_postfx_bloom_slider)
+
+	var postfx_tint_row := HBoxContainer.new()
+	postfx_tint_row.add_child(_make_label("Tint Strength"))
+	_postfx_tint_value = _make_value_label("0.00")
+	postfx_tint_row.add_child(_postfx_tint_value)
+	root.add_child(postfx_tint_row)
+	_postfx_tint_slider = _make_slider(0.0, 1.0, 0.0, 0.01)
+	_postfx_tint_slider.value_changed.connect(func(v: float) -> void:
+		_postfx_tint_value.text = "%.2f" % v
+		if _updating_ui:
+			return
+		environment_setting_changed.emit("postfx_effect", {"name": "tint_strength", "value": v})
+	)
+	root.add_child(_postfx_tint_slider)
+
+	var tint_picker_row := HBoxContainer.new()
+	tint_picker_row.add_child(_make_label("Color Tint"))
+	_postfx_tint_picker = ColorPickerButton.new()
+	_postfx_tint_picker.color = Color(1.0, 1.0, 1.0, 1.0)
+	_postfx_tint_picker.custom_minimum_size = Vector2(96, 28)
+	_postfx_tint_picker.color_changed.connect(func(c: Color) -> void:
+		if _updating_ui:
+			return
+		environment_setting_changed.emit("postfx_effect", {"name": "color_tint", "value": c})
+	)
+	tint_picker_row.add_child(_postfx_tint_picker)
+	root.add_child(tint_picker_row)
+
+	root.add_child(HSeparator.new())
+	root.add_child(_make_label("Post-Process Outlines Layer"))
+
+	_postfx_outlines_layer_enable = CheckBox.new()
+	_postfx_outlines_layer_enable.text = "Enable Outlines Layer"
+	_postfx_outlines_layer_enable.toggled.connect(func(v: bool) -> void:
+		if _updating_ui:
+			return
+		environment_setting_changed.emit("postfx_effect", {"name": "outlines_layer_enabled", "value": v})
+	)
+	root.add_child(_postfx_outlines_layer_enable)
+
+	var out_thickness_row := HBoxContainer.new()
+	out_thickness_row.add_child(_make_label("Outline Thickness"))
+	root.add_child(out_thickness_row)
+	_postfx_outlines_layer_thickness_slider = _make_slider(0.5, 8.0, 2.2, 0.1)
+	_postfx_outlines_layer_thickness_slider.value_changed.connect(func(v: float) -> void:
+		if _updating_ui:
+			return
+		environment_setting_changed.emit("postfx_effect", {"name": "outlines_layer_thickness", "value": v})
+	)
+	root.add_child(_postfx_outlines_layer_thickness_slider)
+
+	var out_depth_threshold_row := HBoxContainer.new()
+	out_depth_threshold_row.add_child(_make_label("Depth Threshold"))
+	root.add_child(out_depth_threshold_row)
+	_postfx_outlines_layer_depth_threshold_slider = _make_slider(0.001, 0.35, 0.055, 0.001)
+	_postfx_outlines_layer_depth_threshold_slider.value_changed.connect(func(v: float) -> void:
+		if _updating_ui:
+			return
+		environment_setting_changed.emit("postfx_effect", {"name": "outlines_layer_depth_threshold", "value": v})
+	)
+	root.add_child(_postfx_outlines_layer_depth_threshold_slider)
+
+	var out_depth_sensitivity_row := HBoxContainer.new()
+	out_depth_sensitivity_row.add_child(_make_label("Depth Sensitivity"))
+	root.add_child(out_depth_sensitivity_row)
+	_postfx_outlines_layer_depth_sensitivity_slider = _make_slider(0.0, 8.0, 1.6, 0.01)
+	_postfx_outlines_layer_depth_sensitivity_slider.value_changed.connect(func(v: float) -> void:
+		if _updating_ui:
+			return
+		environment_setting_changed.emit("postfx_effect", {"name": "outlines_layer_depth_sensitivity", "value": v})
+	)
+	root.add_child(_postfx_outlines_layer_depth_sensitivity_slider)
+
+	var out_normal_sensitivity_row := HBoxContainer.new()
+	out_normal_sensitivity_row.add_child(_make_label("Normal Sensitivity"))
+	root.add_child(out_normal_sensitivity_row)
+	_postfx_outlines_layer_normal_sensitivity_slider = _make_slider(0.0, 8.0, 1.3, 0.01)
+	_postfx_outlines_layer_normal_sensitivity_slider.value_changed.connect(func(v: float) -> void:
+		if _updating_ui:
+			return
+		environment_setting_changed.emit("postfx_effect", {"name": "outlines_layer_normal_sensitivity", "value": v})
+	)
+	root.add_child(_postfx_outlines_layer_normal_sensitivity_slider)
+
+	var out_opacity_row := HBoxContainer.new()
+	out_opacity_row.add_child(_make_label("Outline Opacity"))
+	root.add_child(out_opacity_row)
+	_postfx_outlines_layer_opacity_slider = _make_slider(0.0, 1.0, 0.48, 0.01)
+	_postfx_outlines_layer_opacity_slider.value_changed.connect(func(v: float) -> void:
+		if _updating_ui:
+			return
+		environment_setting_changed.emit("postfx_effect", {"name": "outlines_layer_opacity", "value": v})
+	)
+	root.add_child(_postfx_outlines_layer_opacity_slider)
+
+	var out_color_row := HBoxContainer.new()
+	out_color_row.add_child(_make_label("Outline Color"))
+	_postfx_outlines_layer_color_picker = ColorPickerButton.new()
+	_postfx_outlines_layer_color_picker.color = Color(0.01, 0.01, 0.01, 1.0)
+	_postfx_outlines_layer_color_picker.custom_minimum_size = Vector2(96, 28)
+	_postfx_outlines_layer_color_picker.color_changed.connect(func(c: Color) -> void:
+		if _updating_ui:
+			return
+		environment_setting_changed.emit("postfx_effect", {"name": "outlines_layer_color", "value": c})
+	)
+	out_color_row.add_child(_postfx_outlines_layer_color_picker)
+	root.add_child(out_color_row)
+
+	root.add_child(_make_label("Custom Shader Code"))
+	_postfx_shader_code = TextEdit.new()
+	_postfx_shader_code.custom_minimum_size = Vector2(0, 120)
+	_postfx_shader_code.placeholder_text = "Paste custom canvas_item shader code here..."
+	root.add_child(_postfx_shader_code)
+	var shader_buttons := HBoxContainer.new()
+	var apply_shader_btn := Button.new()
+	apply_shader_btn.text = "Apply Shader"
+	apply_shader_btn.pressed.connect(func() -> void:
+		environment_setting_changed.emit("postfx_apply_custom_shader", _postfx_shader_code.text)
+	)
+	shader_buttons.add_child(apply_shader_btn)
+	var reset_shader_btn := Button.new()
+	reset_shader_btn.text = "Reset Shader"
+	reset_shader_btn.pressed.connect(func() -> void:
+		environment_setting_changed.emit("postfx_apply_custom_shader", "")
+	)
+	shader_buttons.add_child(reset_shader_btn)
+	root.add_child(shader_buttons)
+
+	root.add_child(_make_label(".ppf Metadata"))
+	_ppf_name_edit = LineEdit.new()
+	_ppf_name_edit.placeholder_text = "Preset Name"
+	_ppf_name_edit.text = "New PostFX Preset"
+	root.add_child(_ppf_name_edit)
+	_ppf_author_edit = LineEdit.new()
+	_ppf_author_edit.placeholder_text = "Author"
+	root.add_child(_ppf_author_edit)
+	_ppf_description_edit = LineEdit.new()
+	_ppf_description_edit.placeholder_text = "Description"
+	root.add_child(_ppf_description_edit)
+	_ppf_path_edit = LineEdit.new()
+	_ppf_path_edit.placeholder_text = "user://postfx/my_style.ppf"
+	_ppf_path_edit.text = "user://postfx/new_style.ppf"
+	root.add_child(_ppf_path_edit)
+
+	var file_buttons := HBoxContainer.new()
+	var save_btn := Button.new()
+	save_btn.text = "Save .ppf"
+	save_btn.pressed.connect(func() -> void:
+		environment_setting_changed.emit("postfx_save_local", {
+			"path": _ppf_path_edit.text.strip_edges(),
+			"name": _ppf_name_edit.text.strip_edges(),
+			"author": _ppf_author_edit.text.strip_edges(),
+			"description": _ppf_description_edit.text.strip_edges(),
+			"custom_shader_code": _postfx_shader_code.text,
+		})
+	)
+	file_buttons.add_child(save_btn)
+	var load_btn := Button.new()
+	load_btn.text = "Load .ppf"
+	load_btn.pressed.connect(func() -> void:
+		environment_setting_changed.emit("postfx_load_local", _ppf_path_edit.text.strip_edges())
+	)
+	file_buttons.add_child(load_btn)
+	var export_btn := Button.new()
+	export_btn.text = "Export .ppf"
+	export_btn.pressed.connect(func() -> void:
+		environment_setting_changed.emit("postfx_export_local", {
+			"path": _ppf_path_edit.text.strip_edges(),
+			"name": _ppf_name_edit.text.strip_edges(),
+			"author": _ppf_author_edit.text.strip_edges(),
+			"description": _ppf_description_edit.text.strip_edges(),
+			"custom_shader_code": _postfx_shader_code.text,
+		})
+	)
+	file_buttons.add_child(export_btn)
+	root.add_child(file_buttons)
+
+	_ppf_remote_url_edit = LineEdit.new()
+	_ppf_remote_url_edit.placeholder_text = "https://example.com/presets/graphic_novel.ppf"
+	root.add_child(_ppf_remote_url_edit)
+	var import_remote_btn := Button.new()
+	import_remote_btn.text = "Import Remote .ppf"
+	import_remote_btn.pressed.connect(func() -> void:
+		environment_setting_changed.emit("postfx_import_url", _ppf_remote_url_edit.text.strip_edges())
+	)
+	root.add_child(import_remote_btn)
+
+	root.add_child(HSeparator.new())
 	root.add_child(_make_section_title("Debug"))
 	_full_rebuild_check = CheckBox.new()
 	_full_rebuild_check.text = "Force Full Rebuild"
@@ -317,6 +636,50 @@ func set_environment_state(state: Dictionary) -> void:
 	_lightning_intensity_slider.value = float(state.get("lightning_intensity", 2.2))
 	_lightning_intensity_value.text = "%.2f" % _lightning_intensity_slider.value
 	_lightning_random_check.button_pressed = bool(state.get("lightning_random_variation", true))
+
+	if state.has("postfx") and state.get("postfx") is Dictionary:
+		var postfx: Dictionary = state.get("postfx")
+		var effects_by_name: Dictionary = {}
+		var effects_variant: Variant = postfx.get("effects", [])
+		if effects_variant is Array:
+			for item in effects_variant:
+				if item is Dictionary:
+					var entry: Dictionary = item
+					effects_by_name[String(entry.get("name", ""))] = entry.get("value")
+		if _postfx_outline_slider != null and effects_by_name.has("outline_strength"):
+			_postfx_outline_slider.value = float(effects_by_name["outline_strength"])
+			_postfx_outline_value.text = "%.2f" % _postfx_outline_slider.value
+		if _postfx_contrast_slider != null and effects_by_name.has("contrast"):
+			_postfx_contrast_slider.value = float(effects_by_name["contrast"])
+			_postfx_contrast_value.text = "%.2f" % _postfx_contrast_slider.value
+		if _postfx_saturation_slider != null and effects_by_name.has("saturation"):
+			_postfx_saturation_slider.value = float(effects_by_name["saturation"])
+			_postfx_saturation_value.text = "%.2f" % _postfx_saturation_slider.value
+		if _postfx_vignette_slider != null and effects_by_name.has("vignette_strength"):
+			_postfx_vignette_slider.value = float(effects_by_name["vignette_strength"])
+			_postfx_vignette_value.text = "%.2f" % _postfx_vignette_slider.value
+		if _postfx_bloom_slider != null and effects_by_name.has("bloom_strength"):
+			_postfx_bloom_slider.value = float(effects_by_name["bloom_strength"])
+			_postfx_bloom_value.text = "%.2f" % _postfx_bloom_slider.value
+		if _postfx_tint_slider != null and effects_by_name.has("tint_strength"):
+			_postfx_tint_slider.value = float(effects_by_name["tint_strength"])
+			_postfx_tint_value.text = "%.2f" % _postfx_tint_slider.value
+		if _postfx_tint_picker != null and postfx.has("color_tint"):
+			_postfx_tint_picker.color = postfx.get("color_tint", Color(1.0, 1.0, 1.0, 1.0))
+		if _postfx_outlines_layer_enable != null and effects_by_name.has("outlines_layer_enabled"):
+			_postfx_outlines_layer_enable.button_pressed = bool(effects_by_name["outlines_layer_enabled"])
+		if _postfx_outlines_layer_thickness_slider != null and effects_by_name.has("outlines_layer_thickness"):
+			_postfx_outlines_layer_thickness_slider.value = float(effects_by_name["outlines_layer_thickness"])
+		if _postfx_outlines_layer_depth_threshold_slider != null and effects_by_name.has("outlines_layer_depth_threshold"):
+			_postfx_outlines_layer_depth_threshold_slider.value = float(effects_by_name["outlines_layer_depth_threshold"])
+		if _postfx_outlines_layer_depth_sensitivity_slider != null and effects_by_name.has("outlines_layer_depth_sensitivity"):
+			_postfx_outlines_layer_depth_sensitivity_slider.value = float(effects_by_name["outlines_layer_depth_sensitivity"])
+		if _postfx_outlines_layer_normal_sensitivity_slider != null and effects_by_name.has("outlines_layer_normal_sensitivity"):
+			_postfx_outlines_layer_normal_sensitivity_slider.value = float(effects_by_name["outlines_layer_normal_sensitivity"])
+		if _postfx_outlines_layer_opacity_slider != null and effects_by_name.has("outlines_layer_opacity"):
+			_postfx_outlines_layer_opacity_slider.value = float(effects_by_name["outlines_layer_opacity"])
+		if _postfx_outlines_layer_color_picker != null and effects_by_name.has("outlines_layer_color"):
+			_postfx_outlines_layer_color_picker.color = effects_by_name["outlines_layer_color"]
 	if _full_rebuild_check != null:
 		_full_rebuild_check.button_pressed = bool(state.get("full_rebuild_mode", true))
 	if _debug_visualize_dirty_rect_check != null:
@@ -324,6 +687,11 @@ func set_environment_state(state: Dictionary) -> void:
 	_updating_ui = false
 
 	_update_weather_slider_visibility(_weather_stack_check.button_pressed)
+
+
+func set_postfx_preview_texture(texture: Texture2D) -> void:
+	if _postfx_preview != null:
+		_postfx_preview.texture = texture
 
 
 func set_active_weather(active_weathers: Array[String]) -> void:
@@ -415,3 +783,28 @@ func _make_slider(min_val: float, max_val: float, default_val: float, step: floa
 	slider.value = default_val
 	slider.custom_minimum_size.y = 22
 	return slider
+
+
+func _can_drop_data(_position: Vector2, data: Variant) -> bool:
+	if data is Dictionary:
+		var dict_data: Dictionary = data
+		if dict_data.has("files") and dict_data["files"] is PackedStringArray:
+			for file_path in dict_data["files"]:
+				if String(file_path).to_lower().ends_with(".ppf"):
+					return true
+	return false
+
+
+func _drop_data(_position: Vector2, data: Variant) -> void:
+	if not (data is Dictionary):
+		return
+	var dict_data: Dictionary = data
+	if not dict_data.has("files") or not (dict_data["files"] is PackedStringArray):
+		return
+	for file_path in dict_data["files"]:
+		var path_str: String = String(file_path)
+		if path_str.to_lower().ends_with(".ppf"):
+			if _ppf_path_edit != null:
+				_ppf_path_edit.text = path_str
+			environment_setting_changed.emit("postfx_load_local", path_str)
+			break

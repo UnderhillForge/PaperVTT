@@ -1462,10 +1462,11 @@ func _noise_emitted(emitter_noise_output: Transform3D, emitter_layer: int) -> vo
 
 func _check_physics_body(target: Node3D) -> void:
 	if target is PhysicsBody3D:
-		var show_jitter_tips := ProjectSettings.get_setting("phantom_camera/tips/show_jitter_tips")
-		var physics_interpolation_enabled := ProjectSettings.get_setting("physics/common/physics_interpolation")
+		var has_show_jitter_tips_setting: bool = ProjectSettings.has_setting("phantom_camera/tips/show_jitter_tips")
+		var show_jitter_tips: bool = bool(ProjectSettings.get_setting("phantom_camera/tips/show_jitter_tips", true))
+		var physics_interpolation_enabled: bool = bool(ProjectSettings.get_setting("physics/common/physics_interpolation", false))
 
-		if not physics_interpolation_enabled and _follow_target_physics_based and show_jitter_tips == null: # Default value is null when referencing custom Project Setting
+		if not physics_interpolation_enabled and _follow_target_physics_based and (not has_show_jitter_tips_setting or show_jitter_tips):
 			printerr("Physics Interpolation is disabled in the Project Settings, recommend enabling it to smooth out physics-based camera movement")
 			print_rich("This tip can be disabled from within [code]Project Settings / Phantom Camera / Tips / Show Jitter Tips[/code]")
 		_follow_target_physics_based = true
@@ -2466,12 +2467,5 @@ func draw_follow_gizmo_line() -> bool:
 func draw_look_at_gizmo_line() -> bool:
 	return _draw_look_at_gizmo_line
 
-
-func get_class() -> String:
-	return "PhantomCamera3D"
-
-
-func is_class(value) -> bool:
-	return value == "PhantomCamera3D"
 
 #endregion

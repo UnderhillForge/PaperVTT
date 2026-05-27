@@ -16,3 +16,7 @@ assets/world/models/walls/modular/tudor_wall_window_4m.glb.import
 # Local tooling / test content
 Godot/
 dd_testing/
+assets/previews/
+game_art/debug/
+game_output.log
+game_art/icon.xcf

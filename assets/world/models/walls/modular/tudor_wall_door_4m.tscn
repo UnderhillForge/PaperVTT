@@ -1,8 +1,0 @@
-[gd_scene format=3]
-
-[node name="tudor_wall_door_4m" type="Node3D" unique_id=1590834815]
-metadata/piece_name = "wall_door_4m"
-metadata/piece_kind = "door"
-metadata/wall_variant = "tudor"
-metadata/grid_snap_m = 0.5
-metadata/wall_height_m = 3.4

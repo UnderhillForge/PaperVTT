@@ -1,8 +1,0 @@
-[gd_scene format=3]
-
-[node name="tudor_corner_outer_90" type="Node3D" unique_id=2084498007]
-metadata/piece_name = "corner_outer_90"
-metadata/piece_kind = "corner_outer"
-metadata/wall_variant = "tudor"
-metadata/grid_snap_m = 0.5
-metadata/wall_height_m = 3.4

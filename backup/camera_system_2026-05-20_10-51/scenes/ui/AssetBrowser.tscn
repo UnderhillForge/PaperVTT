@@ -1,0 +1,196 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/asset_browser.gd" id="1"]
+
+[node name="AssetBrowser" type="PanelContainer"]
+custom_minimum_size = Vector2(360, 0)
+size_flags_vertical = 3
+script = ExtResource("1")
+
+[node name="Margin" type="MarginContainer" parent="."]
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="Root" type="VBoxContainer" parent="Margin"]
+theme_override_constants/separation = 8
+
+[node name="HeaderRow" type="HBoxContainer" parent="Margin/Root"]
+
+[node name="Header" type="Label" parent="Margin/Root/HeaderRow"]
+theme_override_font_sizes/font_size = 18
+text = "Library  ▼"
+
+[node name="AssetCount" type="Label" parent="Margin/Root/HeaderRow"]
+unique_name_in_owner = true
+size_flags_horizontal = 10
+horizontal_alignment = 2
+text = "0 assets"
+
+[node name="SearchLineEdit" type="LineEdit" parent="Margin/Root"]
+unique_name_in_owner = true
+placeholder_text = "Search prefabs, e.g. wall stone"
+
+[node name="CategoryTabs" type="ScrollContainer" parent="Margin/Root"]
+custom_minimum_size = Vector2(0, 42)
+horizontal_scroll_mode = 1
+vertical_scroll_mode = 0
+
+[node name="CategoryButtons" type="HBoxContainer" parent="Margin/Root/CategoryTabs"]
+unique_name_in_owner = true
+theme_override_constants/separation = 6
+
+[node name="SelectedInfo" type="Label" parent="Margin/Root"]
+unique_name_in_owner = true
+text = "No prefab selected"
+
+[node name="GridScroll" type="ScrollContainer" parent="Margin/Root"]
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 1
+
+[node name="AssetGrid" type="GridContainer" parent="Margin/Root/GridScroll"]
+unique_name_in_owner = true
+columns = 2
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
+
+[node name="UsageHint" type="RichTextLabel" parent="Margin/Root"]
+custom_minimum_size = Vector2(0, 78)
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+text = "[b]Stamp Flow[/b]\nLMB select card, double-click to stamp immediately\nRMB card: open properties (name, scale, category, tags, preview rot)"
+
+[node name="AssetPropertiesPopup" type="PopupPanel" parent="."]
+unique_name_in_owner = true
+
+[node name="PropsMargin" type="MarginContainer" parent="AssetPropertiesPopup"]
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="PropsRoot" type="VBoxContainer" parent="AssetPropertiesPopup/PropsMargin"]
+theme_override_constants/separation = 8
+
+[node name="PropsTitle" type="Label" parent="AssetPropertiesPopup/PropsMargin/PropsRoot"]
+theme_override_font_sizes/font_size = 16
+text = "Asset Properties"
+
+[node name="NameLabel" type="Label" parent="AssetPropertiesPopup/PropsMargin/PropsRoot"]
+text = "Name"
+
+[node name="PropNameEdit" type="LineEdit" parent="AssetPropertiesPopup/PropsMargin/PropsRoot"]
+unique_name_in_owner = true
+
+[node name="ScaleHeader" type="HBoxContainer" parent="AssetPropertiesPopup/PropsMargin/PropsRoot"]
+
+[node name="ScaleLabel" type="Label" parent="AssetPropertiesPopup/PropsMargin/PropsRoot/ScaleHeader"]
+text = "Scale (1 unit = 1m)"
+
+[node name="PropUniformScaleCheck" type="CheckBox" parent="AssetPropertiesPopup/PropsMargin/PropsRoot/ScaleHeader"]
+unique_name_in_owner = true
+text = "Uniform"
+button_pressed = true
+
+[node name="ScaleRow" type="HBoxContainer" parent="AssetPropertiesPopup/PropsMargin/PropsRoot"]
+theme_override_constants/separation = 6
+
+[node name="PropScaleX" type="SpinBox" parent="AssetPropertiesPopup/PropsMargin/PropsRoot/ScaleRow"]
+unique_name_in_owner = true
+min_value = 0.1
+max_value = 20.0
+step = 0.05
+value = 1.0
+
+[node name="PropScaleY" type="SpinBox" parent="AssetPropertiesPopup/PropsMargin/PropsRoot/ScaleRow"]
+unique_name_in_owner = true
+min_value = 0.1
+max_value = 20.0
+step = 0.05
+value = 1.0
+
+[node name="PropScaleZ" type="SpinBox" parent="AssetPropertiesPopup/PropsMargin/PropsRoot/ScaleRow"]
+unique_name_in_owner = true
+min_value = 0.1
+max_value = 20.0
+step = 0.05
+value = 1.0
+
+[node name="CategoryLabel" type="Label" parent="AssetPropertiesPopup/PropsMargin/PropsRoot"]
+text = "Category"
+
+[node name="PropCategoryOption" type="OptionButton" parent="AssetPropertiesPopup/PropsMargin/PropsRoot"]
+unique_name_in_owner = true
+
+[node name="TagsLabel" type="Label" parent="AssetPropertiesPopup/PropsMargin/PropsRoot"]
+text = "Tags (comma-separated)"
+
+[node name="PropTagsEdit" type="LineEdit" parent="AssetPropertiesPopup/PropsMargin/PropsRoot"]
+unique_name_in_owner = true
+
+[node name="PreviewRotLabel" type="Label" parent="AssetPropertiesPopup/PropsMargin/PropsRoot"]
+text = "Preview Rotation (X/Y/Z deg)"
+
+[node name="PreviewRotRow" type="HBoxContainer" parent="AssetPropertiesPopup/PropsMargin/PropsRoot"]
+theme_override_constants/separation = 6
+
+[node name="PropPreviewRotX" type="SpinBox" parent="AssetPropertiesPopup/PropsMargin/PropsRoot/PreviewRotRow"]
+unique_name_in_owner = true
+min_value = -180.0
+max_value = 180.0
+step = 1.0
+value = 18.0
+
+[node name="PropPreviewRotY" type="SpinBox" parent="AssetPropertiesPopup/PropsMargin/PropsRoot/PreviewRotRow"]
+unique_name_in_owner = true
+min_value = -180.0
+max_value = 180.0
+step = 1.0
+value = 28.0
+
+[node name="PropPreviewRotZ" type="SpinBox" parent="AssetPropertiesPopup/PropsMargin/PropsRoot/PreviewRotRow"]
+unique_name_in_owner = true
+min_value = -180.0
+max_value = 180.0
+step = 1.0
+value = 0.0
+
+[node name="ActionRow" type="HBoxContainer" parent="AssetPropertiesPopup/PropsMargin/PropsRoot"]
+theme_override_constants/separation = 6
+
+[node name="PropRegenPreviewButton" type="Button" parent="AssetPropertiesPopup/PropsMargin/PropsRoot/ActionRow"]
+unique_name_in_owner = true
+text = "Regenerate Preview"
+
+[node name="Spacer" type="Control" parent="AssetPropertiesPopup/PropsMargin/PropsRoot/ActionRow"]
+size_flags_horizontal = 3
+
+[node name="PropSaveButton" type="Button" parent="AssetPropertiesPopup/PropsMargin/PropsRoot/ActionRow"]
+unique_name_in_owner = true
+text = "Save"
+
+[node name="PropCancelButton" type="Button" parent="AssetPropertiesPopup/PropsMargin/PropsRoot/ActionRow"]
+unique_name_in_owner = true
+text = "Cancel"
+
+[node name="PreviewViewport" type="SubViewport" parent="."]
+unique_name_in_owner = true
+size = Vector2i(160, 160)
+own_world_3d = true
+disable_3d = false
+render_target_update_mode = 2
+
+[node name="PreviewStage" type="Node3D" parent="PreviewViewport"]
+unique_name_in_owner = true
+
+[node name="PreviewCamera" type="Camera3D" parent="PreviewViewport"]
+unique_name_in_owner = true
+current = true
+fov = 28.0
+
+[node name="PreviewLight" type="DirectionalLight3D" parent="PreviewViewport"]
+unique_name_in_owner = true
+light_energy = 2.0

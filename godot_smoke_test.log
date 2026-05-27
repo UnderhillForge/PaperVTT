@@ -1,0 +1,93 @@
+Godot Engine v4.7.beta1.official.1c8cc9e7e - https://godotengine.org
+
+WARNING: HDR output is not supported by this display server.
+     at: window_request_hdr_output (servers/display/display_server.cpp:1307)
+WARNING: HDR 2D was automatically enabled because HDR output was requested in project settings. To avoid this warning, enable rendering/viewport/hdr_2d in the Project Settings.
+     at: SceneTree (scene/main/scene_tree.cpp:2121)
+This method can only be called from a PhantomCamera node
+This method can only be called from a PhantomCamera node
+This method can only be called from a PhantomCamera node
+[godot_ai game_helper] registered mcp capture (debugger active=false, logger=true)
+WARNING: Loaded resource as image file, this will not work on export: 'res://addons/sky_3d/assets/textures/noise.jpg'. Instead, import the image file as an Image resource and load it normally as a resource.
+     at: load (core/io/image.cpp:2770)
+     GDScript backtrace (most recent call first):
+         [0] _load_texture_or_null (res://addons/sky_3d/src/SkyDome.gd:120)
+         [1] _build_scene (res://addons/sky_3d/src/SkyDome.gd:68)
+         [2] _ready (res://addons/sky_3d/src/SkyDome.gd:57)
+WARNING: Loaded resource as image file, this will not work on export: 'res://addons/sky_3d/assets/thirdparty/textures/moon/MoonMap.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+     at: load (core/io/image.cpp:2770)
+     GDScript backtrace (most recent call first):
+         [0] _load_texture_or_null (res://addons/sky_3d/src/SkyDome.gd:120)
+         [1] _build_scene (res://addons/sky_3d/src/SkyDome.gd:96)
+         [2] _ready (res://addons/sky_3d/src/SkyDome.gd:57)
+WARNING: Loaded resource as image file, this will not work on export: 'res://addons/sky_3d/assets/textures/noiseClouds.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+     at: load (core/io/image.cpp:2770)
+     GDScript backtrace (most recent call first):
+         [0] _load_texture_or_null (res://addons/sky_3d/src/SkyDome.gd:120)
+         [1] _build_scene (res://addons/sky_3d/src/SkyDome.gd:100)
+         [2] _ready (res://addons/sky_3d/src/SkyDome.gd:57)
+WARNING: Loaded resource as image file, this will not work on export: 'res://addons/sky_3d/assets/thirdparty/textures/milkyway/Milkyway.jpg'. Instead, import the image file as an Image resource and load it normally as a resource.
+     at: load (core/io/image.cpp:2770)
+     GDScript backtrace (most recent call first):
+         [0] _load_texture_or_null (res://addons/sky_3d/src/SkyDome.gd:120)
+         [1] _build_scene (res://addons/sky_3d/src/SkyDome.gd:102)
+         [2] _ready (res://addons/sky_3d/src/SkyDome.gd:57)
+WARNING: Loaded resource as image file, this will not work on export: 'res://addons/sky_3d/assets/thirdparty/textures/milkyway/StarField.jpg'. Instead, import the image file as an Image resource and load it normally as a resource.
+     at: load (core/io/image.cpp:2770)
+     GDScript backtrace (most recent call first):
+         [0] _load_texture_or_null (res://addons/sky_3d/src/SkyDome.gd:120)
+         [1] _build_scene (res://addons/sky_3d/src/SkyDome.gd:104)
+         [2] _ready (res://addons/sky_3d/src/SkyDome.gd:57)
+[PaperVTT] Active tool: Select / None
+ERROR: Error opening file 'res://assets/world/textures/materials/kenney_nature-kit/cliff_block_stone_NW.png'.
+   at: load_image (core/io/image_loader.cpp:91)
+   GDScript backtrace (most recent call first):
+       [0] _load_texture2d_or_null (res://scripts/main/main_controller.gd:2025)
+       [1] _build_import_material (res://scripts/main/main_controller.gd:2015)
+       [2] _setup_dungeondraft_import (res://scripts/main/main_controller.gd:1998)
+       [3] _ready (res://scripts/main/main_controller.gd:280)
+ERROR: Resource file not found: res://assets/world/textures/materials/kenney_nature-kit/cliff_block_stone_NW.png (expected type: Texture2D)
+   at: _load (core/io/resource_loader.cpp:325)
+   GDScript backtrace (most recent call first):
+       [0] _load_texture2d_or_null (res://scripts/main/main_controller.gd:2029)
+       [1] _build_import_material (res://scripts/main/main_controller.gd:2015)
+       [2] _setup_dungeondraft_import (res://scripts/main/main_controller.gd:1998)
+       [3] _ready (res://scripts/main/main_controller.gd:280)
+ERROR: Error loading resource: 'res://assets/world/textures/materials/kenney_nature-kit/cliff_block_stone_NW.png'.
+   at: load (core/core_bind.cpp:82)
+   GDScript backtrace (most recent call first):
+       [0] _load_texture2d_or_null (res://scripts/main/main_controller.gd:2029)
+       [1] _build_import_material (res://scripts/main/main_controller.gd:2015)
+       [2] _setup_dungeondraft_import (res://scripts/main/main_controller.gd:1998)
+       [3] _ready (res://scripts/main/main_controller.gd:280)
+ERROR: Error opening file 'res://assets/world/textures/materials/kenney_nature-kit/stone_smallFlatC.png'.
+   at: load_image (core/io/image_loader.cpp:91)
+   GDScript backtrace (most recent call first):
+       [0] _load_texture2d_or_null (res://scripts/main/main_controller.gd:2025)
+       [1] _build_import_material (res://scripts/main/main_controller.gd:2015)
+       [2] _setup_dungeondraft_import (res://scripts/main/main_controller.gd:1999)
+       [3] _ready (res://scripts/main/main_controller.gd:280)
+ERROR: Resource file not found: res://assets/world/textures/materials/kenney_nature-kit/stone_smallFlatC.png (expected type: Texture2D)
+   at: _load (core/io/resource_loader.cpp:325)
+   GDScript backtrace (most recent call first):
+       [0] _load_texture2d_or_null (res://scripts/main/main_controller.gd:2029)
+       [1] _build_import_material (res://scripts/main/main_controller.gd:2015)
+       [2] _setup_dungeondraft_import (res://scripts/main/main_controller.gd:1999)
+       [3] _ready (res://scripts/main/main_controller.gd:280)
+ERROR: Error loading resource: 'res://assets/world/textures/materials/kenney_nature-kit/stone_smallFlatC.png'.
+   at: load (core/core_bind.cpp:82)
+   GDScript backtrace (most recent call first):
+       [0] _load_texture2d_or_null (res://scripts/main/main_controller.gd:2029)
+       [1] _build_import_material (res://scripts/main/main_controller.gd:2015)
+       [2] _setup_dungeondraft_import (res://scripts/main/main_controller.gd:1999)
+       [3] _ready (res://scripts/main/main_controller.gd:280)
+[PaperVTT] Performance Mode: On
+[PaperVTT] Post-Process: Disabled
+[PaperVTT] Custom heightmap terrain initialized
+[PaperVTT] New map ready: blank flat terrain. Add terrain and assets with tools.
+[PaperVTT] Post-Process: Disabled
+This method can only be called from a PhantomCamera node
+This method can only be called from a PhantomCamera node
+This method can only be called from a PhantomCamera node
+This method can only be called from a PhantomCamera node
+This method can only be called from a PhantomCamera node

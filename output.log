@@ -1,0 +1,67 @@
+Godot Engine v4.7.beta1.official.1c8cc9e7e - https://godotengine.org
+Vulkan 1.4.305 - Forward+ - Using Device #0: Intel - Intel(R) UHD Graphics (TGL GT1)
+
+ERROR: Failed loading resource: res://addons/terrabrush/Assets/Brushes/circle_gradient.png.
+   at: _load (core/io/resource_loader.cpp:317)
+ERROR: Error loading resource: 'res://addons/terrabrush/Assets/Brushes/circle_gradient.png'.
+   at: load (core/core_bind.cpp:82)
+WARNING: MCP | no server found — install uv or run: pip install godot-ai
+     at: push_warning (core/variant/variant_utility.cpp:1033)
+     GDScript backtrace (most recent call first):
+         [0] get_server_command (res://addons/godot_ai/client_configurator.gd:445)
+         [1] start_server (res://addons/godot_ai/utils/server_lifecycle.gd:490)
+         [2] _start_server (res://addons/godot_ai/plugin.gd:635)
+         [3] _enter_tree (res://addons/godot_ai/plugin.gd:201)
+WARNING: MCP | could not find server command
+     at: push_warning (core/variant/variant_utility.cpp:1033)
+     GDScript backtrace (most recent call first):
+         [0] start_server (res://addons/godot_ai/utils/server_lifecycle.gd:494)
+         [1] _start_server (res://addons/godot_ai/plugin.gd:635)
+         [2] _enter_tree (res://addons/godot_ai/plugin.gd:201)
+MCP | plugin loaded
+ERROR: Attempt to open script 'res://addons/post_process_outlines/res:/addons/post_process_outlines/plugin.gd' resulted in error 'File not found'.
+   at: load_source_code (modules/gdscript/gdscript.cpp:1139)
+ERROR: Failed loading resource: res://addons/post_process_outlines/res:/addons/post_process_outlines/plugin.gd.
+   at: _load (core/io/resource_loader.cpp:317)
+MCP | reconnecting (attempt 1; next retry in 1s if needed)
+WARNING: UID duplicate detected between res://assets/world/environment/sky3d/resources/SNoise.tres and res://addons/sky_3d/assets/resources/SNoise.tres.
+     at: _process_file_system (editor/file_system/editor_file_system.cpp:1405)
+WARNING: UID duplicate detected between res://assets/world/environment/sky3d/resources/SunMoonLightFade.tres and res://addons/sky_3d/assets/resources/SunMoonLightFade.tres.
+     at: _process_file_system (editor/file_system/editor_file_system.cpp:1405)
+MCP | plugin unloaded
+This method can only be called from a PhantomCamera node
+This method can only be called from a PhantomCamera node
+This method can only be called from a PhantomCamera node
+WARNING: Loaded resource as image file, this will not work on export: 'res://addons/sky_3d/assets/textures/noise.jpg'. Instead, import the image file as an Image resource and load it normally as a resource.
+     at: load (core/io/image.cpp:2770)
+     GDScript backtrace (most recent call first):
+         [0] _load_texture_or_null (res://addons/sky_3d/src/SkyDome.gd:120)
+         [1] _build_scene (res://addons/sky_3d/src/SkyDome.gd:68)
+         [2] _ready (res://addons/sky_3d/src/SkyDome.gd:57)
+WARNING: Loaded resource as image file, this will not work on export: 'res://addons/sky_3d/assets/thirdparty/textures/moon/MoonMap.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+     at: load (core/io/image.cpp:2770)
+     GDScript backtrace (most recent call first):
+         [0] _load_texture_or_null (res://addons/sky_3d/src/SkyDome.gd:120)
+         [1] _build_scene (res://addons/sky_3d/src/SkyDome.gd:96)
+         [2] _ready (res://addons/sky_3d/src/SkyDome.gd:57)
+WARNING: Loaded resource as image file, this will not work on export: 'res://addons/sky_3d/assets/textures/noiseClouds.png'. Instead, import the image file as an Image resource and load it normally as a resource.
+     at: load (core/io/image.cpp:2770)
+     GDScript backtrace (most recent call first):
+         [0] _load_texture_or_null (res://addons/sky_3d/src/SkyDome.gd:120)
+         [1] _build_scene (res://addons/sky_3d/src/SkyDome.gd:100)
+         [2] _ready (res://addons/sky_3d/src/SkyDome.gd:57)
+WARNING: Loaded resource as image file, this will not work on export: 'res://addons/sky_3d/assets/thirdparty/textures/milkyway/Milkyway.jpg'. Instead, import the image file as an Image resource and load it normally as a resource.
+     at: load (core/io/image.cpp:2770)
+     GDScript backtrace (most recent call first):
+         [0] _load_texture_or_null (res://addons/sky_3d/src/SkyDome.gd:120)
+         [1] _build_scene (res://addons/sky_3d/src/SkyDome.gd:102)
+         [2] _ready (res://addons/sky_3d/src/SkyDome.gd:57)
+WARNING: Loaded resource as image file, this will not work on export: 'res://addons/sky_3d/assets/thirdparty/textures/milkyway/StarField.jpg'. Instead, import the image file as an Image resource and load it normally as a resource.
+     at: load (core/io/image.cpp:2770)
+     GDScript backtrace (most recent call first):
+         [0] _load_texture_or_null (res://addons/sky_3d/src/SkyDome.gd:120)
+         [1] _build_scene (res://addons/sky_3d/src/SkyDome.gd:104)
+         [2] _ready (res://addons/sky_3d/src/SkyDome.gd:57)
+This method can only be called from a PhantomCamera node
+This method can only be called from a PhantomCamera node
+This method can only be called from a PhantomCamera node

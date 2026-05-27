@@ -43,8 +43,8 @@ var _tool_defs: Array[Dictionary] = [
 	{"tool": "snowpaint",    "label": "Snow",       "icon": "res://addons/worldbrush/Assets/Icons/snow_add.png",       "angle_deg": 150.0},
 	# LEFT — paint / art (9 o'clock to 11 o'clock)
 	{"tool": "texturepaint", "label": "Texture",    "icon": "res://addons/worldbrush/Assets/Icons/paint_withdot.png",  "angle_deg": 180.0},
-	{"tool": "paint",        "label": "Paint",      "icon": "res://addons/worldbrush/Assets/Icons/paint.png",          "angle_deg": -150.0},
 	{"tool": "grasspaint",   "label": "Foliage",    "icon": "res://addons/worldbrush/Assets/Icons/foliage_add.png",    "angle_deg": -120.0},
+	{"tool": "boundary",     "label": "Cliff Line", "icon": "res://addons/worldbrush/Assets/Icons/map_set_height.png",  "angle_deg": -150.0},
 ]
 
 func _ready() -> void:

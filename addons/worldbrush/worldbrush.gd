@@ -17,21 +17,46 @@ class_name WorldBrush
 @export var dirty_region_full_rebuild_ratio: float = 0.58
 @export var smooth_mode_post_smooth_enabled: bool = true
 @export var smooth_mode_post_smooth_strength: float = 0.12
-@export var terrain_texture_uv_repeat: float = 50.0
+@export var terrain_texture_uv_repeat: float = 8.0
 
-const TERRAIN_BASE_ALBEDO_PATH: String = "res://assets/world/textures/world/grass_04_2k/grass_04_basecolor_2k.png"
+const TERRAIN_BASE_ALBEDO_PATH: String = "res://assets/world/textures/ground/grass_tile.png"
+const TERRAIN_BASE_MATERIAL_PATH: String = "res://assets/world/materials/terrain_base_material.tres"
+const TERRAIN_BLEND_SHADER_PATH: String = "res://addons/worldbrush/shaders/chunked_terrain_texture_blend.gdshader"
+const MAX_TEXTURE_LAYERS: int = 24
+const CONTROL_MAP_COUNT: int = 6
+const TOOL_TEXTURE_SUBTRACT: String = "texture_subtract"
 
 var _active_world_layer: int = 0
 var _mesh_instance: MeshInstance3D = null
-var _material: StandardMaterial3D = null
+var _material: Material = null
+var _base_albedo_texture: Texture2D = null
+var _base_roughness: float = 0.92
 var _brush_preview: MeshInstance3D = null
 var _brush_preview_enabled: bool = true
 var _brush_preview_radius: float = 10.0
 
 var _layer_heights: Dictionary = {}
 var _layer_paint: Dictionary = {}
+var _layer_paint_g: Dictionary = {}
+var _layer_paint_b: Dictionary = {}
+var _layer_paint_a: Dictionary = {}
+var _layer_texture_weights: Dictionary = {}
 var _layer_water: Dictionary = {}
 var _layer_snow: Dictionary = {}
+var _texture_slot_ids: PackedStringArray = PackedStringArray([])
+var _texture_slot_albedo: Array = []
+var _texture_slot_normal: Array = []
+var _texture_slot_roughness: Array = []
+var _texture_slot_uv_scales: PackedFloat32Array = PackedFloat32Array()
+var _texture_slot_exposures: PackedFloat32Array = PackedFloat32Array()
+var _texture_array_albedo: Texture2DArray = null
+var _texture_array_normal: Texture2DArray = null
+var _texture_array_roughness: Texture2DArray = null
+var _fallback_flat_normal_texture: Texture2D = null
+var _fallback_white_texture: Texture2D = null
+var _control_map_images: Array = []
+var _control_map_textures: Array = []
+var _control_map_resolution: int = 0
 
 var dirty_min: Vector2i = Vector2i.ZERO
 var dirty_max: Vector2i = Vector2i.ZERO
@@ -143,10 +168,17 @@ func get_sharp_falloff(distance: float, radius: float) -> float:
 	var t: float = clampf(1.0 - (distance / radius), 0.0, 1.0)
 	return t * t
 
-func apply_brush(tool_name: String, world_pos: Vector3, brush_size: float, brush_strength: float, flatten_height: float = 0.0, _cliff_mode: bool = false, _overhang_amount: float = 0.3, brush_softness: float = 0.42, brush_mode: String = "smooth") -> void:
+func apply_brush(tool_name: String, world_pos: Vector3, brush_size: float, brush_strength: float, flatten_height: float = 0.0, _cliff_mode: bool = false, _overhang_amount: float = 0.3, brush_softness: float = 0.42, brush_mode: String = "smooth", texture_slot_index: int = 0) -> void:
+	if tool_name == "textureerase":
+		tool_name = TOOL_TEXTURE_SUBTRACT
 	_ensure_layer_data(_active_world_layer)
+	_ensure_texture_weight_layers(_active_world_layer)
 	var heights: PackedFloat32Array = _layer_heights[_active_world_layer]
 	var paint: PackedFloat32Array = _layer_paint[_active_world_layer]
+	var paint_g: PackedFloat32Array = _layer_paint_g[_active_world_layer]
+	var paint_b: PackedFloat32Array = _layer_paint_b[_active_world_layer]
+	var paint_a: PackedFloat32Array = _layer_paint_a[_active_world_layer]
+	var texture_layers: Array = _layer_texture_weights[_active_world_layer] as Array
 	var water: PackedFloat32Array = _layer_water[_active_world_layer]
 	var snow: PackedFloat32Array = _layer_snow[_active_world_layer]
 	var snapshot: PackedFloat32Array = heights.duplicate()
@@ -188,12 +220,27 @@ func apply_brush(tool_name: String, world_pos: Vector3, brush_size: float, brush
 					heights[idxv] = lerpf(heights[idxv], avg, clampf(applied_strength * w, 0.0, 1.0))
 				"flatten":
 					heights[idxv] = lerpf(heights[idxv], flatten_height, clampf(applied_strength * w, 0.0, 1.0))
-				"paint":
-					paint[idxv] = clampf(paint[idxv] + brush_strength * w * 0.5, 0.0, 1.0)
 				"texturepaint":
-					paint[idxv] = clampf(paint[idxv] + brush_strength * w * 0.6, 0.0, 1.0)
-				"textureerase":
-					paint[idxv] = clampf(paint[idxv] - brush_strength * w * 0.7, 0.0, 1.0)
+					var texture_delta: float = brush_strength * w * 1.15
+					if texture_slot_index >= 0 and texture_slot_index < MAX_TEXTURE_LAYERS:
+						var layer_arr: PackedFloat32Array = texture_layers[texture_slot_index] as PackedFloat32Array
+						layer_arr[idxv] = clampf(layer_arr[idxv] + texture_delta, 0.0, 1.0)
+						texture_layers[texture_slot_index] = layer_arr
+						var total_weight: float = 0.0
+						for li in range(MAX_TEXTURE_LAYERS):
+							total_weight += float((texture_layers[li] as PackedFloat32Array)[idxv])
+						if total_weight > 1.0:
+							var inv_total: float = 1.0 / total_weight
+							for li in range(MAX_TEXTURE_LAYERS):
+								var norm_arr: PackedFloat32Array = texture_layers[li] as PackedFloat32Array
+								norm_arr[idxv] = clampf(norm_arr[idxv] * inv_total, 0.0, 1.0)
+								texture_layers[li] = norm_arr
+				TOOL_TEXTURE_SUBTRACT:
+					var erase_delta: float = brush_strength * w * 0.7
+					for li in range(MAX_TEXTURE_LAYERS):
+						var erase_arr: PackedFloat32Array = texture_layers[li] as PackedFloat32Array
+						erase_arr[idxv] = clampf(erase_arr[idxv] - erase_delta, 0.0, 1.0)
+						texture_layers[li] = erase_arr
 				"waterpaint":
 					water[idxv] = clampf(water[idxv] + brush_strength * w * 0.55, 0.0, 1.0)
 					heights[idxv] -= brush_strength * w * 0.35
@@ -212,20 +259,35 @@ func apply_brush(tool_name: String, world_pos: Vector3, brush_size: float, brush
 		_apply_local_relax_pass(heights, min_x, max_x, min_z, max_z, influence_radius, local_center)
 
 	_layer_heights[_active_world_layer] = heights
+	_layer_texture_weights[_active_world_layer] = texture_layers
 	_layer_paint[_active_world_layer] = paint
+	_layer_paint_g[_active_world_layer] = paint_g
+	_layer_paint_b[_active_world_layer] = paint_b
+	_layer_paint_a[_active_world_layer] = paint_a
 	_layer_water[_active_world_layer] = water
 	_layer_snow[_active_world_layer] = snow
+	_sync_legacy_paint_channels_from_layers(_active_world_layer)
+	if tool_name in ["texturepaint", TOOL_TEXTURE_SUBTRACT]:
+		_update_control_maps_from_active_layer()
 	_mark_dirty_rect(min_x, max_x, min_z, max_z)
 	_rebuild_after_stroke(radius, tool_name)
 
 func begin_texture_stroke(_perf_mode: bool = true, _brush_radius: float = 8.0) -> void:
 	pass
 
-func apply_texture_brush(world_pos: Vector3, _albedo: Texture2D = null, _normal: Texture2D = null, _roughness: Texture2D = null, _height: Texture2D = null, _ao: Texture2D = null, brush_size: float = 8.0, brush_strength: float = 0.3, _tile_size: float = 4.0, density: float = 0.75, _softness: float = 0.7, _coverage: float = 0.75, _offset: Vector2 = Vector2.ZERO, _rot: float = 0.0, _scale: float = 1.0, _exposure: float = 1.0, _shape: String = "circle", _variation: float = 0.0, _seed: float = 0.0, _variant: int = 0) -> void:
-	apply_brush("texturepaint", world_pos, brush_size, maxf(brush_strength * density, 0.01))
+func apply_texture_brush(world_pos: Vector3, _albedo: Texture2D = null, _normal: Texture2D = null, _roughness: Texture2D = null, _height: Texture2D = null, _ao: Texture2D = null, brush_size: float = 8.0, brush_strength: float = 0.3, _tile_size: float = 4.0, density: float = 0.75, softness: float = 0.7, _coverage: float = 0.75, _offset: Vector2 = Vector2.ZERO, _rot: float = 0.0, _scale: float = 1.0, _exposure: float = 1.0, _shape: String = "circle", _variation: float = 0.0, _seed: float = 0.0, _variant: int = 0, brush_mode: String = "smooth", texture_id: String = "") -> void:
+	var tex_label: String = "<none>"
+	if _albedo != null:
+		tex_label = _albedo.resource_path if _albedo.resource_path != "" else _albedo.resource_name
+	var slot_idx: int = _ensure_texture_slot(texture_id, _albedo, _normal, _roughness, _tile_size, _scale, _exposure)
+	if slot_idx < 0:
+		return
+	print("Painting with texture: ", tex_label, " | Brush radius: ", brush_size)
+	print("Texture Paint - Brush Center: ", world_pos, " Radius: ", brush_size, " Texture: ", tex_label)
+	apply_brush("texturepaint", world_pos, brush_size, maxf(brush_strength * density, 0.01), 0.0, false, 0.3, softness, brush_mode, slot_idx)
 
-func apply_texture_erase_brush(world_pos: Vector3, brush_size: float = 8.0, brush_strength: float = 0.3, _softness: float = 0.7) -> void:
-	apply_brush("textureerase", world_pos, brush_size, brush_strength)
+func apply_texture_erase_brush(world_pos: Vector3, brush_size: float = 8.0, brush_strength: float = 0.3, softness: float = 0.7, brush_mode: String = "smooth") -> void:
+	apply_brush(TOOL_TEXTURE_SUBTRACT, world_pos, brush_size, brush_strength, 0.0, false, 0.3, softness, brush_mode)
 
 func end_texture_stroke() -> void:
 	pass
@@ -269,20 +331,47 @@ func _ensure_nodes() -> void:
 func _ensure_terrain_material() -> void:
 	if _material != null:
 		return
-	_material = StandardMaterial3D.new()
-	_material.name = "TerrainMaterial"
-	_material.vertex_color_use_as_albedo = false
-	var base_albedo: Texture2D = load(TERRAIN_BASE_ALBEDO_PATH) as Texture2D
-	if base_albedo != null:
-		_material.albedo_texture = base_albedo
-		_material.albedo_color = Color(1.0, 1.0, 1.0, 1.0)
-	else:
-		_material.albedo_color = Color(0.36, 0.45, 0.32, 1.0)
+	_ensure_texture_slot_storage()
+	_ensure_texture_library_fallbacks()
+	var base_material: StandardMaterial3D = load(TERRAIN_BASE_MATERIAL_PATH) as StandardMaterial3D
+	_base_albedo_texture = base_material.albedo_texture if base_material != null else null
+	if _base_albedo_texture == null:
+		_base_albedo_texture = load(TERRAIN_BASE_ALBEDO_PATH) as Texture2D
+	_base_roughness = base_material.roughness if base_material != null else 0.92
+	var blend_shader: Shader = load(TERRAIN_BLEND_SHADER_PATH) as Shader
+	if _base_albedo_texture == null or blend_shader == null:
+		_material = _build_fallback_terrain_material()
+		return
+	var shader_material := ShaderMaterial.new()
+	shader_material.shader = blend_shader
 	var repeat_scale: float = maxf(terrain_texture_uv_repeat, 1.0)
-	_material.uv1_scale = Vector3(repeat_scale, repeat_scale, 1.0)
-	_material.roughness = 0.92
-	_material.metallic = 0.0
-	_material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	shader_material.set_shader_parameter("base_albedo_tex", _base_albedo_texture)
+	shader_material.set_shader_parameter("base_uv_scale", repeat_scale)
+	shader_material.set_shader_parameter("base_roughness", _base_roughness)
+	shader_material.set_shader_parameter("terrain_world_size", terrain_size)
+	_material = shader_material
+	_ensure_control_map_textures()
+	for i in range(CONTROL_MAP_COUNT):
+		(shader_material as ShaderMaterial).set_shader_parameter("control_map_%d" % i, _control_map_textures[i])
+	for i in range(MAX_TEXTURE_LAYERS):
+		_texture_slot_uv_scales[i] = repeat_scale
+		_texture_slot_exposures[i] = 1.0
+	_sync_texture_slots_to_material()
+	_sync_control_maps_to_material()
+
+func _build_fallback_terrain_material() -> StandardMaterial3D:
+	var fallback := StandardMaterial3D.new()
+	fallback.name = "TerrainMaterialFallback"
+	fallback.albedo_texture = _base_albedo_texture
+	fallback.albedo_color = Color(1.0, 1.0, 1.0, 1.0)
+	fallback.vertex_color_use_as_albedo = false
+	fallback.uv1_scale = Vector3(maxf(terrain_texture_uv_repeat, 1.0), maxf(terrain_texture_uv_repeat, 1.0), 1.0)
+	fallback.roughness = _base_roughness
+	fallback.metallic = 0.0
+	fallback.cull_mode = BaseMaterial3D.CULL_DISABLED
+	fallback.transparency = BaseMaterial3D.TRANSPARENCY_DISABLED
+	fallback.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_OPAQUE_ONLY
+	return fallback
 
 
 func _apply_terrain_material_to_mesh() -> void:
@@ -290,51 +379,277 @@ func _apply_terrain_material_to_mesh() -> void:
 		return
 	_ensure_terrain_material()
 	if _material == null:
-		_material = StandardMaterial3D.new()
-		_material.name = "TerrainMaterialFallback"
-		_material.vertex_color_use_as_albedo = false
-		var fallback_albedo: Texture2D = load(TERRAIN_BASE_ALBEDO_PATH) as Texture2D
-		if fallback_albedo != null:
-			_material.albedo_texture = fallback_albedo
-			_material.albedo_color = Color(1.0, 1.0, 1.0, 1.0)
-		else:
-			_material.albedo_color = Color(0.36, 0.45, 0.32, 1.0)
-		var repeat_scale: float = maxf(terrain_texture_uv_repeat, 1.0)
-		_material.uv1_scale = Vector3(repeat_scale, repeat_scale, 1.0)
-		_material.roughness = 0.92
-		_material.metallic = 0.0
-		_material.cull_mode = BaseMaterial3D.CULL_DISABLED
+		_material = _build_fallback_terrain_material()
 	_mesh_instance.material_override = _material
 	if _mesh_instance.mesh is ArrayMesh:
 		var array_mesh: ArrayMesh = _mesh_instance.mesh as ArrayMesh
 		if array_mesh.get_surface_count() > 0:
 			array_mesh.surface_set_material(0, _material)
 	if debug_rebuild_logging:
-		print("Assigned terrain material: ", _material.name)
+		print("Assigned terrain material: ", _material.resource_name if _material != null else "<null>")
+
+func _apply_texture_set_to_material(albedo: Texture2D, normal: Texture2D, roughness: Texture2D, tile_size: float, scale: float, exposure: float) -> void:
+	_ensure_texture_slot("", albedo, normal, roughness, tile_size, scale, exposure)
+
+func _ensure_texture_slot_storage() -> void:
+	if _texture_slot_ids.size() == MAX_TEXTURE_LAYERS:
+		return
+	_texture_slot_ids = PackedStringArray()
+	_texture_slot_albedo.clear()
+	_texture_slot_normal.clear()
+	_texture_slot_roughness.clear()
+	_texture_slot_uv_scales = PackedFloat32Array()
+	_texture_slot_exposures = PackedFloat32Array()
+	_texture_slot_uv_scales.resize(MAX_TEXTURE_LAYERS)
+	_texture_slot_exposures.resize(MAX_TEXTURE_LAYERS)
+	for i in range(MAX_TEXTURE_LAYERS):
+		_texture_slot_ids.append("")
+		_texture_slot_albedo.append(null)
+		_texture_slot_normal.append(null)
+		_texture_slot_roughness.append(null)
+		_texture_slot_uv_scales[i] = maxf(terrain_texture_uv_repeat, 1.0)
+		_texture_slot_exposures[i] = 1.0
+
+func _ensure_control_map_textures() -> void:
+	var target_size: int = terrain_resolution + 1
+	if _control_map_resolution == target_size and _control_map_textures.size() == CONTROL_MAP_COUNT:
+		return
+	_control_map_images.clear()
+	_control_map_textures.clear()
+	_control_map_resolution = target_size
+	for _i in range(CONTROL_MAP_COUNT):
+		var img := Image.create(target_size, target_size, false, Image.FORMAT_RGBA8)
+		img.fill(Color(0.0, 0.0, 0.0, 0.0))
+		_control_map_images.append(img)
+		_control_map_textures.append(ImageTexture.create_from_image(img))
+
+func _sync_control_maps_to_material() -> void:
+	if _material == null or not (_material is ShaderMaterial):
+		return
+	_ensure_control_map_textures()
+	var shader_material: ShaderMaterial = _material as ShaderMaterial
+	for i in range(CONTROL_MAP_COUNT):
+		shader_material.set_shader_parameter("control_map_%d" % i, _control_map_textures[i])
+	shader_material.set_shader_parameter("terrain_world_size", terrain_size)
+
+func _ensure_texture_slot(texture_id: String, albedo: Texture2D, normal: Texture2D, roughness: Texture2D, tile_size: float, scale: float, exposure: float) -> int:
+	_ensure_texture_slot_storage()
+	var resolved_id: String = texture_id.strip_edges()
+	if resolved_id == "" and albedo != null:
+		resolved_id = albedo.resource_path if albedo.resource_path != "" else albedo.resource_name
+	if resolved_id == "":
+		resolved_id = "__base__"
+	for i in range(MAX_TEXTURE_LAYERS):
+		if _texture_slot_ids[i] == resolved_id:
+			_update_texture_slot(i, albedo, normal, roughness, tile_size, scale, exposure)
+			return i
+	for i in range(MAX_TEXTURE_LAYERS):
+		if _texture_slot_ids[i] == "":
+			_texture_slot_ids[i] = resolved_id
+			_update_texture_slot(i, albedo, normal, roughness, tile_size, scale, exposure)
+			return i
+	push_warning("Texture Paint slots full (max %d)." % MAX_TEXTURE_LAYERS)
+	return -1
+
+func _update_texture_slot(slot_idx: int, albedo: Texture2D, normal: Texture2D, roughness: Texture2D, tile_size: float, scale: float, exposure: float) -> void:
+	if slot_idx < 0 or slot_idx >= MAX_TEXTURE_LAYERS:
+		return
+	var resolved_albedo: Texture2D = albedo if albedo != null else _fallback_white_texture
+	var resolved_normal: Texture2D = normal if normal != null else _fallback_flat_normal_texture
+	var resolved_roughness: Texture2D = roughness if roughness != null else _fallback_white_texture
+	var effective_tile_meters: float = maxf(tile_size * maxf(scale, 0.1), 0.25)
+	var resolved_uv_scale: float = clampf(terrain_size / effective_tile_meters, 1.0, 1024.0)
+	var resolved_exposure: float = clampf(exposure, 0.25, 2.0)
+	if _texture_slot_albedo[slot_idx] == resolved_albedo and _texture_slot_normal[slot_idx] == resolved_normal and _texture_slot_roughness[slot_idx] == resolved_roughness and is_equal_approx(_texture_slot_uv_scales[slot_idx], resolved_uv_scale) and is_equal_approx(_texture_slot_exposures[slot_idx], resolved_exposure):
+		return
+	_texture_slot_albedo[slot_idx] = resolved_albedo
+	_texture_slot_normal[slot_idx] = resolved_normal
+	_texture_slot_roughness[slot_idx] = resolved_roughness
+	_texture_slot_uv_scales[slot_idx] = resolved_uv_scale
+	_texture_slot_exposures[slot_idx] = resolved_exposure
+	_sync_texture_slots_to_material()
+
+func _sync_texture_slots_to_material() -> void:
+	if _material == null or not (_material is ShaderMaterial):
+		return
+	var shader_material: ShaderMaterial = _material as ShaderMaterial
+	_sync_texture_arrays_to_material()
+	shader_material.set_shader_parameter("paint_albedo_array", _texture_array_albedo)
+	shader_material.set_shader_parameter("paint_normal_array", _texture_array_normal)
+	shader_material.set_shader_parameter("paint_roughness_array", _texture_array_roughness)
+	shader_material.set_shader_parameter("paint_uv_scale", _texture_slot_uv_scales)
+	shader_material.set_shader_parameter("paint_exposure", _texture_slot_exposures)
+
+func _ensure_texture_library_fallbacks() -> void:
+	if _fallback_flat_normal_texture == null:
+		var normal_image := Image.create_empty(4, 4, false, Image.FORMAT_RGBA8)
+		normal_image.fill(Color(0.5, 0.5, 1.0, 1.0))
+		_fallback_flat_normal_texture = ImageTexture.create_from_image(normal_image)
+	if _fallback_white_texture == null:
+		var white_image := Image.create_empty(4, 4, false, Image.FORMAT_RGBA8)
+		white_image.fill(Color(1.0, 1.0, 1.0, 1.0))
+		_fallback_white_texture = ImageTexture.create_from_image(white_image)
+
+func _sync_texture_arrays_to_material() -> void:
+	_texture_array_albedo = _build_texture_array(_texture_slot_albedo, _fallback_white_texture, true)
+	_texture_array_normal = _build_texture_array(_texture_slot_normal, _fallback_flat_normal_texture, false)
+	_texture_array_roughness = _build_texture_array(_texture_slot_roughness, _fallback_white_texture, false)
+
+func _build_texture_array(source_textures: Array, fallback_texture: Texture2D, treat_as_color: bool) -> Texture2DArray:
+	var images: Array[Image] = []
+	images.resize(MAX_TEXTURE_LAYERS)
+	var target_size: Vector2i = Vector2i.ZERO
+	for i in range(MAX_TEXTURE_LAYERS):
+		var texture: Texture2D = source_textures[i] as Texture2D if i < source_textures.size() else null
+		if texture == null:
+			texture = fallback_texture
+		if texture == null:
+			return null
+		var image: Image = texture.get_image()
+		if image == null or image.is_empty():
+			return null
+		if target_size == Vector2i.ZERO:
+			target_size = image.get_size()
+		else:
+			target_size.x = maxi(target_size.x, image.get_width())
+			target_size.y = maxi(target_size.y, image.get_height())
+	for i in range(MAX_TEXTURE_LAYERS):
+		var texture: Texture2D = source_textures[i] as Texture2D if i < source_textures.size() else null
+		if texture == null:
+			texture = fallback_texture
+		if texture == null:
+			return null
+		var image: Image = texture.get_image()
+		if image == null or image.is_empty():
+			return null
+		if image.get_width() != target_size.x or image.get_height() != target_size.y:
+			image.resize(target_size.x, target_size.y, Image.INTERPOLATE_BILINEAR)
+		if image.get_format() != Image.FORMAT_RGBA8:
+			image.convert(Image.FORMAT_RGBA8)
+		image.generate_mipmaps()
+		images[i] = image
+	var texture_array := Texture2DArray.new()
+	var result: Error = texture_array.create_from_images(images)
+	if result != OK:
+		push_warning("Terrain texture array build failed with error %s" % result)
+		return null
+	return texture_array
 
 func _ensure_layer_data(layer: int) -> void:
 	if _layer_heights.has(layer):
+		_ensure_texture_weight_layers(layer)
+		_sync_legacy_paint_channels_from_layers(layer)
+		_ensure_paint_channels_for_layer(layer)
 		return
 	var count: int = (terrain_resolution + 1) * (terrain_resolution + 1)
 	var heights := PackedFloat32Array()
 	var paint := PackedFloat32Array()
+	var paint_g := PackedFloat32Array()
+	var paint_b := PackedFloat32Array()
+	var paint_a := PackedFloat32Array()
 	var water := PackedFloat32Array()
 	var snow := PackedFloat32Array()
 	heights.resize(count)
 	paint.resize(count)
+	paint_g.resize(count)
+	paint_b.resize(count)
+	paint_a.resize(count)
 	water.resize(count)
 	snow.resize(count)
 	for i in range(count):
 		heights[i] = 0.0
 		paint[i] = 0.0
+		paint_g[i] = 0.0
+		paint_b[i] = 0.0
+		paint_a[i] = 0.0
 		water[i] = 0.0
 		snow[i] = 0.0
 	if seed_initial_terrain:
 		_seed_height_data(heights)
 	_layer_heights[layer] = heights
 	_layer_paint[layer] = paint
+	_layer_paint_g[layer] = paint_g
+	_layer_paint_b[layer] = paint_b
+	_layer_paint_a[layer] = paint_a
+	_layer_texture_weights[layer] = []
+	_ensure_texture_weight_layers(layer)
+	_sync_legacy_paint_channels_from_layers(layer)
 	_layer_water[layer] = water
 	_layer_snow[layer] = snow
+
+func _ensure_texture_weight_layers(layer: int) -> void:
+	var count: int = (terrain_resolution + 1) * (terrain_resolution + 1)
+	var layers: Array = _layer_texture_weights.get(layer, []) as Array
+	if layers.size() != MAX_TEXTURE_LAYERS:
+		var rebuilt_layers: Array = []
+		rebuilt_layers.resize(MAX_TEXTURE_LAYERS)
+		for i in range(MAX_TEXTURE_LAYERS):
+			var arr := PackedFloat32Array()
+			arr.resize(count)
+			if i < layers.size() and layers[i] is PackedFloat32Array:
+				var src: PackedFloat32Array = layers[i] as PackedFloat32Array
+				var copy_size: int = mini(src.size(), count)
+				for j in range(copy_size):
+					arr[j] = clampf(src[j], 0.0, 1.0)
+			rebuilt_layers[i] = arr
+		layers = rebuilt_layers
+	_layer_texture_weights[layer] = layers
+
+func _sync_legacy_paint_channels_from_layers(layer: int) -> void:
+	_ensure_paint_channels_for_layer(layer)
+	_ensure_texture_weight_layers(layer)
+	var layers: Array = _layer_texture_weights[layer] as Array
+	var legacy_r: PackedFloat32Array = _layer_paint[layer]
+	var legacy_g: PackedFloat32Array = _layer_paint_g[layer]
+	var legacy_b: PackedFloat32Array = _layer_paint_b[layer]
+	var legacy_a: PackedFloat32Array = _layer_paint_a[layer]
+	var l0: PackedFloat32Array = layers[0] as PackedFloat32Array
+	var l1: PackedFloat32Array = layers[1] as PackedFloat32Array
+	var l2: PackedFloat32Array = layers[2] as PackedFloat32Array
+	var l3: PackedFloat32Array = layers[3] as PackedFloat32Array
+	for i in range(legacy_r.size()):
+		legacy_r[i] = l0[i]
+		legacy_g[i] = l1[i]
+		legacy_b[i] = l2[i]
+		legacy_a[i] = l3[i]
+	_layer_paint[layer] = legacy_r
+	_layer_paint_g[layer] = legacy_g
+	_layer_paint_b[layer] = legacy_b
+	_layer_paint_a[layer] = legacy_a
+
+func _update_control_maps_from_active_layer() -> void:
+	_ensure_texture_weight_layers(_active_world_layer)
+	_ensure_control_map_textures()
+	var stride: int = terrain_resolution + 1
+	var layer_weights: Array = _layer_texture_weights[_active_world_layer] as Array
+	for z in range(stride):
+		for x in range(stride):
+			var idxv: int = _idx(x, z, stride)
+			for cm in range(CONTROL_MAP_COUNT):
+				var base_idx: int = cm * 4
+				var r: float = float((layer_weights[base_idx + 0] as PackedFloat32Array)[idxv])
+				var g: float = float((layer_weights[base_idx + 1] as PackedFloat32Array)[idxv])
+				var b: float = float((layer_weights[base_idx + 2] as PackedFloat32Array)[idxv])
+				var a: float = float((layer_weights[base_idx + 3] as PackedFloat32Array)[idxv])
+				(_control_map_images[cm] as Image).set_pixel(x, z, Color(r, g, b, a))
+	for cm in range(CONTROL_MAP_COUNT):
+		(_control_map_textures[cm] as ImageTexture).update(_control_map_images[cm] as Image)
+	_sync_control_maps_to_material()
+
+func _ensure_paint_channels_for_layer(layer: int) -> void:
+	var base_paint: PackedFloat32Array = _layer_paint.get(layer, PackedFloat32Array())
+	if not _layer_paint_g.has(layer) or (_layer_paint_g[layer] as PackedFloat32Array).size() != base_paint.size():
+		var chan_g := PackedFloat32Array()
+		chan_g.resize(base_paint.size())
+		_layer_paint_g[layer] = chan_g
+	if not _layer_paint_b.has(layer) or (_layer_paint_b[layer] as PackedFloat32Array).size() != base_paint.size():
+		var chan_b := PackedFloat32Array()
+		chan_b.resize(base_paint.size())
+		_layer_paint_b[layer] = chan_b
+	if not _layer_paint_a.has(layer) or (_layer_paint_a[layer] as PackedFloat32Array).size() != base_paint.size():
+		var chan_a := PackedFloat32Array()
+		chan_a.resize(base_paint.size())
+		_layer_paint_a[layer] = chan_a
 
 func _seed_height_data(heights: PackedFloat32Array) -> void:
 	var noise := FastNoiseLite.new()
@@ -383,21 +698,17 @@ func _compute_normal(data: PackedFloat32Array, x: int, z: int, step: float) -> V
 	return Vector3(nx, 2.0 * step, nz).normalized()
 
 
-func _compute_vertex_color(paint_amt: float, water_amt: float, snow_amt: float) -> Color:
-	var terrain_col: Color = Color(0.20, 0.29, 0.22, 1.0)
-	terrain_col = terrain_col.lerp(Color(0.40, 0.33, 0.24, 1.0), paint_amt)
-	terrain_col = terrain_col.lerp(Color(0.19, 0.40, 0.52, 1.0), water_amt * 0.9)
-	terrain_col = terrain_col.lerp(Color(0.91, 0.93, 0.95, 1.0), snow_amt)
-	return terrain_col
+func _compute_vertex_color(layer_r: float, layer_g: float, layer_b: float, layer_a: float) -> Color:
+	return Color(clampf(layer_r, 0.0, 1.0), clampf(layer_g, 0.0, 1.0), clampf(layer_b, 0.0, 1.0), clampf(layer_a, 0.0, 1.0))
 
 
-func _average_neighbor_color(paint: PackedFloat32Array, water: PackedFloat32Array, snow: PackedFloat32Array, x: int, z: int, stride: int) -> Color:
+func _average_neighbor_color(paint: PackedFloat32Array, paint_g: PackedFloat32Array, paint_b: PackedFloat32Array, paint_a: PackedFloat32Array, x: int, z: int, stride: int) -> Color:
 	var accum: Color = Color(0.0, 0.0, 0.0, 0.0)
 	var count: float = 0.0
 	for zz in range(maxi(0, z - 1), mini(terrain_resolution, z + 1) + 1):
 		for xx in range(maxi(0, x - 1), mini(terrain_resolution, x + 1) + 1):
 			var idxv: int = _idx(xx, zz, stride)
-			accum += _compute_vertex_color(paint[idxv], water[idxv], snow[idxv])
+			accum += _compute_vertex_color(paint[idxv], paint_g[idxv], paint_b[idxv], paint_a[idxv])
 			count += 1.0
 	if count <= 0.0:
 		return Color(0.20, 0.29, 0.22, 1.0)
@@ -466,7 +777,7 @@ func _rebuild_after_stroke(radius: float, tool_name: String) -> void:
 			print("Terrain Rebuild Path: FULL REBUILD (dirty rect disabled) | tool: %s | force_full: %s" % [tool_name, str(_full_rebuild_mode)])
 		rebuild_mesh()
 		return
-	var supports_dirty: bool = tool_name in ["raise", "lower", "smooth", "flatten", "paint", "texturepaint", "textureerase"]
+	var supports_dirty: bool = tool_name in ["raise", "lower", "smooth", "flatten", "texturepaint", TOOL_TEXTURE_SUBTRACT]
 	if not supports_dirty:
 		_log_rebuild("Rebuild mode: full (tool requires full refresh) | tool: %s" % tool_name)
 		rebuild_mesh()
@@ -506,6 +817,9 @@ func rebuild_mesh() -> void:
 	var start_time: int = Time.get_ticks_usec()
 	var heights: PackedFloat32Array = _layer_heights[_active_world_layer]
 	var paint: PackedFloat32Array = _layer_paint[_active_world_layer]
+	var paint_g: PackedFloat32Array = _layer_paint_g[_active_world_layer]
+	var paint_b: PackedFloat32Array = _layer_paint_b[_active_world_layer]
+	var paint_a: PackedFloat32Array = _layer_paint_a[_active_world_layer]
 	var water: PackedFloat32Array = _layer_water[_active_world_layer]
 	var snow: PackedFloat32Array = _layer_snow[_active_world_layer]
 	var stride: int = terrain_resolution + 1
@@ -529,10 +843,7 @@ func rebuild_mesh() -> void:
 			var pz: float = -half + float(z) * step
 			vertices[i] = Vector3(px, heights[i], pz)
 			uvs[i] = Vector2(float(x) / float(terrain_resolution), float(z) / float(terrain_resolution))
-			var snow_amt: float = snow[i]
-			var water_amt: float = water[i]
-			var paint_amt: float = paint[i]
-			colors[i] = _compute_vertex_color(paint_amt, water_amt, snow_amt)
+			colors[i] = _compute_vertex_color(paint[i], paint_g[i], paint_b[i], paint_a[i])
 
 	for z in range(stride):
 		for x in range(stride):
@@ -578,6 +889,7 @@ func rebuild_mesh() -> void:
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr, Array(), Dictionary(), Mesh.ARRAY_FLAG_USE_DYNAMIC_UPDATE)
 	mesh.set_custom_aabb(AABB(Vector3(-half, min_terrain_height, -half), Vector3(terrain_size, max_terrain_height - min_terrain_height, terrain_size)))
 	_mesh_instance.mesh = mesh
+	_update_control_maps_from_active_layer()
 	_apply_terrain_material_to_mesh()
 	is_dirty = false
 	dirty_min = Vector2i.ZERO
@@ -601,6 +913,9 @@ func rebuild_dirty_mesh() -> void:
 	var start_time: int = Time.get_ticks_usec()
 	var heights: PackedFloat32Array = _layer_heights[_active_world_layer]
 	var paint: PackedFloat32Array = _layer_paint[_active_world_layer]
+	var paint_g: PackedFloat32Array = _layer_paint_g[_active_world_layer]
+	var paint_b: PackedFloat32Array = _layer_paint_b[_active_world_layer]
+	var paint_a: PackedFloat32Array = _layer_paint_a[_active_world_layer]
 	var water: PackedFloat32Array = _layer_water[_active_world_layer]
 	var snow: PackedFloat32Array = _layer_snow[_active_world_layer]
 	var stride: int = terrain_resolution + 1
@@ -647,7 +962,7 @@ func rebuild_dirty_mesh() -> void:
 			normal_bytes.encode_float(n_ofs + 4, normal.y)
 			normal_bytes.encode_float(n_ofs + 8, normal.z)
 
-			var terrain_col: Color = _compute_vertex_color(paint[idxv], water[idxv], snow[idxv])
+			var terrain_col: Color = _compute_vertex_color(paint[idxv], paint_g[idxv], paint_b[idxv], paint_a[idxv])
 			if debug_visualize_dirty_rect:
 				terrain_col = Color.RED
 			color_bytes.encode_u32(i * row_color_size, terrain_col.to_rgba32())
@@ -658,7 +973,7 @@ func rebuild_dirty_mesh() -> void:
 		mesh.surface_update_attribute_region(0, start_index * row_color_size, color_bytes)
 
 	var seam_start_time: int = Time.get_ticks_usec()
-	_blend_dirty_outer_border(mesh, heights, paint, water, snow, stride, step, row_normal_size, row_color_size, normal_block_offset, update_min_x, update_max_x, update_min_z, update_max_z)
+	_blend_dirty_outer_border(mesh, heights, paint, paint_g, paint_b, paint_a, stride, step, row_normal_size, row_color_size, normal_block_offset, update_min_x, update_max_x, update_min_z, update_max_z)
 	_apply_terrain_material_to_mesh()
 	var seam_time: int = Time.get_ticks_usec() - seam_start_time
 
@@ -672,7 +987,7 @@ func rebuild_dirty_mesh() -> void:
 		print("Dirty rebuild: %.3f ms" % (float(Time.get_ticks_usec() - start_time) / 1000.0))
 
 
-func _blend_dirty_outer_border(mesh: ArrayMesh, heights: PackedFloat32Array, paint: PackedFloat32Array, water: PackedFloat32Array, snow: PackedFloat32Array, stride: int, step: float, row_normal_size: int, row_color_size: int, normal_block_offset: int, min_x: int, max_x: int, min_z: int, max_z: int) -> void:
+func _blend_dirty_outer_border(mesh: ArrayMesh, heights: PackedFloat32Array, paint: PackedFloat32Array, paint_g: PackedFloat32Array, paint_b: PackedFloat32Array, paint_a: PackedFloat32Array, stride: int, step: float, row_normal_size: int, row_color_size: int, normal_block_offset: int, min_x: int, max_x: int, min_z: int, max_z: int) -> void:
 	var blend_strength: float = clampf(dirty_edge_blend_strength, 0.0, 1.0)
 	if blend_strength <= 0.0:
 		return
@@ -695,8 +1010,8 @@ func _blend_dirty_outer_border(mesh: ArrayMesh, heights: PackedFloat32Array, pai
 			normal_bytes.encode_float(4, blended_normal.y)
 			normal_bytes.encode_float(8, blended_normal.z)
 
-			var current_color: Color = _compute_vertex_color(paint[idxv], water[idxv], snow[idxv])
-			var avg_color: Color = _average_neighbor_color(paint, water, snow, x, z, stride)
+			var current_color: Color = _compute_vertex_color(paint[idxv], paint_g[idxv], paint_b[idxv], paint_a[idxv])
+			var avg_color: Color = _average_neighbor_color(paint, paint_g, paint_b, paint_a, x, z, stride)
 			var blended_color: Color = current_color.lerp(avg_color, b)
 
 			var color_bytes := PackedByteArray()

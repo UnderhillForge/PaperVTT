@@ -50,6 +50,11 @@ func setup(coord: Vector2i, grid_min_x: int, grid_max_x: int, grid_min_z: int, g
 		_mesh_instance.material_override = _material
 	_debug_border_instance.visible = false
 
+func set_material(material: Material) -> void:
+	_material = material
+	if _mesh_instance != null:
+		_mesh_instance.material_override = _material
+
 func intersects_vertex_rect(rect_min_x: int, rect_max_x: int, rect_min_z: int, rect_max_z: int) -> bool:
 	if rect_max_x < min_x or rect_min_x > max_x:
 		return false
@@ -57,7 +62,7 @@ func intersects_vertex_rect(rect_min_x: int, rect_max_x: int, rect_min_z: int, r
 		return false
 	return true
 
-func rebuild_mesh(heights: PackedFloat32Array, paint: PackedFloat32Array, water: PackedFloat32Array, snow: PackedFloat32Array, terrain_resolution: int, terrain_size: float, min_terrain_height: float, max_terrain_height: float) -> void:
+func rebuild_mesh(heights: PackedFloat32Array, paint_r: PackedFloat32Array, paint_g: PackedFloat32Array, paint_b: PackedFloat32Array, paint_a: PackedFloat32Array, water: PackedFloat32Array, snow: PackedFloat32Array, terrain_resolution: int, terrain_size: float, min_terrain_height: float, max_terrain_height: float) -> void:
 	if _mesh_instance == null:
 		return
 	var old_surface_count: int = 0
@@ -116,7 +121,7 @@ func rebuild_mesh(heights: PackedFloat32Array, paint: PackedFloat32Array, water:
 			var pz: float = -half + float(gz) * step
 			vertices[local_idx] = Vector3(px, heights[global_idx], pz)
 			uvs[local_idx] = Vector2(float(gx) / float(terrain_resolution), float(gz) / float(terrain_resolution))
-			colors[local_idx] = _compute_vertex_color(paint[global_idx], water[global_idx], snow[global_idx])
+			colors[local_idx] = _compute_vertex_color(paint_r[global_idx], paint_g[global_idx], paint_b[global_idx], paint_a[global_idx])
 			normals[local_idx] = _compute_normal(heights, gx, gz, step, terrain_resolution, stride)
 
 	# Explicitly snap all shared chunk-edge vertices/normals from the master height array.
@@ -162,10 +167,10 @@ func rebuild_mesh(heights: PackedFloat32Array, paint: PackedFloat32Array, water:
 		_mesh_instance.material_override = _material
 	_update_debug_border(vertices)
 
-func rebuild_region_from_source(heights: PackedFloat32Array, paint: PackedFloat32Array, water: PackedFloat32Array, snow: PackedFloat32Array, terrain_resolution: int, terrain_size: float, min_terrain_height: float, max_terrain_height: float, dirty_min_x: int, dirty_max_x: int, dirty_min_z: int, dirty_max_z: int, border_padding: int = 4, force_rebuild: bool = false) -> void:
+func rebuild_region_from_source(heights: PackedFloat32Array, paint_r: PackedFloat32Array, paint_g: PackedFloat32Array, paint_b: PackedFloat32Array, paint_a: PackedFloat32Array, water: PackedFloat32Array, snow: PackedFloat32Array, terrain_resolution: int, terrain_size: float, min_terrain_height: float, max_terrain_height: float, dirty_min_x: int, dirty_max_x: int, dirty_min_z: int, dirty_max_z: int, border_padding: int = 4, force_rebuild: bool = false) -> void:
 	if not force_rebuild and not intersects_vertex_rect(dirty_min_x, dirty_max_x, dirty_min_z, dirty_max_z):
 		return
-	rebuild_mesh(heights, paint, water, snow, terrain_resolution, terrain_size, min_terrain_height, max_terrain_height)
+	rebuild_mesh(heights, paint_r, paint_g, paint_b, paint_a, water, snow, terrain_resolution, terrain_size, min_terrain_height, max_terrain_height)
 
 func set_debug_border(enabled: bool, color: Color = Color.WHITE, highlight: bool = false) -> void:
 	_debug_border_enabled = enabled
@@ -198,12 +203,8 @@ func _compute_normal(heights: PackedFloat32Array, x: int, z: int, step: float, t
 	var nz: float = hd - hu
 	return Vector3(nx, 2.0 * step, nz).normalized()
 
-func _compute_vertex_color(paint_amt: float, water_amt: float, snow_amt: float) -> Color:
-	var terrain_col: Color = Color(0.20, 0.29, 0.22, 1.0)
-	terrain_col = terrain_col.lerp(Color(0.40, 0.33, 0.24, 1.0), paint_amt)
-	terrain_col = terrain_col.lerp(Color(0.19, 0.40, 0.52, 1.0), water_amt * 0.9)
-	terrain_col = terrain_col.lerp(Color(0.91, 0.93, 0.95, 1.0), snow_amt)
-	return terrain_col
+func _compute_vertex_color(layer_r: float, layer_g: float, layer_b: float, layer_a: float) -> Color:
+	return Color(clampf(layer_r, 0.0, 1.0), clampf(layer_g, 0.0, 1.0), clampf(layer_b, 0.0, 1.0), clampf(layer_a, 0.0, 1.0))
 
 func _snap_shared_border_data(vertices: PackedVector3Array, normals: PackedVector3Array, heights: PackedFloat32Array, step: float, half: float, stride: int) -> void:
 	# Left and right shared borders.

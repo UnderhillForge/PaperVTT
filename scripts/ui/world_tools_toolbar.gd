@@ -4,6 +4,9 @@ signal tool_changed(tool_name: String)
 signal setting_changed(setting_name: String, value: Variant)
 signal clear_requested()
 
+const TARGET_TEXEL_DENSITY_PX_PER_M: int = 256
+const TARGET_TEXTURE_TILE_SIZE: float = 8.0
+
 @onready var _group_terrain_btn: Button = %GroupTerrain
 @onready var _group_foliage_btn: Button = %GroupFoliage
 @onready var _group_structures_btn: Button = %GroupStructures
@@ -273,6 +276,7 @@ func _ready() -> void:
 	_texture_shape_mode_option.add_item("Varied")
 	_texture_shape_mode_option.set_item_metadata(2, "varied")
 	_texture_shape_mode_option.select(0)
+	_texture_tile_size_slider.tooltip_text = "Target preset: 8.0 (256 px/m terrain baseline)"
 
 	_texture_tile_size_slider.value_changed.connect(func(v: float) -> void: setting_changed.emit("texture_tile_size", v))
 	_texture_density_slider.value_changed.connect(func(v: float) -> void: setting_changed.emit("texture_density", v))
@@ -437,7 +441,11 @@ func _update_value_labels(_value: float) -> void:
 	_scatter_scale_max_value.text = "%.2f" % _scatter_scale_max_slider.value
 	_scatter_rotation_value.text = "%d deg" % int(round(_scatter_rotation_slider.value))
 	_scatter_tilt_value.text = "%d deg" % int(round(_scatter_tilt_slider.value))
-	_texture_tile_size_value.text = "%.1f" % _texture_tile_size_slider.value
+	var tile_size: float = _texture_tile_size_slider.value
+	if absf(tile_size - TARGET_TEXTURE_TILE_SIZE) <= 0.001:
+		_texture_tile_size_value.text = "%.1f (256 px/m)" % tile_size
+	else:
+		_texture_tile_size_value.text = "%.1f (target: 4.0)" % tile_size
 	_texture_density_value.text = "%.2f" % _texture_density_slider.value
 	_texture_shape_variation_value.text = "%d%%" % int(round(_texture_shape_variation_slider.value * 100.0))
 	_texture_edge_softness_value.text = "%.2f" % _texture_edge_softness_slider.value
@@ -468,8 +476,6 @@ func _update_tool_hint(tool_name: String) -> void:
 			_tool_hint.text = "[b]Smooth Terrain[/b]  [i]3[/i]\nHold LMB and drag\nEsc: back to Select"
 		"flatten":
 			_tool_hint.text = "[b]Flatten Terrain[/b]  [i]4[/i]\nHold LMB and drag\nFlatten Y sets the target height\nEsc: back to Select"
-		"paint":
-			_tool_hint.text = "[b]Paint Terrain[/b]  [i]5[/i]\nHold LMB and drag\nLower strength for smooth blends\nEsc: back to Select"
 		"grasspaint":
 			_tool_hint.text = "[b]Paint Grass[/b]  [i]7[/i]\nHold LMB to paint thick swathes\nRadius = area, Strength = fill speed\nEsc: back to Select"
 		"grasserase":
@@ -478,10 +484,10 @@ func _update_tool_hint(tool_name: String) -> void:
 			_tool_hint.text = "[b]Scatter Paint[/b]\nHold LMB to spray selected scatter asset\nUses Radius + Strength and scatter settings\nEsc: back to Select"
 		"scattererase":
 			_tool_hint.text = "[b]Scatter Erase[/b]\nHold LMB to erase scattered instances\nRadius controls erase area\nEsc: back to Select"
+		"boundary":
+			_tool_hint.text = "[b]Cliff Line Tool[/b]  [i]B[/i]\nLMB: place polyline points\nDouble-click or Enter: finish line\nRMB: cancel current line\nDrag handles to edit • Use inspector to set side, height, angle, width\nApply creates cliff and hides guide"
 		"texturepaint":
-			_tool_hint.text = "[b]Paint Texture[/b]\nHold LMB to airbrush texture onto terrain\nDensity + Edge Softness shape blend and fade\nEsc: back to Select"
-		"textureerase":
-			_tool_hint.text = "[b]Erase Texture[/b]\nHold LMB to restore terrain to base grass\nRadius / Strength control the erase effect\nEsc: back to Select"
+			_tool_hint.text = "[b]Texture Brush[/b]\nHold LMB to paint texture onto terrain\nUse inspector toggles for Erase/Subtract and Stamp mode\nEsc: back to Select"
 		"horizonmountain":
 			_tool_hint.text = "[b]Place Distant Mountain[/b]\nLMB: click to aim direction - mountain placed 3000m away\nMountains are visible from anywhere in the world\nEsc: back to Select"
 		"wall":
@@ -509,13 +515,13 @@ func _apply_tool(tool_name: String, emit_tool_signal: bool) -> void:
 
 func _group_for_tool(tool_name: String) -> String:
 	match tool_name:
-		"raise", "lower", "smooth", "flatten", "paint", "select":
+		"raise", "lower", "smooth", "flatten", "select", "boundary":
 			return "terrain"
 		"grasspaint", "grasserase":
 			return "foliage"
 		"wall", "stamp", "riverdraw":
 			return "structures"
-		"texturepaint", "textureerase":
+		"texturepaint":
 			return "paint"
 		"horizonmountain":
 			return "horizon"
@@ -539,7 +545,7 @@ func _update_tool_visibility(tool_name: String) -> void:
 	var is_river: bool = tool_name == "riverdraw"
 	var is_grass: bool = (tool_name == "grasspaint" or tool_name == "grasserase")
 	var is_scatter: bool = (tool_name == "scatterpaint" or tool_name == "scattererase")
-	var is_texture: bool = (tool_name == "texturepaint" or tool_name == "textureerase")
+	var is_texture: bool = tool_name == "texturepaint"
 	var has_brush: bool = not is_wall and not is_horizon and not is_river
 
 	_brush_label.visible = has_brush
@@ -672,8 +678,8 @@ func _format_tool_name(tool_name: String) -> String:
 			return "Scatter Erase"
 		"texturepaint":
 			return "Texture Paint"
-		"textureerase":
-			return "Texture Erase"
+		"boundary":
+			return "Cliff Line"
 		"horizonmountain":
 			return "Distant Mountain"
 		"riverdraw":

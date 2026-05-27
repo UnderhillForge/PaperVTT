@@ -24,7 +24,7 @@ const DistantHorizonSystemScript: Script = preload("res://scripts/world/distant_
 @onready var time_weather_panel: Control = %TimeWeatherPanel
 @onready var time_of_day_lighting: Node = get_node_or_null("LightingManager")
 
-@export var use_chunked_terrain: bool = true
+@export var use_chunked_terrain: bool = false
 @export var debug_draw_chunk_borders: bool = false
 @export var debug_draw_chunk_borders_red: bool = false
 @export var debug_highlight_problem_borders: bool = false
@@ -62,7 +62,8 @@ var _selected_river_point_index: int = -1
 var _river_preview_node: MeshInstance3D = null
 var _texture_painter: RefCounted = null
 var _selected_texture_id: String = ""
-var _texture_tile_size: float = 4.0
+# 8.0 fits the current 2K terrain set at the project 256 px/m baseline.
+var _texture_tile_size: float = 8.0
 var _texture_density: float = 0.75
 var _texture_perf_mode: bool = true
 var _texture_brush_shape_mode: String = "circle"
@@ -72,11 +73,18 @@ var _texture_coverage_limit: float = 0.75
 var _texture_random_rotation: float = 30.0
 var _texture_scale_variation: float = 0.15
 var _texture_exposure: float = 0.95
+var _texture_erase_mode: bool = false
+var _texture_stamp_mode: bool = false
+var _texture_stamp_overlap: float = 0.28
+var _texture_stamp_scatter: float = 0.32
 var _texture_stroke_offset: Vector2 = Vector2.ZERO
 var _texture_stroke_rotation: float = 0.0
 var _texture_stroke_scale: float = 1.0
 var _texture_stroke_seed: float = 0.0
 var _texture_stroke_shape_variant: int = 0
+var _texture_stamp_has_last: bool = false
+var _texture_stamp_last_pos: Vector3 = Vector3.ZERO
+var _texture_maps_cache: Dictionary = {}
 var _cliff_mode: bool = false
 var _overhang_amount: float = 0.3
 var _scatter_density: float = 1.2
@@ -105,6 +113,7 @@ var _is_editor_runtime: bool = OS.has_feature("editor")
 const STROKE_INTERVAL_SEC: float = 1.0 / 70.0
 const TEXTURE_STROKE_INTERVAL_SEC: float = 1.0 / 55.0
 const TEXTURE_STROKE_INTERVAL_PERF_SEC: float = 1.0 / 34.0
+const TEXTURE_STAMP_MIN_SPACING_M: float = 0.45
 const STAMP_DRAG_INTERVAL_SEC: float = 1.0 / 16.0
 ## Distance (meters) in front of the camera at which Distant Mountains are placed.
 const HORIZON_MOUNTAIN_PLACE_DISTANCE: float = 3000.0
@@ -121,6 +130,7 @@ const DUNGEONDRAFT_IMPORTER_SCRIPT: Script = preload("res://scripts/import/dunge
 # SCATTER_SYSTEM_SCRIPT — removed (legacy scatter migration)
 const PLAYER_CHARACTER_SCENE: PackedScene = preload("res://scenes/characters/PlayerCharacter.tscn")
 # WALL_TOOL_SCRIPT — removed (legacy wall migration)
+const BOUNDARY_SYSTEM_SCRIPT: Script = preload("res://scripts/world/boundary_system.gd")
 const USER_SCREENSHOT_PATH: String = "user://full_editor_screenshot.png"
 const RES_SCREENSHOT_PATH: String = "res://debug_full_editor.png"
 const PREFAB_VISIBILITY_END_NEAR: float = 170.0
@@ -131,7 +141,6 @@ const STARTER_TREE_CLUSTER_COUNT: int = 10
 const AUTO_DEBUG_SCREENSHOTS: bool = false
 const PERF_OVERLAY_INTERVAL_SEC: float = 0.25
 const DISABLE_CUSTOM_POSTFX_DEFAULT: bool = true
-const ENABLE_TERRABRUSH_EDITOR_RUNTIME: bool = false
 const DEFAULT_DUNGEONDRAFT_MAP_PATH: String = "res://dd_testing/test1.dungeondraft_map"
 const IMPORT_WALL_TEXTURE_PATH: String = "res://assets/world/textures/materials/kenney_nature-kit/cliff_block_stone_NW.png"
 const IMPORT_FLOOR_TEXTURE_PATH: String = "res://assets/world/textures/materials/kenney_nature-kit/stone_smallFlatC.png"
@@ -169,6 +178,9 @@ var _dungeondraft_importer: RefCounted = null
 var _dd_import_dialog: FileDialog = null
 var _import_prefab_paths: Array[String] = []
 var _wall_tool = null  # wall tool stub — legacy wall_tool.gd moved to legacy/
+var _boundary_system: Node = null
+var _boundary_selected_state: Dictionary = {}
+var _boundary_inspector_refresh_pending: bool = false
 var _import_prefab_key_to_path: Dictionary = {}
 var _import_wall_material: StandardMaterial3D = null
 var _import_floor_material: StandardMaterial3D = null
@@ -274,8 +286,6 @@ func _ready() -> void:
 	var ok: bool = _runtime_terrain_editor.initialize(_terrain_node)
 	if ok:
 		_set_status("Custom heightmap terrain initialized")
-	elif ENABLE_TERRABRUSH_EDITOR_RUNTIME and _get_terrabrush_editor_node() != null:
-		_set_status("TerraBrushEditor ready (press V to toggle)")
 	else:
 		_set_status("Heightmap terrain unavailable; stamping remains active")
 
@@ -935,7 +945,7 @@ func _process(delta: float) -> void:
 	if _is_tool_dragging and _current_tool != "stamp":
 		_stroke_interval_accum += delta
 		var stroke_interval: float = _get_active_stroke_interval()
-		if _current_tool == "texturepaint" or _current_tool == "textureerase":
+		if _current_tool == "texturepaint":
 			stroke_interval = TEXTURE_STROKE_INTERVAL_PERF_SEC if _texture_perf_mode else TEXTURE_STROKE_INTERVAL_SEC
 		while _stroke_interval_accum >= stroke_interval:
 			_stroke_interval_accum -= stroke_interval
@@ -1021,7 +1031,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				get_viewport().set_input_as_handled()
 				return
 			KEY_5:
-				_switch_tool("paint")
+				_switch_tool("texturepaint")
 				get_viewport().set_input_as_handled()
 				return
 			KEY_6:
@@ -1038,6 +1048,10 @@ func _unhandled_input(event: InputEvent) -> void:
 				return
 			KEY_9:
 				_switch_tool("wall")
+				get_viewport().set_input_as_handled()
+				return
+			KEY_B:
+				_switch_tool("boundary")
 				get_viewport().set_input_as_handled()
 				return
 
@@ -1092,6 +1106,30 @@ func _unhandled_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 			return
 
+	if _current_tool == "boundary":
+		if _boundary_system != null and _boundary_system.has_method("handle_input"):
+			var boundary_mouse_pos: Vector2 = get_viewport().get_mouse_position()
+			# Also allow Enter key to finish the cliff line
+			if event is InputEventKey and (event as InputEventKey).pressed and not (event as InputEventKey).echo:
+				var key_ev: InputEventKey = event as InputEventKey
+				if key_ev.keycode == KEY_ENTER or key_ev.keycode == KEY_KP_ENTER:
+					if _boundary_system.has_method("close_drawing"):
+						_boundary_system.call("close_drawing")
+					get_viewport().set_input_as_handled()
+					return
+				if key_ev.keycode == KEY_ESCAPE:
+					_clear_active_tool("Boundary drawing cancelled")
+					get_viewport().set_input_as_handled()
+					return
+				if key_ev.keycode == KEY_DELETE or key_ev.keycode == KEY_BACKSPACE:
+					if _boundary_system.has_method("delete_selected"):
+						_boundary_system.call("delete_selected")
+					get_viewport().set_input_as_handled()
+					return
+			if bool(_boundary_system.call("handle_input", event, boundary_mouse_pos)):
+				get_viewport().set_input_as_handled()
+		return
+
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed:
 			if _current_tool == "select":
@@ -1119,7 +1157,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			_is_stamp_dragging = false
 			if _is_tool_dragging:
 				_is_tool_dragging = false
-				if _terrain_node != null and (_current_tool == "texturepaint" or _current_tool == "textureerase") and _terrain_node.has_method("end_texture_stroke"):
+				if _terrain_node != null and _current_tool == "texturepaint" and _terrain_node.has_method("end_texture_stroke"):
 					_terrain_node.call("end_texture_stroke")
 				if not _current_tool.begins_with("grass") and not _current_tool.begins_with("scatter"):
 					_runtime_terrain_editor.end_stroke()
@@ -1263,13 +1301,15 @@ func _on_tool_changed(tool_name: String) -> void:
 		_activate_wall_tool()
 	else:
 		_deactivate_wall_tool()
+	if _current_tool == "boundary":
+		_activate_boundary_tool()
+	else:
+		_deactivate_boundary_tool()
 	_apply_sculpt_mode_boost(tool_name in ["raise", "lower", "smooth", "flatten"])
 	_update_active_tool_feedback()
 	_update_worldbrush_inspector_for_tool(tool_name)
 	_update_tool_name_display()
 	_set_status("Active tool: %s" % _format_tool_name(tool_name))
-	if tool_name in ["raise", "lower", "smooth", "flatten", "paint"] and not _runtime_terrain_editor.is_available() and _get_terrabrush_editor_node() != null:
-		_set_status("Use V to enable TerraBrushEditor for terrain sculpting")
 
 func _on_tool_clear_requested() -> void:
 	_clear_active_tool("Cleared active tool")
@@ -1348,8 +1388,18 @@ func _on_tool_setting_changed(setting_name: String, value: Variant) -> void:
 			_texture_scale_variation = float(value)
 		"texture_exposure":
 			_texture_exposure = float(value)
+		"texture_erase_mode":
+			_texture_erase_mode = bool(value)
+		"texture_stamp_mode":
+			_texture_stamp_mode = bool(value)
+			_texture_stamp_has_last = false
+		"texture_stamp_overlap":
+			_texture_stamp_overlap = clampf(float(value), 0.0, 0.95)
+		"texture_stamp_scatter":
+			_texture_stamp_scatter = clampf(float(value), 0.0, 1.0)
 		"selected_texture_id":
 			_selected_texture_id = String(value)
+			_texture_maps_cache.clear()
 			if _texture_painter != null:
 				_texture_painter.selected_texture_id = String(value)
 		"brush_softness":
@@ -1366,6 +1416,35 @@ func _on_tool_setting_changed(setting_name: String, value: Variant) -> void:
 			_cliff_mode = bool(value)
 		"overhang_amount":
 			_overhang_amount = float(value)
+		"boundary_label":
+			if _boundary_system != null and _boundary_system.has_method("set_selected_property"):
+				_boundary_system.call("set_selected_property", "label", String(value))
+		"boundary_type":
+			if _boundary_system != null and _boundary_system.has_method("set_selected_property"):
+				_boundary_system.call("set_selected_property", "type", String(value))
+		"boundary_material":
+			if _boundary_system != null and _boundary_system.has_method("set_selected_property"):
+				_boundary_system.call("set_selected_property", "material", String(value))
+		"boundary_direction":
+			if _boundary_system != null and _boundary_system.has_method("set_selected_property"):
+				_boundary_system.call("set_selected_property", "direction", int(value))
+		"boundary_steepness":
+			if _boundary_system != null and _boundary_system.has_method("set_selected_property"):
+				_boundary_system.call("set_selected_property", "steepness", float(value))
+		"boundary_raise_height":
+			if _boundary_system != null and _boundary_system.has_method("set_selected_property"):
+				_boundary_system.call("set_selected_property", "raise_height", float(value))
+		"boundary_wall_brush_width":
+			if _boundary_system != null and _boundary_system.has_method("set_selected_property"):
+				_boundary_system.call("set_selected_property", "wall_brush_width", float(value))
+		"boundary_apply":
+			if _boundary_system != null and _boundary_system.has_method("apply_selected"):
+				_boundary_system.call("apply_selected")
+				_set_status("Cliff applied to terrain")
+		"boundary_delete":
+			if _boundary_system != null and _boundary_system.has_method("delete_selected"):
+				_boundary_system.call("delete_selected")
+				_set_status("Boundary deleted")
 		"wall_height":
 			if _wall_tool != null and _wall_tool.has_method("set_segment_height"):
 				_wall_tool.call("set_segment_height", float(value))
@@ -1591,6 +1670,9 @@ func _create_new_flat_map(_include_seed_content: bool = true) -> void:
 	_apply_time_of_day(_sky_time_hours)
 	_apply_weather_preset(WEATHER_NORMAL, false)
 	_set_status("New map ready: blank flat terrain. Add terrain and assets with tools.")
+	if _boundary_system != null and _boundary_system.has_method("deserialize"):
+		_boundary_system.call("deserialize", [])
+	_boundary_selected_state = {}
 	if AUTO_DEBUG_SCREENSHOTS:
 		call_deferred("_capture_full_editor_screenshot", "new_map")
 
@@ -1931,12 +2013,12 @@ func _setup_dungeondraft_import() -> void:
 
 func _build_import_material(texture_path: String, fallback_color: Color) -> StandardMaterial3D:
 	var mat := StandardMaterial3D.new()
-	mat.uv1_scale = Vector3(1.0, 1.0, 1.0)
+	mat.uv1_scale = Vector3(4.0, 4.0, 1.0)
 	mat.albedo_color = fallback_color
 	var tex: Texture2D = _load_texture2d_or_null(texture_path)
 	if tex != null:
 		mat.albedo_texture = tex
-		mat.uv1_scale = Vector3(2.2, 2.2, 1.0)
+		mat.uv1_scale = Vector3(4.0, 4.0, 1.0)
 	return mat
 
 func _load_texture2d_or_null(path: String) -> Texture2D:
@@ -2235,20 +2317,80 @@ func _switch_tool(tool_name: String) -> void:
 		"lower": true,
 		"smooth": true,
 		"flatten": true,
-		"paint": true,
 		"stamp": true,
 		"grasspaint": true,
 		"grasserase": true,
 		"wall": true,
 		"texturepaint": true,
-		"textureerase": true,
 		"riverdraw": true,
 		"horizonmountain": true,
+		"boundary": true,
 	}
 	if world_tools != null and world_tools.has_method("set_tool_from_action") and toolbar_supported.has(tool_name):
 		world_tools.call("set_tool_from_action", "tool_" + tool_name)
 		return
 	_on_tool_changed(tool_name)
+
+func _activate_boundary_tool() -> void:
+	_ensure_boundary_system()
+	if _boundary_system != null and _boundary_system.has_method("activate"):
+		_boundary_system.call("activate", _terrain_node, camera, _active_world_layer)
+
+func _deactivate_boundary_tool() -> void:
+	if _boundary_system != null and _boundary_system.has_method("deactivate"):
+		_boundary_system.call("deactivate")
+
+func _ensure_boundary_system() -> void:
+	if _boundary_system != null and is_instance_valid(_boundary_system):
+		return
+	_boundary_system = BOUNDARY_SYSTEM_SCRIPT.new()
+	_boundary_system.name = "BoundarySystem"
+	add_child(_boundary_system)
+	if _boundary_system.has_signal("boundary_selected"):
+		var selected_cb: Callable = Callable(self, "_on_boundary_selected")
+		if _boundary_system.is_connected("boundary_selected", selected_cb):
+			_boundary_system.disconnect("boundary_selected", selected_cb)
+		_boundary_system.connect("boundary_selected", selected_cb)
+	if _boundary_system.has_signal("boundary_deselected"):
+		var deselected_cb: Callable = Callable(self, "_on_boundary_deselected")
+		if _boundary_system.is_connected("boundary_deselected", deselected_cb):
+			_boundary_system.disconnect("boundary_deselected", deselected_cb)
+		_boundary_system.connect("boundary_deselected", deselected_cb)
+	if _boundary_system.has_signal("drawing_finished"):
+		var finished_cb: Callable = Callable(self, "_on_boundary_drawing_finished")
+		if _boundary_system.is_connected("drawing_finished", finished_cb):
+			_boundary_system.disconnect("drawing_finished", finished_cb)
+		_boundary_system.connect("drawing_finished", finished_cb)
+
+func _on_boundary_selected(boundary: Object) -> void:
+	_boundary_selected_state = boundary.serialize() if boundary != null else {}
+	_queue_boundary_inspector_refresh()
+	_set_status("Cliff line selected: %s - adjust properties and click Apply" % String(_boundary_selected_state.get("label", "")))
+
+func _on_boundary_deselected() -> void:
+	_boundary_selected_state = {}
+	_queue_boundary_inspector_refresh()
+
+func _on_boundary_drawing_finished(boundary: Object) -> void:
+	_boundary_selected_state = boundary.serialize() if boundary != null else {}
+	_queue_boundary_inspector_refresh()
+	_set_status("Cliff line drawn (%d pts) - adjust properties in inspector, then Apply" % int(_boundary_selected_state.get("points", []).size()))
+
+func _queue_boundary_inspector_refresh() -> void:
+	if _boundary_inspector_refresh_pending:
+		return
+	_boundary_inspector_refresh_pending = true
+	call_deferred("_deferred_boundary_inspector_refresh")
+
+func _deferred_boundary_inspector_refresh() -> void:
+	_boundary_inspector_refresh_pending = false
+	if _current_tool == "boundary":
+		_update_worldbrush_inspector_for_tool("boundary")
+
+func _get_selected_boundary_state() -> Variant:
+	if _boundary_selected_state.is_empty():
+		return null
+	return _boundary_selected_state
 
 func _activate_wall_tool() -> void:
 	if _wall_tool == null:
@@ -2306,6 +2448,8 @@ func _cancel_active_interactions() -> void:
 	_runtime_terrain_editor.end_stroke()
 	_set_river_handles_visible(false)
 	_set_river_preview_visible(false)
+	if _boundary_system != null and _boundary_system.has_method("cancel_drawing"):
+		_boundary_system.call("cancel_drawing")
 
 func _route_input_to_characters(event: InputEvent) -> bool:
 	if event is not InputEventMouseButton:
@@ -2578,16 +2722,16 @@ func _update_active_tool_feedback() -> void:
 		"stamp":
 			var prefab_name := "Pick prefab" if _selected_prefab == "" else _selected_prefab.get_file().get_basename()
 			viewport_hint.text = "Mode: Stamp | %s | LMB place | RMB/Q/E rotate | Esc clears tool" % prefab_name
-		"raise", "lower", "smooth", "flatten", "paint":
+		"raise", "lower", "smooth", "flatten":
 			viewport_hint.text = "Mode: %s | Hold LMB to sculpt | Brush %.1f | Strength %.2f | Esc clears tool" % [_format_tool_name(_current_tool), _brush_size, _brush_strength]
 		"grasspaint", "grasserase":
 			viewport_hint.text = "Mode: %s | Hold LMB to paint | Radius %.1f | Density %.2f | Esc clears tool" % [_format_tool_name(_current_tool), _brush_size, _brush_strength]
 		"scatterpaint", "scattererase":
 			viewport_hint.text = "Mode: %s | Hold LMB to spray/erase | Radius %.1f | Density %.2f | Scale %.2f-%.2f" % [_format_tool_name(_current_tool), _brush_size, _scatter_density, _scatter_scale_min, _scatter_scale_max]
 		"texturepaint":
-			viewport_hint.text = "Mode: Texture Paint | Radius %.1f | Strength %.2f | Density %.2f | Shape %s | Var %d%% | Soft %.2f" % [_brush_size, _brush_strength, _texture_density, _texture_brush_shape_mode.capitalize(), int(round(_texture_shape_variation * 100.0)), _texture_edge_softness]
-		"textureerase":
-			viewport_hint.text = "Mode: Texture Erase | Radius %.1f | Strength %.2f" % [_brush_size, _brush_strength]
+			var texture_mode_label: String = "Erase" if _texture_erase_mode else "Paint"
+			var stroke_mode_label: String = "Stamp" if _texture_stamp_mode else "Continuous"
+			viewport_hint.text = "Mode: Texture %s (%s) | Radius %.1f | Strength %.2f | Density %.2f | Shape %s | Var %d%% | Soft %.2f" % [texture_mode_label, stroke_mode_label, _brush_size, _brush_strength, _texture_density, _texture_brush_shape_mode.capitalize(), int(round(_texture_shape_variation * 100.0)), _texture_edge_softness]
 		"horizonmountain":
 			viewport_hint.text = "Mode: Distant Mountain | LMB: click to place %dm away in that direction | Esc clears tool" % [int(HORIZON_MOUNTAIN_PLACE_DISTANCE)]
 		"riverdraw":
@@ -2628,6 +2772,8 @@ func _format_tool_name(tool_name: String) -> String:
 			return "Smart Wall"
 		"riverdraw":
 			return "Draw River"
+		"boundary":
+			return "Cliff Line"
 		"select":
 			return "Select / None"
 		_:
@@ -2709,25 +2855,7 @@ func _begin_tool_stroke() -> void:
 			_grass_system.call("apply_brush", _current_tool, hit as Vector3, _brush_size, _brush_strength)
 		return
 	if _current_tool == "texturepaint":
-		if _terrain_node != null:
-			if _terrain_node.has_method("begin_texture_stroke"):
-				_terrain_node.call("begin_texture_stroke", _texture_perf_mode, _brush_size)
-			var max_off: float = _texture_tile_size * 0.65
-			_texture_stroke_offset = Vector2(randf_range(-max_off, max_off), randf_range(-max_off, max_off))
-			_texture_stroke_rotation = randf_range(-_texture_random_rotation, _texture_random_rotation)
-			_texture_stroke_scale = 1.0 + randf_range(-_texture_scale_variation, _texture_scale_variation)
-			_texture_stroke_seed = randf() * 4096.0
-			if _texture_brush_shape_mode == "varied":
-				_texture_stroke_shape_variant = randi_range(0, 2)
-			else:
-				_texture_stroke_shape_variant = 0
-			var maps: Dictionary = _get_texture_maps(_selected_texture_id, 1024)
-			if not maps.is_empty() and maps.has("albedo"):
-				_terrain_node.call("apply_texture_brush", hit as Vector3, maps.get("albedo", null), maps.get("normal", null), maps.get("roughness", null), maps.get("height", null), maps.get("ao", null), _brush_size, _brush_strength, _texture_tile_size, _texture_density, _texture_edge_softness, _texture_coverage_limit, _texture_stroke_offset, _texture_stroke_rotation, _texture_stroke_scale, _texture_exposure, _texture_brush_shape_mode, _texture_shape_variation, _texture_stroke_seed, _texture_stroke_shape_variant)
-		return
-	if _current_tool == "textureerase":
-		if _terrain_node != null:
-			_terrain_node.call("apply_texture_erase_brush", hit as Vector3, _brush_size, _brush_strength, _texture_edge_softness)
+		_begin_texture_paint_stroke(hit as Vector3)
 		return
 	_runtime_terrain_editor.set_tool(_current_tool, _brush_size, _brush_strength, _flatten_height, _cliff_mode, _overhang_amount)
 	if _runtime_terrain_editor.has_method("set_brush_falloff"):
@@ -2751,16 +2879,69 @@ func _continue_tool_stroke() -> void:
 				_grass_system.call("apply_brush", _current_tool, hit as Vector3, _brush_size, _brush_strength)
 		return
 	if _current_tool == "texturepaint":
-		if _terrain_node != null:
-			var maps: Dictionary = _get_texture_maps(_selected_texture_id, 1024)
-			if not maps.is_empty() and maps.has("albedo"):
-				_terrain_node.call("apply_texture_brush", hit as Vector3, maps.get("albedo", null), maps.get("normal", null), maps.get("roughness", null), maps.get("height", null), maps.get("ao", null), _brush_size, _brush_strength, _texture_tile_size, _texture_density, _texture_edge_softness, _texture_coverage_limit, _texture_stroke_offset, _texture_stroke_rotation, _texture_stroke_scale, _texture_exposure, _texture_brush_shape_mode, _texture_shape_variation, _texture_stroke_seed, _texture_stroke_shape_variant)
-		return
-	if _current_tool == "textureerase":
-		if _terrain_node != null:
-			_terrain_node.call("apply_texture_erase_brush", hit as Vector3, _brush_size, _brush_strength, _texture_edge_softness)
+		_continue_texture_paint_stroke(hit as Vector3)
 		return
 	_runtime_terrain_editor.continue_stroke(hit as Vector3, camera.rotation.y)
+
+func _refresh_texture_stroke_variation() -> void:
+	var max_off: float = _texture_tile_size * 0.65
+	_texture_stroke_offset = Vector2(randf_range(-max_off, max_off), randf_range(-max_off, max_off))
+	_texture_stroke_rotation = randf_range(-_texture_random_rotation, _texture_random_rotation)
+	_texture_stroke_scale = 1.0 + randf_range(-_texture_scale_variation, _texture_scale_variation)
+	_texture_stroke_seed = randf() * 4096.0
+	if _texture_brush_shape_mode == "varied":
+		_texture_stroke_shape_variant = randi_range(0, 2)
+	else:
+		_texture_stroke_shape_variant = 0
+
+func _apply_texture_paint_sample(hit: Vector3) -> void:
+	if _terrain_node == null:
+		return
+	if _texture_erase_mode:
+		_terrain_node.call("apply_texture_erase_brush", hit, _brush_size, _brush_strength, _texture_edge_softness, _brush_mode)
+		return
+	var maps: Dictionary = _get_texture_maps(_selected_texture_id, 1024)
+	if maps.is_empty() or not maps.has("albedo"):
+		return
+	_terrain_node.call("apply_texture_brush", hit, maps.get("albedo", null), maps.get("normal", null), maps.get("roughness", null), maps.get("height", null), maps.get("ao", null), _brush_size, _brush_strength, _texture_tile_size, _texture_density, _texture_edge_softness, _texture_coverage_limit, _texture_stroke_offset, _texture_stroke_rotation, _texture_stroke_scale, _texture_exposure, _texture_brush_shape_mode, _texture_shape_variation, _texture_stroke_seed, _texture_stroke_shape_variant, _brush_mode, _selected_texture_id)
+
+func _begin_texture_paint_stroke(hit: Vector3) -> void:
+	if _terrain_node == null:
+		return
+	if _terrain_node.has_method("begin_texture_stroke"):
+		_terrain_node.call("begin_texture_stroke", _texture_perf_mode, _brush_size)
+	_texture_stamp_has_last = false
+	_refresh_texture_stroke_variation()
+	if _texture_stamp_mode:
+		_try_apply_texture_stamp(hit)
+	else:
+		_apply_texture_paint_sample(hit)
+
+func _continue_texture_paint_stroke(hit: Vector3) -> void:
+	if _terrain_node == null:
+		return
+	if _texture_stamp_mode:
+		_try_apply_texture_stamp(hit)
+	else:
+		_apply_texture_paint_sample(hit)
+
+func _try_apply_texture_stamp(hit: Vector3) -> void:
+	var spacing: float = maxf(_brush_size * (1.0 - _texture_stamp_overlap), TEXTURE_STAMP_MIN_SPACING_M)
+	if _texture_stamp_has_last and hit.distance_to(_texture_stamp_last_pos) < spacing:
+		return
+	var stamp_pos: Vector3 = hit
+	if _texture_stamp_scatter > 0.001:
+		var scatter_radius: float = _brush_size * _texture_stamp_scatter
+		var scatter_dir: Vector2 = Vector2.RIGHT.rotated(randf() * TAU)
+		var scatter_dist: float = randf() * scatter_radius
+		stamp_pos.x += scatter_dir.x * scatter_dist
+		stamp_pos.z += scatter_dir.y * scatter_dist
+	# Stamp mode uses fully random rotation per dab to break repeated patterns.
+	_texture_stroke_rotation = randf_range(0.0, 360.0)
+	_texture_stroke_seed = randf() * 4096.0
+	_apply_texture_paint_sample(stamp_pos)
+	_texture_stamp_last_pos = stamp_pos
+	_texture_stamp_has_last = true
 
 func _get_mouse_world_position() -> Variant:
 	var mouse := get_viewport().get_mouse_position()
@@ -2870,7 +3051,7 @@ func _setup_preview_nodes() -> void:
 
 func _tool_uses_radius_preview(tool_name: String) -> bool:
 	match tool_name:
-		"raise", "lower", "smooth", "flatten", "paint", "grasspaint", "grasserase", "scatterpaint", "scattererase", "texturepaint", "textureerase", "waterpaint", "snowpaint":
+		"raise", "lower", "smooth", "flatten", "grasspaint", "grasserase", "scatterpaint", "scattererase", "texturepaint", "waterpaint", "snowpaint":
 			return true
 		_:
 			return false
@@ -3099,7 +3280,7 @@ func _update_brush_preview(world_pos: Vector3) -> void:
 	var rim_color: Color = Color(0.70, 0.98, 0.88, 0.88)
 	
 	match _current_tool:
-		"raise", "lower", "smooth", "paint":
+		"raise", "lower", "smooth":
 			base_color = Color(0.26, 0.84, 0.70, 0.07)
 			rim_color = Color(0.64, 0.99, 0.86, 0.88)
 		"flatten":
@@ -3112,11 +3293,12 @@ func _update_brush_preview(world_pos: Vector3) -> void:
 			base_color = Color(0.88, 0.95, 1.0, 0.09)
 			rim_color = Color(0.96, 1.0, 1.0, 0.90)
 		"texturepaint":
-			base_color = Color(0.66, 0.52, 0.96, 0.08)
-			rim_color = Color(0.86, 0.76, 1.0, 0.90)
-		"textureerase":
-			base_color = Color(0.56, 0.62, 0.92, 0.07)
-			rim_color = Color(0.76, 0.84, 0.98, 0.84)
+			if _texture_erase_mode:
+				base_color = Color(0.56, 0.62, 0.92, 0.07)
+				rim_color = Color(0.76, 0.84, 0.98, 0.84)
+			else:
+				base_color = Color(0.66, 0.52, 0.96, 0.08)
+				rim_color = Color(0.86, 0.76, 1.0, 0.90)
 		"grasspaint", "grasserase":
 			base_color = Color(0.36, 0.82, 0.38, 0.07)
 			rim_color = Color(0.66, 0.97, 0.58, 0.84)
@@ -3445,17 +3627,12 @@ func _get_chunked_worldbrush_node() -> Node:
 		return null
 	return terrain_placeholder.find_child("ChunkedWorldBrush", true, false)
 
-func _get_terrabrush_node() -> Node:
-	if terrain_placeholder == null:
-		return null
-	return terrain_placeholder.find_child("TerraBrush", true, false)
-
-func _get_terrabrush_editor_node() -> Node:
-	if terrain_placeholder == null:
-		return null
-	return terrain_placeholder.find_child("TerraBrushEditor", true, false)
-
 func _get_texture_maps(texture_id: String, target_size: int = 1024) -> Dictionary:
+	var cache_key: String = "%s::%d" % [texture_id, target_size]
+	if _texture_maps_cache.has(cache_key):
+		var cached_maps: Variant = _texture_maps_cache[cache_key]
+		if cached_maps is Dictionary:
+			return (cached_maps as Dictionary).duplicate()
 	if _texture_painter != null and _texture_painter.has_method("get_pbr_maps"):
 		var painter_texture_id: String = texture_id
 		if painter_texture_id.is_empty() and _texture_painter.has_method("get"):
@@ -3463,13 +3640,26 @@ func _get_texture_maps(texture_id: String, target_size: int = 1024) -> Dictionar
 		if painter_texture_id != "":
 			var painter_maps: Variant = _texture_painter.call("get_pbr_maps", painter_texture_id, target_size)
 			if painter_maps is Dictionary and not (painter_maps as Dictionary).is_empty():
-				return painter_maps
+				var painter_result: Dictionary = (painter_maps as Dictionary).duplicate()
+				_texture_maps_cache[cache_key] = painter_result.duplicate()
+				return painter_result
 	if texture_id.is_empty():
+		return {}
+
+	var texture_path: String = texture_id
+	if not texture_path.begins_with("res://"):
+		texture_path = "res://assets/world/textures/%s" % texture_id
+	var lower_texture_path: String = texture_path.to_lower()
+	if lower_texture_path.ends_with(".png") or lower_texture_path.ends_with(".jpg") or lower_texture_path.ends_with(".jpeg") or lower_texture_path.ends_with(".webp"):
+		if ResourceLoader.exists(texture_path):
+			var direct_maps: Dictionary = {"albedo": load(texture_path)}
+			_texture_maps_cache[cache_key] = direct_maps.duplicate()
+			return direct_maps
 		return {}
 
 	var texture_folder: String = texture_id
 	if not texture_folder.begins_with("res://"):
-		texture_folder = "res://assets/world/textures/world/%s" % texture_id
+		texture_folder = "res://assets/world/textures/%s" % texture_id
 	var texture_dir: DirAccess = DirAccess.open(texture_folder)
 	if texture_dir == null:
 		return {}
@@ -3510,6 +3700,8 @@ func _get_texture_maps(texture_id: String, target_size: int = 1024) -> Dictionar
 					break
 				file_name = texture_dir.get_next()
 			texture_dir.list_dir_end()
+	if not maps.is_empty():
+		_texture_maps_cache[cache_key] = maps.duplicate()
 	return maps
 
 func _ensure_worldbrush_menu() -> void:
@@ -3609,7 +3801,6 @@ func _update_worldbrush_inspector_for_tool(tool_name: String) -> void:
 		"lower":        icon_path = "res://addons/worldbrush/Assets/Icons/map_remove.png"
 		"smooth":       icon_path = "res://addons/worldbrush/Assets/Icons/map_smooth.png"
 		"flatten":      icon_path = "res://addons/worldbrush/Assets/Icons/map_set_height.png"
-		"paint":        icon_path = "res://addons/worldbrush/Assets/Icons/paint.png"
 		"texturepaint": icon_path = "res://addons/worldbrush/Assets/Icons/paint_withdot.png"
 		"grasspaint":   icon_path = "res://addons/worldbrush/Assets/Icons/foliage_add.png"
 		"waterpaint":   icon_path = "res://addons/worldbrush/Assets/Icons/water_add.png"
@@ -3617,6 +3808,7 @@ func _update_worldbrush_inspector_for_tool(tool_name: String) -> void:
 		"riverdraw":    icon_path = "res://addons/worldbrush/Assets/Icons/flow_add.png"
 		"wall":         icon_path = "res://addons/worldbrush/Assets/Icons/lock_add.png"
 		"stamp":        icon_path = "res://addons/worldbrush/Assets/Icons/object_add.png"
+		"boundary":     icon_path = "res://addons/worldbrush/Assets/Icons/map_set_height.png"
 	if _worldbrush_inspector.has_method("set_tool"):
 		_worldbrush_inspector.call("set_tool", tool_name, icon_path)
 	# Sync current brush values into the inspector
@@ -3634,6 +3826,11 @@ func _update_worldbrush_inspector_for_tool(tool_name: String) -> void:
 			"smooth_post_pass_enabled": _smooth_post_pass_enabled,
 			"smooth_post_pass_strength": _smooth_post_pass_strength,
 			"selected_texture_id": _selected_texture_id,
+			"texture_tile_size": _texture_tile_size,
+			"texture_erase_mode": _texture_erase_mode,
+			"texture_stamp_mode": _texture_stamp_mode,
+			"texture_stamp_overlap": _texture_stamp_overlap,
+			"texture_stamp_scatter": _texture_stamp_scatter,
 			"world_layer": _active_world_layer,
 			"wall_type": String(toolbar_settings.get("wall_type", "stone")),
 			"wall_height": float(toolbar_settings.get("wall_height", 3.4)),
@@ -3646,6 +3843,7 @@ func _update_worldbrush_inspector_for_tool(tool_name: String) -> void:
 			"river_flow_speed": float(toolbar_settings.get("river_flow_speed", _river_flow_speed)),
 			"river_average_depth": float(toolbar_settings.get("river_average_depth", _river_average_depth)),
 			"water_mode": String(toolbar_settings.get("water_mode", _water_mode)),
+			"boundary_selected": _get_selected_boundary_state(),
 		})
 	if _texture_painter != null and _worldbrush_inspector.has_method("set_texture_painter"):
 		_worldbrush_inspector.call("set_texture_painter", _texture_painter)
@@ -3714,15 +3912,10 @@ func _ensure_terrain_node() -> Node:
 			worldbrush_node.call("set_full_rebuild_mode", _terrain_full_rebuild_mode)
 		return worldbrush_node
 
-	var terrabrush_node: Node = _get_terrabrush_node()
-	if terrabrush_node != null:
-		return terrabrush_node
-
 	for child in terrain_placeholder.get_children():
 		child.queue_free()
 
-	# Runtime safe mode: TerraBrush native init currently crashes in libterrabrush.macos.debug.
-	# Keep editor stable with a simple fallback ground until the extension-side crash is resolved.
+	# Fallback: no WorldBrush node found — create a basic flat plane so the editor remains usable.
 	var ground := MeshInstance3D.new()
 	ground.name = "FallbackGround"
 	var plane := PlaneMesh.new()
@@ -3813,6 +4006,8 @@ func _save_map_to_path(path: String) -> bool:
 	data["sky3d"] = _export_sky_state()
 	if _horizon_system != null and is_instance_valid(_horizon_system) and _horizon_system.has_method("serialize"):
 		data["horizon_mountains"] = _horizon_system.call("serialize")
+	if _boundary_system != null and is_instance_valid(_boundary_system) and _boundary_system.has_method("serialize"):
+		data["boundaries"] = _boundary_system.call("serialize")
 	var file := FileAccess.open(path, FileAccess.WRITE)
 	if file == null:
 		_set_status("Save failed: %s" % path)
@@ -3842,6 +4037,7 @@ func _load_map_from_path(path: String) -> bool:
 	var terrain_data: Dictionary = data.get("terrain", {})
 	var horizon_data: Array = data.get("horizon_mountains", [])
 	var sky_data: Dictionary = data.get("sky3d", {})
+	var boundary_data: Array = data.get("boundaries", [])
 	var wall_system: Node = _get_or_create_wall_system()
 	if wall_system != null and wall_system.has_method("load_data"):
 		wall_system.call("load_data", wall_data)
@@ -3852,6 +4048,9 @@ func _load_map_from_path(path: String) -> bool:
 	_import_sky_state(sky_data)
 	if _horizon_system != null and is_instance_valid(_horizon_system) and _horizon_system.has_method("deserialize"):
 		_horizon_system.call("deserialize", horizon_data)
+	_ensure_boundary_system()
+	if _boundary_system != null and _boundary_system.has_method("deserialize"):
+		_boundary_system.call("deserialize", boundary_data)
 	_set_status("Loaded map: %s" % path)
 	return true
 
