@@ -1,6 +1,8 @@
 shader_type canvas_item;
 
 uniform bool enabled = true;
+uniform bool fast_mode = false;
+uniform float postfx_intensity : hint_range(0.0, 1.0, 0.01) = 1.0;
 uniform vec4 outline_color : source_color = vec4(0.0, 0.0, 0.0, 1.0);
 uniform float outline_thickness : hint_range(0.5, 10.0, 0.1) = 7.5;
 uniform float outline_strength : hint_range(0.0, 6.0, 0.01) = 5.0;
@@ -56,7 +58,9 @@ void fragment() {
 	if (!enabled) {
 		COLOR = scene_col;
 	} else {
-		vec2 px = TEXTURE_PIXEL_SIZE * outline_thickness;
+		float outline_scale = fast_mode ? 0.7 : 1.0;
+		float effective_outline_thickness = max(outline_thickness * outline_scale, 0.001);
+		vec2 px = TEXTURE_PIXEL_SIZE * effective_outline_thickness;
 
 		float tl = luminance(texture(TEXTURE, uv + vec2(-px.x, -px.y)).rgb);
 		float tc = luminance(texture(TEXTURE, uv + vec2(0.0, -px.y)).rgb);
@@ -76,22 +80,29 @@ void fragment() {
 
 		float lum = luminance(scene_col.rgb);
 		float hatch_mask = smoothstep(0.02, 0.95, 1.0 - lum);
-		float hatch = hatch_pattern(uv) * hatch_opacity;
+		float hatch = hatch_pattern(uv) * hatch_opacity * (fast_mode ? 0.65 : 1.0);
 		float hatch_blend = hatch * hatch_mask * 0.18;
 		vec3 hatched_scene = mix(scene_col.rgb, scene_col.rgb * (1.0 - hatch_blend), hatch_mask);
 		vec3 paperized = mix(hatched_scene, hatched_scene * paper_tint.rgb, paper_strength * 0.35);
 		vec3 outlined = mix(paperized, outline_color.rgb, outline * outline_color.a * 0.28);
 		vec3 out_col = max(vec3(0.0), outlined * (1.0 - (outline * line_darken * 0.35)));
 
-		vec2 bloom_px = TEXTURE_PIXEL_SIZE * 2.0;
-		vec3 bloom_sample = texture(TEXTURE, uv + vec2(bloom_px.x, 0.0)).rgb;
-		bloom_sample += texture(TEXTURE, uv + vec2(-bloom_px.x, 0.0)).rgb;
-		bloom_sample += texture(TEXTURE, uv + vec2(0.0, bloom_px.y)).rgb;
-		bloom_sample += texture(TEXTURE, uv + vec2(0.0, -bloom_px.y)).rgb;
-		bloom_sample *= 0.25;
-		out_col = mix(out_col, out_col + bloom_sample * 0.22, bloom_strength);
+		if (bloom_strength > 0.001) {
+			float bloom_radius = fast_mode ? 1.5 : 2.0;
+			vec2 bloom_px = TEXTURE_PIXEL_SIZE * bloom_radius;
+			vec3 bloom_sample = texture(TEXTURE, uv + vec2(bloom_px.x, 0.0)).rgb;
+			bloom_sample += texture(TEXTURE, uv + vec2(-bloom_px.x, 0.0)).rgb;
+			if (!fast_mode) {
+				bloom_sample += texture(TEXTURE, uv + vec2(0.0, bloom_px.y)).rgb;
+				bloom_sample += texture(TEXTURE, uv + vec2(0.0, -bloom_px.y)).rgb;
+				bloom_sample *= 0.25;
+			} else {
+				bloom_sample *= 0.5;
+			}
+			out_col = mix(out_col, out_col + bloom_sample * 0.22, bloom_strength);
+		}
 
-		if (outlines_layer_enabled && outlines_layer_opacity > 0.001) {
+		if (!fast_mode && outlines_layer_enabled && outlines_layer_opacity > 0.001) {
 			vec2 o_px = TEXTURE_PIXEL_SIZE * outlines_layer_thickness;
 			float o_tl = luminance(texture(TEXTURE, uv + vec2(-o_px.x, -o_px.y)).rgb);
 			float o_tc = luminance(texture(TEXTURE, uv + vec2(0.0, -o_px.y)).rgb);
@@ -139,6 +150,7 @@ void fragment() {
 		out_col = (out_col - vec3(0.5)) * daytime_contrast + vec3(0.5);
 		out_col *= daytime_brightness;
 		out_col = clamp(out_col, vec3(0.0), vec3(1.0));
-		COLOR = vec4(out_col, scene_col.a);
+		vec3 final_rgb = mix(scene_col.rgb, out_col, clamp(postfx_intensity, 0.0, 1.0));
+		COLOR = vec4(final_rgb, scene_col.a);
 	}
 }

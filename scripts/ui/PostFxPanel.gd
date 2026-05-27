@@ -9,17 +9,11 @@ var _pending_preview_texture: Texture2D = null
 
 var _preview: TextureRect = null
 var _outline_slider: HSlider = null
-var _outline_value: Label = null
 var _contrast_slider: HSlider = null
-var _contrast_value: Label = null
 var _saturation_slider: HSlider = null
-var _saturation_value: Label = null
 var _vignette_slider: HSlider = null
-var _vignette_value: Label = null
 var _bloom_slider: HSlider = null
-var _bloom_value: Label = null
 var _tint_strength_slider: HSlider = null
-var _tint_strength_value: Label = null
 var _tint_picker: ColorPickerButton = null
 var _outlines_layer_enable: CheckBox = null
 var _outlines_layer_thickness_slider: HSlider = null
@@ -69,8 +63,8 @@ func _ready() -> void:
 	preset_row.add_child(preset_label)
 	_preset_option = OptionButton.new()
 	_preset_option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	for name in ["Graphic Novel", "Graphic Novel Outlines", "Pen & Ink Outlines", "Watercolor", "Cinematic", "Horror", "Dreamy"]:
-		_preset_option.add_item(name)
+	for preset_name in ["Graphic Novel", "Graphic Novel Outlines", "Pen & Ink Outlines", "Watercolor", "Cinematic", "Horror", "Dreamy"]:
+		_preset_option.add_item(preset_name)
 	preset_row.add_child(_preset_option)
 	var apply_preset := Button.new()
 	apply_preset.text = "Apply"
@@ -249,9 +243,15 @@ func set_postfx_state(state: Dictionary) -> void:
 	if _outlines_layer_enable != null and effects_by_name.has("outlines_layer_enabled"):
 		_outlines_layer_enable.button_pressed = bool(effects_by_name["outlines_layer_enabled"])
 	if _tint_picker != null and state.has("color_tint"):
-		_tint_picker.color = state.get("color_tint", Color(1.0, 1.0, 1.0, 1.0))
+		var tint_color: Variant = state.get("color_tint", Color(1.0, 1.0, 1.0, 1.0))
+		if tint_color == null:
+			tint_color = Color(1.0, 1.0, 1.0, 1.0)
+		_tint_picker.color = tint_color
 	if _outlines_layer_color_picker != null and effects_by_name.has("outlines_layer_color"):
-		_outlines_layer_color_picker.color = effects_by_name["outlines_layer_color"]
+		var outlines_color: Variant = effects_by_name["outlines_layer_color"]
+		if outlines_color == null:
+			outlines_color = Color(0.01, 0.01, 0.01, 1.0)
+		_outlines_layer_color_picker.color = outlines_color
 	_updating_ui = false
 
 func set_postfx_preview_texture(texture: Texture2D) -> void:
@@ -312,7 +312,10 @@ func _set_slider_from_state(slider: HSlider, effects_by_name: Dictionary, key: S
 	if slider == null:
 		return
 	if effects_by_name.has(key):
-		slider.value = float(effects_by_name[key])
+		var value: Variant = effects_by_name[key]
+		if value == null:
+			return
+		slider.value = value
 
 func _ppf_payload() -> Dictionary:
 	return {

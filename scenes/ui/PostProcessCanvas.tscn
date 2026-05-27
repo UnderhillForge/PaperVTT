@@ -5,24 +5,26 @@
 
 [sub_resource type="ShaderMaterial" id="1"]
 shader = ExtResource("1")
-shader_parameter/enabled = false
+shader_parameter/enabled = true
+shader_parameter/fast_mode = false
+shader_parameter/postfx_intensity = 1.0
 shader_parameter/outline_color = Color(0, 0, 0, 1)
-shader_parameter/outline_thickness = 4.0
-shader_parameter/outline_strength = 2.35
+shader_parameter/outline_thickness = 4.3
+shader_parameter/outline_strength = 2.55
 shader_parameter/edge_threshold = 0.013
-shader_parameter/hatch_opacity = 0.24
-shader_parameter/hatch_scale = 560.0
+shader_parameter/hatch_opacity = 0.28
+shader_parameter/hatch_scale = 540.0
 shader_parameter/hatch_contrast = 1.15
 shader_parameter/paper_tint = Color(0.95, 0.93, 0.88, 1)
-shader_parameter/paper_strength = 0.05
-shader_parameter/line_darken = 0.085
-shader_parameter/outlines_layer_enabled = false
+shader_parameter/paper_strength = 0.06
+shader_parameter/line_darken = 0.075
+shader_parameter/outlines_layer_enabled = true
 shader_parameter/outlines_layer_color = Color(0.01, 0.01, 0.01, 1)
 shader_parameter/outlines_layer_thickness = 2.2
 shader_parameter/outlines_layer_depth_sensitivity = 1.6
 shader_parameter/outlines_layer_depth_threshold = 0.055
 shader_parameter/outlines_layer_normal_sensitivity = 1.3
-shader_parameter/outlines_layer_opacity = 0.48
+shader_parameter/outlines_layer_opacity = 0.52
 
 [node name="PostProcessCanvas" type="CanvasLayer"]
 layer = 50

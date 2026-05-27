@@ -43,6 +43,10 @@ var face_material: String = "rock"
 ## Texture ID to paint on the cliff face (empty = keep terrain as-is).
 var wall_texture_id: String = ""
 
+## Cave entrances attached to this boundary.
+## Array[Dictionary] with keys: edge_index, edge_t, position(Array[3]), normal(Array[3]), marker_id
+var cave_entrances: Array = []
+
 ## Whether the extrusion has been applied to the terrain.
 var applied: bool = false
 
@@ -64,6 +68,7 @@ func serialize() -> Dictionary:
 		"raise_side": raise_side,
 		"face_material": face_material,
 		"wall_texture_id": wall_texture_id,
+		"cave_entrances": cave_entrances.duplicate(true),
 		"applied": applied,
 	}
 
@@ -81,6 +86,7 @@ static func deserialize(d: Dictionary) -> BoundaryData:
 	b.raise_side = 1 if int(d.get("raise_side", 1)) >= 0 else -1
 	b.face_material = String(d.get("face_material", b.boundary_type if b.boundary_type != "" else "rock"))
 	b.wall_texture_id = String(d.get("wall_texture_id", ""))
+	b.cave_entrances = (d.get("cave_entrances", []) as Array).duplicate(true)
 	b.applied = bool(d.get("applied", false))
 	var raw_pts: Array = d.get("points", [])
 	for rp in raw_pts:

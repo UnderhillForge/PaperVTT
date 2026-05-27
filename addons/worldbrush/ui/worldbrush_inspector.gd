@@ -548,6 +548,19 @@ func _update_custom_options() -> void:
 		if selected_boundary == null:
 			_custom_options_container.add_child(_make_label("Draw mode active - click terrain to place points\nDouble-click or Enter to finish line\nRight-click to cancel current line"))
 		else:
+			# Applied status badge
+			var is_applied: bool = bool(selected_boundary.get("applied", false))
+			if is_applied:
+				var status_lbl := Label.new()
+				status_lbl.text = "✓ Applied to terrain"
+				status_lbl.add_theme_color_override("font_color", Color(0.35, 0.85, 0.5))
+				_custom_options_container.add_child(status_lbl)
+			# Undo button
+			var undo_btn := Button.new()
+			undo_btn.text = "Undo (Ctrl+Z)"
+			undo_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			undo_btn.pressed.connect(func() -> void: tool_setting_changed.emit("boundary_undo", true))
+			_custom_options_container.add_child(undo_btn)
 			# Label / Name
 			_custom_options_container.add_child(_make_label("Cliff Line Name"))
 			var name_edit := LineEdit.new()
@@ -573,6 +586,31 @@ func _update_custom_options() -> void:
 				tool_setting_changed.emit("boundary_material", String(md) if md is String else "rock")
 			)
 			_custom_options_container.add_child(material_option)
+			# Cliff face texture
+			_custom_options_container.add_child(_make_label("Cliff Face Texture"))
+			var texture_option := OptionButton.new()
+			texture_option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			var cliff_texture_paths: Array[String] = [
+				"res://assets/world/textures/ground/cliff_brush.png",
+				"res://assets/world/textures/ground/cliff2_brush.png",
+			]
+			var current_texture_path: String = String(selected_boundary.get("wall_texture_id", ""))
+			# Normalise empty to the first (default) path so the dropdown reflects reality.
+			if current_texture_path == "":
+				current_texture_path = cliff_texture_paths[0]
+			for tex_idx in range(cliff_texture_paths.size()):
+				var tex_path: String = cliff_texture_paths[tex_idx]
+				texture_option.add_item(tex_path.get_file())
+				texture_option.set_item_metadata(tex_idx, tex_path)
+				if tex_path == current_texture_path:
+					texture_option.select(tex_idx)
+			if texture_option.selected < 0:
+				texture_option.select(0)
+			texture_option.item_selected.connect(func(index: int) -> void:
+				var md: Variant = texture_option.get_item_metadata(index)
+				tool_setting_changed.emit("boundary_wall_texture_id", String(md))
+			)
+			_custom_options_container.add_child(texture_option)
 			# Steepness slider
 			_custom_options_container.add_child(_make_label("Steepness (0 deg = slope, 90 deg = cliff)"))
 			var steep_slider := _make_slider(0.0, 90.0, float(selected_boundary.get("steepness", 80.0)), 1.0)
@@ -616,7 +654,7 @@ func _update_custom_options() -> void:
 			# Apply / Delete buttons
 			var btn_row := HBoxContainer.new()
 			var apply_btn := Button.new()
-			apply_btn.text = "Apply Cliff"
+			apply_btn.text = "Re-Apply Cliff" if is_applied else "Apply Cliff"
 			apply_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			apply_btn.pressed.connect(func() -> void: tool_setting_changed.emit("boundary_apply", true))
 			btn_row.add_child(apply_btn)
@@ -625,6 +663,32 @@ func _update_custom_options() -> void:
 			del_btn.pressed.connect(func() -> void: tool_setting_changed.emit("boundary_delete", true))
 			btn_row.add_child(del_btn)
 			_custom_options_container.add_child(btn_row)
+			var cave_btn := Button.new()
+			cave_btn.text = "Add Cave Entrance"
+			cave_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			cave_btn.pressed.connect(func() -> void: tool_setting_changed.emit("boundary_add_cave_entrance", true))
+			_custom_options_container.add_child(cave_btn)
+			# Cave entrance list with per-entry delete
+			var entrances: Array = selected_boundary.get("cave_entrances", []) as Array
+			if not entrances.is_empty():
+				_custom_options_container.add_child(_make_label("Cave Entrances (%d)" % entrances.size()))
+				for ent_idx in range(entrances.size()):
+					var ent_data: Dictionary = entrances[ent_idx] as Dictionary
+					var ent_row := HBoxContainer.new()
+					var ent_lbl := Label.new()
+					ent_lbl.text = String(ent_data.get("marker_id", "Cave %d" % (ent_idx + 1)))
+					ent_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+					ent_lbl.clip_text = true
+					ent_row.add_child(ent_lbl)
+					var ent_del := Button.new()
+					ent_del.text = "✕"
+					ent_del.tooltip_text = "Delete this cave entrance"
+					var captured_idx: int = ent_idx
+					ent_del.pressed.connect(func() -> void:
+						tool_setting_changed.emit("boundary_delete_cave_entrance", captured_idx)
+					)
+					ent_row.add_child(ent_del)
+					_custom_options_container.add_child(ent_row)
 
 	if _custom_options_container.get_child_count() == 0:
 		_custom_options_container.add_child(_make_label("No additional options for this tool."))

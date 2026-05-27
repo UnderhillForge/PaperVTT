@@ -259,7 +259,7 @@ func get_sharp_falloff(distance: float, radius: float) -> float:
 	var t: float = clampf(1.0 - (distance / radius), 0.0, 1.0)
 	return t * t
 
-func apply_brush(tool_name: String, world_pos: Vector3, brush_size: float, brush_strength: float, flatten_height: float = 0.0, _cliff_mode: bool = false, _overhang_amount: float = 0.3, brush_softness: float = 0.42, brush_mode: String = "smooth", texture_slot_index: int = 0) -> void:
+func apply_brush(tool_name: String, world_pos: Vector3, brush_size: float, brush_strength: float, flatten_height: float = 0.0, _cliff_mode: bool = false, _overhang_amount: float = 0.3, brush_softness: float = 0.42, brush_mode: String = "smooth", texture_slot_index: int = 0, defer_rebuild: bool = false) -> void:
 	if tool_name == "textureerase":
 		tool_name = TOOL_TEXTURE_SUBTRACT
 	_ensure_layer_data(_active_world_layer)
@@ -368,6 +368,8 @@ func apply_brush(tool_name: String, world_pos: Vector3, brush_size: float, brush
 	_sync_legacy_paint_channels_from_layers(_active_world_layer)
 	if is_texture_tool:
 		_update_control_maps_from_active_layer()
+	if defer_rebuild:
+		return
 	var force_full_for_raise: bool = tool_name == "raise" and max_height_delta >= maxf(high_raise_force_full_rebuild_delta, 0.1)
 	if _full_rebuild_mode:
 		rebuild_mesh()
@@ -395,13 +397,17 @@ func apply_brush(tool_name: String, world_pos: Vector3, brush_size: float, brush
 		return
 	_rebuild_chunks_intersecting_rect(min_x, max_x, min_z, max_z)
 
+
+func flush_deferred_rebuild() -> void:
+	rebuild_mesh()
+
 func begin_texture_stroke(perf_mode: bool = true, _brush_radius: float = 8.0) -> void:
 	_texture_stroke_active = true
 	_texture_stroke_perf_mode = perf_mode
 	_texture_stroke_dirty_valid = false
 	_texture_stroke_last_flush_msec = Time.get_ticks_msec()
 
-func apply_texture_brush(world_pos: Vector3, albedo: Texture2D = null, normal: Texture2D = null, roughness: Texture2D = null, _height: Texture2D = null, _ao: Texture2D = null, brush_size: float = 8.0, brush_strength: float = 0.3, tile_size: float = 4.0, density: float = 0.75, softness: float = 0.7, _coverage: float = 0.75, _offset: Vector2 = Vector2.ZERO, _rot: float = 0.0, scale: float = 1.0, exposure: float = 1.0, _shape: String = "circle", _variation: float = 0.0, _seed: float = 0.0, _variant: int = 0, brush_mode: String = "smooth", texture_id: String = "") -> void:
+func apply_texture_brush(world_pos: Vector3, albedo: Texture2D = null, normal: Texture2D = null, roughness: Texture2D = null, _height: Texture2D = null, _ao: Texture2D = null, brush_size: float = 8.0, brush_strength: float = 0.3, tile_size: float = 4.0, density: float = 0.75, softness: float = 0.7, _coverage: float = 0.75, _offset: Vector2 = Vector2.ZERO, _rot: float = 0.0, scale: float = 1.0, exposure: float = 1.0, _shape: String = "circle", _variation: float = 0.0, _seed: float = 0.0, _variant: int = 0, brush_mode: String = "smooth", texture_id: String = "", defer_rebuild: bool = false) -> void:
 	var tex_label: String = "<none>"
 	if albedo != null:
 		tex_label = albedo.resource_path if albedo.resource_path != "" else albedo.resource_name
@@ -410,7 +416,7 @@ func apply_texture_brush(world_pos: Vector3, albedo: Texture2D = null, normal: T
 		return
 	if debug_chunk_rebuild_logging:
 		print("Painting with texture: ", tex_label, " | Brush radius: ", brush_size)
-	apply_brush("texturepaint", world_pos, brush_size, maxf(brush_strength * density, 0.01), 0.0, false, 0.3, softness, brush_mode, slot_idx)
+	apply_brush("texturepaint", world_pos, brush_size, maxf(brush_strength * density, 0.01), 0.0, false, 0.3, softness, brush_mode, slot_idx, defer_rebuild)
 
 func apply_texture_erase_brush(world_pos: Vector3, brush_size: float = 8.0, brush_strength: float = 0.3, softness: float = 0.7, brush_mode: String = "smooth") -> void:
 	apply_brush(TOOL_TEXTURE_SUBTRACT, world_pos, brush_size, brush_strength, 0.0, false, 0.3, softness, brush_mode)

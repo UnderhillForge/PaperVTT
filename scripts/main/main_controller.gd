@@ -106,6 +106,8 @@ var _performance_mode: bool = false
 var _ultra_performance_mode: bool = false
 var _lightweight_postfx: bool = false
 var _post_process_disabled: bool = false
+var _postfx_quality_preset: String = "Medium"
+var _postfx_intensity: float = 1.0
 var _perf_overlay_accum: float = 0.0
 var _lightweight_editor_mode: bool = false
 var _is_editor_runtime: bool = OS.has_feature("editor")
@@ -130,7 +132,7 @@ const DUNGEONDRAFT_IMPORTER_SCRIPT: Script = preload("res://scripts/import/dunge
 # SCATTER_SYSTEM_SCRIPT — removed (legacy scatter migration)
 const PLAYER_CHARACTER_SCENE: PackedScene = preload("res://scenes/characters/PlayerCharacter.tscn")
 # WALL_TOOL_SCRIPT — removed (legacy wall migration)
-const BOUNDARY_SYSTEM_SCRIPT: Script = preload("res://scripts/world/boundary_system.gd")
+const BOUNDARY_SYSTEM_SCRIPT_PATH: String = "res://scripts/world/boundary_system.gd"
 const USER_SCREENSHOT_PATH: String = "user://full_editor_screenshot.png"
 const RES_SCREENSHOT_PATH: String = "res://debug_full_editor.png"
 const PREFAB_VISIBILITY_END_NEAR: float = 170.0
@@ -140,7 +142,9 @@ const PREFAB_VISIBILITY_END_FAR_EDITOR: float = 72.0
 const STARTER_TREE_CLUSTER_COUNT: int = 10
 const AUTO_DEBUG_SCREENSHOTS: bool = false
 const PERF_OVERLAY_INTERVAL_SEC: float = 0.25
-const DISABLE_CUSTOM_POSTFX_DEFAULT: bool = true
+const DISABLE_CUSTOM_POSTFX_DEFAULT: bool = false
+const RENDER_LAYER_WORLD: int = 1
+const RENDER_LAYER_SKY: int = 2
 const DEFAULT_DUNGEONDRAFT_MAP_PATH: String = "res://dd_testing/test1.dungeondraft_map"
 const IMPORT_WALL_TEXTURE_PATH: String = "res://assets/world/textures/materials/kenney_nature-kit/cliff_block_stone_NW.png"
 const IMPORT_FLOOR_TEXTURE_PATH: String = "res://assets/world/textures/materials/kenney_nature-kit/stone_smallFlatC.png"
@@ -243,10 +247,10 @@ var _lightning_flash_timer: float = 0.0
 var _lightning_flash_duration: float = 0.22
 
 func _ready() -> void:
-	# Fail-safe: keep post-process disabled until full startup completes.
-	if postfx_canvas != null and postfx_canvas.has_method("set_enabled"):
+	# Keep the editor override in sync with the boot default.
+	if postfx_canvas != null and postfx_canvas.has_method("set_enabled") and DISABLE_CUSTOM_POSTFX_DEFAULT:
 		postfx_canvas.call("set_enabled", false)
-	_post_process_disabled = true
+	_post_process_disabled = DISABLE_CUSTOM_POSTFX_DEFAULT
 	if camera != null:
 		camera.make_current()
 
@@ -279,8 +283,18 @@ func _ready() -> void:
 	_load_terrain_extension()
 	_setup_dungeondraft_import()
 	_terrain_node = _ensure_terrain_node()
+	if postfx_canvas != null:
+		if postfx_canvas.has_method("set_world_layer_mask"):
+			postfx_canvas.call("set_world_layer_mask", RENDER_LAYER_WORLD)
+		if postfx_canvas.has_method("set_sky_layer_mask"):
+			postfx_canvas.call("set_sky_layer_mask", RENDER_LAYER_SKY)
+		if postfx_canvas.has_method("set_quality_preset"):
+			postfx_canvas.call("set_quality_preset", _postfx_quality_preset)
+		if postfx_canvas.has_method("set_postfx_intensity"):
+			postfx_canvas.call("set_postfx_intensity", _postfx_intensity)
 	if _is_editor_runtime:
-		_apply_editor_optimization_preset(false)
+		_apply_editor_render_budget()
+	_ensure_render_layer_setup()
 	_setup_preview_nodes()
 
 	var ok: bool = _runtime_terrain_editor.initialize(_terrain_node)
@@ -294,6 +308,7 @@ func _ready() -> void:
 	# Texture Painter — removed (legacy terrain migration)
 	
 	_ensure_character_setup()
+	_ensure_render_layer_setup()
 
 	# --- Large-world systems --------------------------------------------------
 	# Extend the camera far plane so distant mountains (thousands of meters
@@ -341,6 +356,7 @@ func _setup_sky3d() -> void:
 
 	if camera != null:
 		_refresh_sky_camera_links()
+	_apply_sky_render_layer_separation()
 
 	var dome: Object = sky_3d.get("sky") as Object
 	if dome != null:
@@ -355,6 +371,42 @@ func _setup_sky3d() -> void:
 	_apply_weather_preset(_sky_weather, false)
 
 	sun_light = get_node_or_null("Sky3D/SunLight") as DirectionalLight3D
+
+
+func _apply_sky_render_layer_separation() -> void:
+	if sky_3d == null:
+		return
+	var dome: Object = sky_3d.get("sky") as Object
+	if dome != null and _object_has_property(dome, "fog_layers"):
+		dome.set("fog_layers", RENDER_LAYER_SKY)
+	_apply_visual_layer_recursive(sky_3d, RENDER_LAYER_SKY)
+
+
+func _ensure_render_layer_setup() -> void:
+	if camera != null:
+		camera.cull_mask = camera.cull_mask | RENDER_LAYER_WORLD | RENDER_LAYER_SKY
+	if postfx_canvas != null:
+		if postfx_canvas.has_method("set_world_layer_mask"):
+			postfx_canvas.call("set_world_layer_mask", RENDER_LAYER_WORLD)
+		if postfx_canvas.has_method("set_sky_layer_mask"):
+			postfx_canvas.call("set_sky_layer_mask", RENDER_LAYER_SKY)
+	if terrain_placeholder != null:
+		_apply_visual_layer_recursive(terrain_placeholder, RENDER_LAYER_WORLD)
+	if stamp_root != null:
+		_apply_visual_layer_recursive(stamp_root, RENDER_LAYER_WORLD)
+	var characters_root: Node = get_node_or_null("Characters")
+	if characters_root != null:
+		_apply_visual_layer_recursive(characters_root, RENDER_LAYER_WORLD)
+	_apply_sky_render_layer_separation()
+
+
+func _apply_visual_layer_recursive(node: Node, layer_mask: int) -> void:
+	if node is GeometryInstance3D:
+		var visual := node as GeometryInstance3D
+		visual.layers = layer_mask
+	for child in node.get_children():
+		if child is Node:
+			_apply_visual_layer_recursive(child as Node, layer_mask)
 
 
 func _setup_time_weather_panel() -> void:
@@ -396,6 +448,7 @@ func _on_day_length_panel_changed(minutes_per_day: float) -> void:
 
 func _on_sky_environment_changed(_env: Environment) -> void:
 	_refresh_sky_camera_links()
+	_apply_sky_render_layer_separation()
 
 
 func _refresh_sky_camera_links() -> void:
@@ -998,7 +1051,17 @@ func _unhandled_input(event: InputEvent) -> void:
 				if bool(_wall_tool.call("undo_last_segment")):
 					get_viewport().set_input_as_handled()
 					return
+		if event.keycode == KEY_Z and event.ctrl_pressed and _current_tool == "boundary":
+			if _boundary_system != null and _boundary_system.has_method("undo_last"):
+				_boundary_system.call("undo_last")
+				_set_status("Boundary action undone")
+				get_viewport().set_input_as_handled()
+				return
 		match event.keycode:
+			KEY_P:
+				_toggle_postfx()
+				get_viewport().set_input_as_handled()
+				return
 			KEY_R:
 				if _has_active_character():
 					_deselect_all_characters()
@@ -1437,10 +1500,25 @@ func _on_tool_setting_changed(setting_name: String, value: Variant) -> void:
 		"boundary_wall_brush_width":
 			if _boundary_system != null and _boundary_system.has_method("set_selected_property"):
 				_boundary_system.call("set_selected_property", "wall_brush_width", float(value))
+		"boundary_wall_texture_id":
+			if _boundary_system != null and _boundary_system.has_method("set_selected_property"):
+				_boundary_system.call("set_selected_property", "wall_texture_id", String(value))
 		"boundary_apply":
 			if _boundary_system != null and _boundary_system.has_method("apply_selected"):
 				_boundary_system.call("apply_selected")
 				_set_status("Cliff applied to terrain")
+		"boundary_add_cave_entrance":
+			if _boundary_system != null and _boundary_system.has_method("begin_cave_placement"):
+				_boundary_system.call("begin_cave_placement")
+				_set_status("Click on a cliff line segment to place cave entrance")
+		"boundary_delete_cave_entrance":
+			if _boundary_system != null and _boundary_system.has_method("delete_cave_entrance"):
+				_boundary_system.call("delete_cave_entrance", int(value))
+				_set_status("Cave entrance deleted")
+		"boundary_undo":
+			if _boundary_system != null and _boundary_system.has_method("undo_last"):
+				_boundary_system.call("undo_last")
+				_set_status("Boundary action undone")
 		"boundary_delete":
 			if _boundary_system != null and _boundary_system.has_method("delete_selected"):
 				_boundary_system.call("delete_selected")
@@ -1587,6 +1665,16 @@ func _on_tool_setting_changed(setting_name: String, value: Variant) -> void:
 			if postfx_canvas != null and postfx_canvas.has_method("import_ppf_from_url"):
 				postfx_canvas.call("import_ppf_from_url", String(value))
 				_set_status("Importing .ppf from URL...")
+		"postfx_enabled":
+			_set_post_process_disabled(not bool(value))
+		"postfx_quality_preset":
+			_postfx_quality_preset = String(value)
+			if postfx_canvas != null and postfx_canvas.has_method("set_quality_preset"):
+				postfx_canvas.call("set_quality_preset", _postfx_quality_preset)
+		"postfx_intensity":
+			_postfx_intensity = clampf(float(value), 0.0, 1.0)
+			if postfx_canvas != null and postfx_canvas.has_method("set_postfx_intensity"):
+				postfx_canvas.call("set_postfx_intensity", _postfx_intensity)
 	_sync_environment_inspector()
 
 
@@ -2343,7 +2431,11 @@ func _deactivate_boundary_tool() -> void:
 func _ensure_boundary_system() -> void:
 	if _boundary_system != null and is_instance_valid(_boundary_system):
 		return
-	_boundary_system = BOUNDARY_SYSTEM_SCRIPT.new()
+	var boundary_script: Script = load(BOUNDARY_SYSTEM_SCRIPT_PATH) as Script
+	if boundary_script == null:
+		_set_status("Boundary system script could not be loaded")
+		return
+	_boundary_system = boundary_script.new()
 	_boundary_system.name = "BoundarySystem"
 	add_child(_boundary_system)
 	if _boundary_system.has_signal("boundary_selected"):
@@ -2607,8 +2699,8 @@ func _capture_window_image() -> Image:
 
 func _toggle_postfx() -> void:
 	if postfx_canvas != null and postfx_canvas.has_method("set_enabled"):
-		postfx_canvas.call("set_enabled", not bool(postfx_canvas.get("enabled")))
-		_set_status("PostFX: %s" % ("On" if bool(postfx_canvas.get("enabled")) else "Off"))
+		_set_post_process_disabled(not _post_process_disabled)
+		_set_status("PostFX: %s" % ("On" if not _post_process_disabled else "Off"))
 	elif postfx_canvas != null:
 		postfx_canvas.visible = not postfx_canvas.visible
 		_set_status("PostFX visibility toggled")
@@ -3896,6 +3988,7 @@ func _ensure_terrain_node() -> Node:
 			chunked_node.call("set_debug_draw_chunk_borders", debug_draw_chunk_borders)
 		if chunked_node != null and chunked_node.has_method("set_debug_draw_chunk_borders_red"):
 			chunked_node.call("set_debug_draw_chunk_borders_red", debug_draw_chunk_borders_red)
+		_ensure_render_layer_setup()
 		return chunked_node
 
 	var worldbrush_node: Node = _get_worldbrush_node()
@@ -3910,6 +4003,7 @@ func _ensure_terrain_node() -> Node:
 			worldbrush_node.call("set_world_layer", _active_world_layer)
 		if worldbrush_node.has_method("set_full_rebuild_mode"):
 			worldbrush_node.call("set_full_rebuild_mode", _terrain_full_rebuild_mode)
+		_ensure_render_layer_setup()
 		return worldbrush_node
 
 	for child in terrain_placeholder.get_children():
@@ -3928,6 +4022,7 @@ func _ensure_terrain_node() -> Node:
 	fallback_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	ground.material_override = fallback_mat
 	terrain_placeholder.add_child(ground)
+	_ensure_render_layer_setup()
 	return terrain_placeholder
 
 func _set_use_chunked_terrain(enabled: bool) -> void:

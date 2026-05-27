@@ -37,6 +37,10 @@ var _full_rebuild_check: CheckBox = null
 var _debug_visualize_dirty_rect_check: CheckBox = null
 
 var _postfx_preview: TextureRect = null
+var _postfx_enabled_check: CheckBox = null
+var _postfx_quality_option: OptionButton = null
+var _postfx_intensity_slider: HSlider = null
+var _postfx_intensity_value: Label = null
 var _postfx_outline_slider: HSlider = null
 var _postfx_outline_value: Label = null
 var _postfx_contrast_slider: HSlider = null
@@ -284,6 +288,45 @@ func _ready() -> void:
 	root.add_child(HSeparator.new())
 	root.add_child(_make_section_title("Live Post-Process Editor"))
 
+	_postfx_enabled_check = CheckBox.new()
+	_postfx_enabled_check.text = "Enable Post-Processing"
+	_postfx_enabled_check.button_pressed = true
+	_postfx_enabled_check.toggled.connect(func(v: bool) -> void:
+		if _updating_ui:
+			return
+		environment_setting_changed.emit("postfx_enabled", v)
+	)
+	root.add_child(_postfx_enabled_check)
+
+	var quality_row := HBoxContainer.new()
+	quality_row.add_child(_make_label("Quality Preset"))
+	_postfx_quality_option = OptionButton.new()
+	_postfx_quality_option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_postfx_quality_option.add_item("Low")
+	_postfx_quality_option.add_item("Medium")
+	_postfx_quality_option.add_item("High")
+	_postfx_quality_option.item_selected.connect(func(idx: int) -> void:
+		if _updating_ui:
+			return
+		environment_setting_changed.emit("postfx_quality_preset", _postfx_quality_option.get_item_text(idx))
+	)
+	quality_row.add_child(_postfx_quality_option)
+	root.add_child(quality_row)
+
+	var postfx_intensity_row := HBoxContainer.new()
+	postfx_intensity_row.add_child(_make_label("Overall Intensity"))
+	_postfx_intensity_value = _make_value_label("1.00")
+	postfx_intensity_row.add_child(_postfx_intensity_value)
+	root.add_child(postfx_intensity_row)
+	_postfx_intensity_slider = _make_slider(0.0, 1.0, 1.0, 0.01)
+	_postfx_intensity_slider.value_changed.connect(func(v: float) -> void:
+		_postfx_intensity_value.text = "%.2f" % v
+		if _updating_ui:
+			return
+		environment_setting_changed.emit("postfx_intensity", v)
+	)
+	root.add_child(_postfx_intensity_slider)
+
 	var preview_label := _make_label("Live Preview")
 	root.add_child(preview_label)
 	_postfx_preview = TextureRect.new()
@@ -297,8 +340,9 @@ func _ready() -> void:
 	preset_row.add_child(_make_label("Preset"))
 	_postfx_preset_option = OptionButton.new()
 	_postfx_preset_option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	for name in ["Graphic Novel", "Graphic Novel Outlines", "Pen & Ink Outlines", "Watercolor", "Cinematic", "Horror", "Dreamy"]:
-		_postfx_preset_option.add_item(name)
+	var preset_names := ["Graphic Novel", "Graphic Novel Outlines", "Pen & Ink Outlines", "Watercolor", "Cinematic", "Horror", "Dreamy"]
+	for i in range(preset_names.size()):
+		_postfx_preset_option.add_item(String(preset_names[i]))
 	preset_row.add_child(_postfx_preset_option)
 	var apply_preset_btn := Button.new()
 	apply_preset_btn.text = "Apply"
@@ -600,25 +644,48 @@ func _ready() -> void:
 
 func set_environment_state(state: Dictionary) -> void:
 	_updating_ui = true
-	var time_h: float = float(state.get("time_hours", 12.0))
+	var time_h: Variant = state.get("time_hours", 12.0)
+	if time_h == null:
+		time_h = 12.0
 	_time_slider.value = clampf(time_h, 0.0, 23.983333)
 	_update_time_label(_time_slider.value)
-	_day_length_spin.value = float(state.get("day_length_minutes", 15.0))
+	var day_length_value: Variant = state.get("day_length_minutes", 15.0)
+	if day_length_value == null:
+		day_length_value = 15.0
+	_day_length_spin.value = day_length_value
 	_pause_time_check.button_pressed = bool(state.get("time_paused", false))
-	_time_scale_slider.value = float(state.get("time_scale", 1.0))
+	var time_scale_value: Variant = state.get("time_scale", 1.0)
+	if time_scale_value == null:
+		time_scale_value = 1.0
+	_time_scale_slider.value = time_scale_value
 	_time_scale_value.text = "%.2fx" % _time_scale_slider.value
 
 	_override_check.button_pressed = bool(state.get("lighting_override_enabled", false))
 	_override_controls.visible = _override_check.button_pressed
-	_override_color.color = state.get("lighting_override_color", Color(1.0, 0.95, 0.86, 1.0))
-	_override_energy_slider.value = float(state.get("lighting_override_energy", 2.2))
+	var override_color_value: Variant = state.get("lighting_override_color", Color(1.0, 0.95, 0.86, 1.0))
+	if override_color_value == null:
+		override_color_value = Color(1.0, 0.95, 0.86, 1.0)
+	_override_color.color = override_color_value
+	var override_energy_value: Variant = state.get("lighting_override_energy", 2.2)
+	if override_energy_value == null:
+		override_energy_value = 2.2
+	_override_energy_slider.value = override_energy_value
 	_override_energy_value.text = "%.2f" % _override_energy_slider.value
-	_override_saturation_slider.value = float(state.get("lighting_override_saturation", 1.0))
+	var override_saturation_value: Variant = state.get("lighting_override_saturation", 1.0)
+	if override_saturation_value == null:
+		override_saturation_value = 1.0
+	_override_saturation_slider.value = override_saturation_value
 	_override_saturation_value.text = "%.2f" % _override_saturation_slider.value
-	_override_tint_strength_slider.value = float(state.get("lighting_override_tint_strength", 0.65))
+	var override_tint_strength_value: Variant = state.get("lighting_override_tint_strength", 0.65)
+	if override_tint_strength_value == null:
+		override_tint_strength_value = 0.65
+	_override_tint_strength_slider.value = override_tint_strength_value
 	_override_tint_strength_value.text = "%.2f" % _override_tint_strength_slider.value
 
-	_weather_global_slider.value = float(state.get("weather_intensity_global", 1.0))
+	var weather_global_value: Variant = state.get("weather_intensity_global", 1.0)
+	if weather_global_value == null:
+		weather_global_value = 1.0
+	_weather_global_slider.value = weather_global_value
 	_weather_global_value.text = "%.2f" % _weather_global_slider.value
 	_weather_stack_check.button_pressed = bool(state.get("weather_stacking_enabled", false))
 
@@ -626,19 +693,47 @@ func set_environment_state(state: Dictionary) -> void:
 	for key in _weather_rows.keys():
 		var slider: HSlider = _weather_rows[key]["slider"]
 		var value_label: Label = _weather_rows[key]["value"]
-		var val: float = float(channels.get(key, 1.0 if key == String(state.get("weather", "normal")) else 0.0))
+		var val: Variant = channels.get(key, 1.0 if key == String(state.get("weather", "normal")) else 0.0)
+		if val == null:
+			val = 0.0
 		slider.value = val
 		value_label.text = "%.2f" % val
 
 	_lightning_enable_check.button_pressed = bool(state.get("lightning_enabled", false))
-	_lightning_interval_slider.value = float(state.get("lightning_interval", 18.0))
+	var lightning_interval_value: Variant = state.get("lightning_interval", 18.0)
+	if lightning_interval_value == null:
+		lightning_interval_value = 18.0
+	_lightning_interval_slider.value = lightning_interval_value
 	_lightning_interval_value.text = "%.1f" % _lightning_interval_slider.value
-	_lightning_intensity_slider.value = float(state.get("lightning_intensity", 2.2))
+	var lightning_intensity_value: Variant = state.get("lightning_intensity", 2.2)
+	if lightning_intensity_value == null:
+		lightning_intensity_value = 2.2
+	_lightning_intensity_slider.value = lightning_intensity_value
 	_lightning_intensity_value.text = "%.2f" % _lightning_intensity_slider.value
 	_lightning_random_check.button_pressed = bool(state.get("lightning_random_variation", true))
 
 	if state.has("postfx") and state.get("postfx") is Dictionary:
 		var postfx: Dictionary = state.get("postfx")
+		if _postfx_enabled_check != null:
+			_postfx_enabled_check.button_pressed = bool(postfx.get("enabled", true))
+		if _postfx_quality_option != null:
+			var quality_name: String = String(postfx.get("quality_preset", "Medium"))
+			var quality_idx: int = 1
+			match quality_name.to_lower():
+				"low":
+					quality_idx = 0
+				"high":
+					quality_idx = 2
+				_:
+					quality_idx = 1
+			_postfx_quality_option.select(quality_idx)
+		if _postfx_intensity_slider != null:
+			var intensity_value: Variant = postfx.get("intensity", 1.0)
+			if intensity_value == null:
+				intensity_value = 1.0
+			_postfx_intensity_slider.value = clampf(float(intensity_value), 0.0, 1.0)
+		if _postfx_intensity_value != null:
+			_postfx_intensity_value.text = "%.2f" % _postfx_intensity_slider.value
 		var effects_by_name: Dictionary = {}
 		var effects_variant: Variant = postfx.get("effects", [])
 		if effects_variant is Array:
@@ -647,39 +742,78 @@ func set_environment_state(state: Dictionary) -> void:
 					var entry: Dictionary = item
 					effects_by_name[String(entry.get("name", ""))] = entry.get("value")
 		if _postfx_outline_slider != null and effects_by_name.has("outline_strength"):
-			_postfx_outline_slider.value = float(effects_by_name["outline_strength"])
+			var outline_value: Variant = effects_by_name["outline_strength"]
+			if outline_value == null:
+				outline_value = 2.35
+			_postfx_outline_slider.value = outline_value
 			_postfx_outline_value.text = "%.2f" % _postfx_outline_slider.value
 		if _postfx_contrast_slider != null and effects_by_name.has("contrast"):
-			_postfx_contrast_slider.value = float(effects_by_name["contrast"])
+			var contrast_value: Variant = effects_by_name["contrast"]
+			if contrast_value == null:
+				contrast_value = 1.0
+			_postfx_contrast_slider.value = contrast_value
 			_postfx_contrast_value.text = "%.2f" % _postfx_contrast_slider.value
 		if _postfx_saturation_slider != null and effects_by_name.has("saturation"):
-			_postfx_saturation_slider.value = float(effects_by_name["saturation"])
+			var saturation_value: Variant = effects_by_name["saturation"]
+			if saturation_value == null:
+				saturation_value = 1.0
+			_postfx_saturation_slider.value = saturation_value
 			_postfx_saturation_value.text = "%.2f" % _postfx_saturation_slider.value
 		if _postfx_vignette_slider != null and effects_by_name.has("vignette_strength"):
-			_postfx_vignette_slider.value = float(effects_by_name["vignette_strength"])
+			var vignette_value: Variant = effects_by_name["vignette_strength"]
+			if vignette_value == null:
+				vignette_value = 0.25
+			_postfx_vignette_slider.value = vignette_value
 			_postfx_vignette_value.text = "%.2f" % _postfx_vignette_slider.value
 		if _postfx_bloom_slider != null and effects_by_name.has("bloom_strength"):
-			_postfx_bloom_slider.value = float(effects_by_name["bloom_strength"])
+			var bloom_value: Variant = effects_by_name["bloom_strength"]
+			if bloom_value == null:
+				bloom_value = 0.12
+			_postfx_bloom_slider.value = bloom_value
 			_postfx_bloom_value.text = "%.2f" % _postfx_bloom_slider.value
 		if _postfx_tint_slider != null and effects_by_name.has("tint_strength"):
-			_postfx_tint_slider.value = float(effects_by_name["tint_strength"])
+			var tint_value: Variant = effects_by_name["tint_strength"]
+			if tint_value == null:
+				tint_value = 0.0
+			_postfx_tint_slider.value = tint_value
 			_postfx_tint_value.text = "%.2f" % _postfx_tint_slider.value
 		if _postfx_tint_picker != null and postfx.has("color_tint"):
-			_postfx_tint_picker.color = postfx.get("color_tint", Color(1.0, 1.0, 1.0, 1.0))
+			var tint_color_value: Variant = postfx.get("color_tint", Color(1.0, 1.0, 1.0, 1.0))
+			if tint_color_value == null:
+				tint_color_value = Color(1.0, 1.0, 1.0, 1.0)
+			_postfx_tint_picker.color = tint_color_value
 		if _postfx_outlines_layer_enable != null and effects_by_name.has("outlines_layer_enabled"):
 			_postfx_outlines_layer_enable.button_pressed = bool(effects_by_name["outlines_layer_enabled"])
 		if _postfx_outlines_layer_thickness_slider != null and effects_by_name.has("outlines_layer_thickness"):
-			_postfx_outlines_layer_thickness_slider.value = float(effects_by_name["outlines_layer_thickness"])
+			var outline_thickness_value: Variant = effects_by_name["outlines_layer_thickness"]
+			if outline_thickness_value == null:
+				outline_thickness_value = 2.2
+			_postfx_outlines_layer_thickness_slider.value = outline_thickness_value
 		if _postfx_outlines_layer_depth_threshold_slider != null and effects_by_name.has("outlines_layer_depth_threshold"):
-			_postfx_outlines_layer_depth_threshold_slider.value = float(effects_by_name["outlines_layer_depth_threshold"])
+			var depth_threshold_value: Variant = effects_by_name["outlines_layer_depth_threshold"]
+			if depth_threshold_value == null:
+				depth_threshold_value = 0.055
+			_postfx_outlines_layer_depth_threshold_slider.value = depth_threshold_value
 		if _postfx_outlines_layer_depth_sensitivity_slider != null and effects_by_name.has("outlines_layer_depth_sensitivity"):
-			_postfx_outlines_layer_depth_sensitivity_slider.value = float(effects_by_name["outlines_layer_depth_sensitivity"])
+			var depth_sensitivity_value: Variant = effects_by_name["outlines_layer_depth_sensitivity"]
+			if depth_sensitivity_value == null:
+				depth_sensitivity_value = 1.6
+			_postfx_outlines_layer_depth_sensitivity_slider.value = depth_sensitivity_value
 		if _postfx_outlines_layer_normal_sensitivity_slider != null and effects_by_name.has("outlines_layer_normal_sensitivity"):
-			_postfx_outlines_layer_normal_sensitivity_slider.value = float(effects_by_name["outlines_layer_normal_sensitivity"])
+			var normal_sensitivity_value: Variant = effects_by_name["outlines_layer_normal_sensitivity"]
+			if normal_sensitivity_value == null:
+				normal_sensitivity_value = 1.3
+			_postfx_outlines_layer_normal_sensitivity_slider.value = normal_sensitivity_value
 		if _postfx_outlines_layer_opacity_slider != null and effects_by_name.has("outlines_layer_opacity"):
-			_postfx_outlines_layer_opacity_slider.value = float(effects_by_name["outlines_layer_opacity"])
+			var opacity_value: Variant = effects_by_name["outlines_layer_opacity"]
+			if opacity_value == null:
+				opacity_value = 0.48
+			_postfx_outlines_layer_opacity_slider.value = opacity_value
 		if _postfx_outlines_layer_color_picker != null and effects_by_name.has("outlines_layer_color"):
-			_postfx_outlines_layer_color_picker.color = effects_by_name["outlines_layer_color"]
+			var outline_color_value: Variant = effects_by_name["outlines_layer_color"]
+			if outline_color_value == null:
+				outline_color_value = Color(0.01, 0.01, 0.01, 1.0)
+			_postfx_outlines_layer_color_picker.color = outline_color_value
 	if _full_rebuild_check != null:
 		_full_rebuild_check.button_pressed = bool(state.get("full_rebuild_mode", true))
 	if _debug_visualize_dirty_rect_check != null:

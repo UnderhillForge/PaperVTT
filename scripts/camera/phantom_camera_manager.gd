@@ -13,9 +13,9 @@ extends Node
 @export var editor_zoom_step: float = 5.0
 @export var editor_orbit_sensitivity: float = 0.25
 @export var editor_pan_speed: float = 0.022
-@export var spring_length_min: float = 3.5
-@export var spring_length_max: float = 12.0
-@export var spring_zoom_step: float = 0.5
+@export var spring_length_min: float = 4.2
+@export var spring_length_max: float = 14.5
+@export var spring_zoom_step: float = 0.4
 @export var manual_return_delay: float = 0.12
 @export var auto_follow_blend_speed: float = 4.0
 @export var follow_pivot_blend_speed: float = 8.5
@@ -34,6 +34,13 @@ extends Node
 @export var follow_slope_pitch_sensitivity: float = 2.6
 @export var follow_slope_pitch_max_extra: float = 14.0
 @export var follow_slope_pitch_blend_speed: float = 6.5
+@export var follow_collision_mask: int = 2147483647
+@export var follow_collision_margin: float = 0.75
+@export var follow_collision_radius: float = 0.65
+@export var hard_terrain_clearance: float = 0.9
+@export var hard_terrain_pitch_boost_max: float = 20.0
+@export var hard_terrain_pitch_boost_speed: float = 26.0
+@export var hard_terrain_spring_shorten: float = 2.1
 @export var auto_pivot_when_idle: bool = true
 @export var mouse_sensitivity: float = 0.18
 @export var pitch_min: float = -25.0
@@ -134,11 +141,13 @@ func _process(delta: float) -> void:
 				_manual_look = false
 
 	if _manual_look:
+		_enforce_follow_camera_terrain_clearance(delta)
 		return
 
 	var should_pivot: bool = auto_pivot_when_idle or _is_target_moving() or _is_target_turning()
 	if should_pivot:
 		_apply_auto_follow_pivot(delta)
+	_enforce_follow_camera_terrain_clearance(delta)
 
 func _handle_top_down_input(event: InputEvent) -> void:
 	if _top_down_camera == null:
@@ -395,6 +404,32 @@ func _adjust_spring_length(delta_len: float) -> void:
 	var current_len: float = float(_follow_camera.call("get_spring_length"))
 	_follow_camera.call("set_spring_length", clampf(current_len + delta_len, spring_length_min, spring_length_max))
 
+func _enforce_follow_camera_terrain_clearance(_delta: float) -> void:
+	if _follow_camera == null or _camera == null:
+		return
+	var terrain_node: Node = _get_active_terrain_node()
+	if terrain_node == null:
+		return
+	if not terrain_node.has_method("sample_height"):
+		return
+	var cam_pos: Vector3 = _camera.global_position
+	var terrain_h: float = float(terrain_node.call("sample_height", cam_pos.x, cam_pos.z))
+	var required_cam_y: float = terrain_h + maxf(hard_terrain_clearance, 0.1)
+	if cam_pos.y >= required_cam_y:
+		return
+
+	var penetration: float = required_cam_y - cam_pos.y
+	if _follow_camera.has_method("get_spring_length") and _follow_camera.has_method("set_spring_length"):
+		var spring_len: float = float(_follow_camera.call("get_spring_length"))
+		var shortened: float = spring_len - (penetration * maxf(hard_terrain_spring_shorten, 0.0))
+		_follow_camera.call("set_spring_length", clampf(shortened, spring_length_min, spring_length_max))
+
+	if _follow_camera.has_method("get_third_person_rotation_degrees") and _follow_camera.has_method("set_third_person_rotation_degrees"):
+		var rot: Vector3 = _follow_camera.call("get_third_person_rotation_degrees")
+		var boost_target: float = rot.x + minf(maxf(hard_terrain_pitch_boost_max, 0.0), penetration * maxf(hard_terrain_pitch_boost_speed, 0.0))
+		rot.x = clampf(boost_target, pitch_min, pitch_max)
+		_follow_camera.call("set_third_person_rotation_degrees", rot)
+
 func _is_target_moving() -> bool:
 	if _active_target == null:
 		return false
@@ -521,6 +556,14 @@ func _initialize_follow_camera_defaults() -> void:
 		return
 	if _follow_camera_defaults_applied:
 		return
+	if _follow_camera.has_method("set_collision_mask"):
+		_follow_camera.call("set_collision_mask", max(1, follow_collision_mask))
+	if _follow_camera.has_method("set_margin"):
+		_follow_camera.call("set_margin", maxf(follow_collision_margin, 0.05))
+	if _follow_camera.has_method("set_shape"):
+		var follow_shape := SphereShape3D.new()
+		follow_shape.radius = maxf(follow_collision_radius, 0.15)
+		_follow_camera.call("set_shape", follow_shape)
 	if _follow_camera.has_method("set_follow_offset"):
 		_follow_camera.call("set_follow_offset", Vector3(shoulder_lateral_offset, follow_height_offset, 0.0))
 	if _follow_camera.has_method("set_look_at_offset"):
@@ -564,5 +607,5 @@ func _restore_perspective() -> void:
 	_camera.projection = Camera3D.PROJECTION_PERSPECTIVE
 	_camera.fov = 70.0
 	# Restore full near/far range for perspective views.
-	_camera.near = 0.05
+	_camera.near = 0.12
 	_camera.far = 4000.0

@@ -18,6 +18,9 @@ class_name WorldBrush
 @export var smooth_mode_post_smooth_enabled: bool = true
 @export var smooth_mode_post_smooth_strength: float = 0.12
 @export var terrain_texture_uv_repeat: float = 8.0
+@export var terrain_collision_enabled: bool = true
+@export_flags_3d_physics var terrain_collision_layer: int = 1
+@export_flags_3d_physics var terrain_collision_mask: int = 1
 
 const TERRAIN_BASE_ALBEDO_PATH: String = "res://assets/world/textures/ground/grass_tile.png"
 const TERRAIN_BASE_MATERIAL_PATH: String = "res://assets/world/materials/terrain_base_material.tres"
@@ -28,6 +31,8 @@ const TOOL_TEXTURE_SUBTRACT: String = "texture_subtract"
 
 var _active_world_layer: int = 0
 var _mesh_instance: MeshInstance3D = null
+var _terrain_collision_body: StaticBody3D = null
+var _terrain_collision_shape: CollisionShape3D = null
 var _material: Material = null
 var _base_albedo_texture: Texture2D = null
 var _base_roughness: float = 0.92
@@ -168,7 +173,7 @@ func get_sharp_falloff(distance: float, radius: float) -> float:
 	var t: float = clampf(1.0 - (distance / radius), 0.0, 1.0)
 	return t * t
 
-func apply_brush(tool_name: String, world_pos: Vector3, brush_size: float, brush_strength: float, flatten_height: float = 0.0, _cliff_mode: bool = false, _overhang_amount: float = 0.3, brush_softness: float = 0.42, brush_mode: String = "smooth", texture_slot_index: int = 0) -> void:
+func apply_brush(tool_name: String, world_pos: Vector3, brush_size: float, brush_strength: float, flatten_height: float = 0.0, _cliff_mode: bool = false, _overhang_amount: float = 0.3, brush_softness: float = 0.42, brush_mode: String = "smooth", texture_slot_index: int = 0, defer_rebuild: bool = false) -> void:
 	if tool_name == "textureerase":
 		tool_name = TOOL_TEXTURE_SUBTRACT
 	_ensure_layer_data(_active_world_layer)
@@ -270,12 +275,22 @@ func apply_brush(tool_name: String, world_pos: Vector3, brush_size: float, brush
 	if tool_name in ["texturepaint", TOOL_TEXTURE_SUBTRACT]:
 		_update_control_maps_from_active_layer()
 	_mark_dirty_rect(min_x, max_x, min_z, max_z)
-	_rebuild_after_stroke(radius, tool_name)
+	if not defer_rebuild:
+		_rebuild_after_stroke(radius, tool_name)
+
+
+func flush_deferred_rebuild() -> void:
+	if not is_dirty:
+		return
+	if _full_rebuild_mode or not enable_dirty_rect_rebuild:
+		rebuild_mesh()
+		return
+	rebuild_dirty_mesh()
 
 func begin_texture_stroke(_perf_mode: bool = true, _brush_radius: float = 8.0) -> void:
 	pass
 
-func apply_texture_brush(world_pos: Vector3, _albedo: Texture2D = null, _normal: Texture2D = null, _roughness: Texture2D = null, _height: Texture2D = null, _ao: Texture2D = null, brush_size: float = 8.0, brush_strength: float = 0.3, _tile_size: float = 4.0, density: float = 0.75, softness: float = 0.7, _coverage: float = 0.75, _offset: Vector2 = Vector2.ZERO, _rot: float = 0.0, _scale: float = 1.0, _exposure: float = 1.0, _shape: String = "circle", _variation: float = 0.0, _seed: float = 0.0, _variant: int = 0, brush_mode: String = "smooth", texture_id: String = "") -> void:
+func apply_texture_brush(world_pos: Vector3, _albedo: Texture2D = null, _normal: Texture2D = null, _roughness: Texture2D = null, _height: Texture2D = null, _ao: Texture2D = null, brush_size: float = 8.0, brush_strength: float = 0.3, _tile_size: float = 4.0, density: float = 0.75, softness: float = 0.7, _coverage: float = 0.75, _offset: Vector2 = Vector2.ZERO, _rot: float = 0.0, _scale: float = 1.0, _exposure: float = 1.0, _shape: String = "circle", _variation: float = 0.0, _seed: float = 0.0, _variant: int = 0, brush_mode: String = "smooth", texture_id: String = "", defer_rebuild: bool = false) -> void:
 	var tex_label: String = "<none>"
 	if _albedo != null:
 		tex_label = _albedo.resource_path if _albedo.resource_path != "" else _albedo.resource_name
@@ -283,8 +298,7 @@ func apply_texture_brush(world_pos: Vector3, _albedo: Texture2D = null, _normal:
 	if slot_idx < 0:
 		return
 	print("Painting with texture: ", tex_label, " | Brush radius: ", brush_size)
-	print("Texture Paint - Brush Center: ", world_pos, " Radius: ", brush_size, " Texture: ", tex_label)
-	apply_brush("texturepaint", world_pos, brush_size, maxf(brush_strength * density, 0.01), 0.0, false, 0.3, softness, brush_mode, slot_idx)
+	apply_brush("texturepaint", world_pos, brush_size, maxf(brush_strength * density, 0.01), 0.0, false, 0.3, softness, brush_mode, slot_idx, defer_rebuild)
 
 func apply_texture_erase_brush(world_pos: Vector3, brush_size: float = 8.0, brush_strength: float = 0.3, softness: float = 0.7, brush_mode: String = "smooth") -> void:
 	apply_brush(TOOL_TEXTURE_SUBTRACT, world_pos, brush_size, brush_strength, 0.0, false, 0.3, softness, brush_mode)
@@ -308,6 +322,7 @@ func _ensure_nodes() -> void:
 		_mesh_instance = MeshInstance3D.new()
 		_mesh_instance.name = "TerrainMesh"
 		add_child(_mesh_instance)
+	_ensure_collision_body()
 	_ensure_terrain_material()
 	_apply_terrain_material_to_mesh()
 	if _brush_preview == null:
@@ -327,6 +342,38 @@ func _ensure_nodes() -> void:
 		_brush_preview.material_override = ring_mat
 		_brush_preview.visible = false
 		add_child(_brush_preview)
+
+
+func _ensure_collision_body() -> void:
+	if _terrain_collision_body == null:
+		_terrain_collision_body = StaticBody3D.new()
+		_terrain_collision_body.name = "TerrainCollision"
+		add_child(_terrain_collision_body)
+	if _terrain_collision_shape == null:
+		_terrain_collision_shape = CollisionShape3D.new()
+		_terrain_collision_shape.name = "TerrainCollisionShape"
+		_terrain_collision_body.add_child(_terrain_collision_shape)
+	_terrain_collision_body.collision_layer = terrain_collision_layer
+	_terrain_collision_body.collision_mask = terrain_collision_mask
+	_terrain_collision_body.visible = false
+
+
+func _update_terrain_collision() -> void:
+	if not terrain_collision_enabled:
+		if _terrain_collision_shape != null:
+			_terrain_collision_shape.shape = null
+		return
+	if _mesh_instance == null or _mesh_instance.mesh == null or not (_mesh_instance.mesh is ArrayMesh):
+		return
+	_ensure_collision_body()
+	var mesh: ArrayMesh = _mesh_instance.mesh as ArrayMesh
+	var faces: PackedVector3Array = mesh.get_faces()
+	if faces.size() < 3:
+		_terrain_collision_shape.shape = null
+		return
+	var shape := ConcavePolygonShape3D.new()
+	shape.data = faces
+	_terrain_collision_shape.shape = shape
 
 func _ensure_terrain_material() -> void:
 	if _material != null:
@@ -891,6 +938,7 @@ func rebuild_mesh() -> void:
 	_mesh_instance.mesh = mesh
 	_update_control_maps_from_active_layer()
 	_apply_terrain_material_to_mesh()
+	_update_terrain_collision()
 	is_dirty = false
 	dirty_min = Vector2i.ZERO
 	dirty_max = Vector2i.ZERO
@@ -975,6 +1023,7 @@ func rebuild_dirty_mesh() -> void:
 	var seam_start_time: int = Time.get_ticks_usec()
 	_blend_dirty_outer_border(mesh, heights, paint, paint_g, paint_b, paint_a, stride, step, row_normal_size, row_color_size, normal_block_offset, update_min_x, update_max_x, update_min_z, update_max_z)
 	_apply_terrain_material_to_mesh()
+	_update_terrain_collision()
 	var seam_time: int = Time.get_ticks_usec() - seam_start_time
 
 	if debug_rebuild_logging:

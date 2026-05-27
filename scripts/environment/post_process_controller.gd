@@ -2,11 +2,15 @@ extends CanvasLayer
 
 signal ppf_import_completed(success: bool, message: String)
 
-@export var enabled: bool = false
+@export var enabled: bool = true
 @export var main_camera_path: NodePath = NodePath("../Camera3D")
 @export var performance_mode: bool = false
 @export var ultra_performance_mode: bool = false
 @export var lightweight_mode: bool = false
+@export var quality_preset: String = "Medium"
+@export var postfx_intensity: float = 1.0
+@export_flags_3d_render var world_layer_mask: int = 1
+@export_flags_3d_render var sky_layer_mask: int = 2
 
 @onready var _viewport: SubViewport = $SceneViewport
 @onready var _overlay: TextureRect = $FullscreenOverlay
@@ -16,6 +20,16 @@ var _render_scale: float = 1.0
 var _daylight_factor: float = 0.0
 var _sculpt_mode: bool = false
 var _default_shader: Shader = null
+
+const QUALITY_LOW: String = "Low"
+const QUALITY_MEDIUM: String = "Medium"
+const QUALITY_HIGH: String = "High"
+
+const QUALITY_RENDER_SCALE: Dictionary = {
+	QUALITY_LOW: 0.5,
+	QUALITY_MEDIUM: 0.67,
+	QUALITY_HIGH: 1.0,
+}
 
 const POSTFX_PARAM_DEFAULTS: Dictionary = {
 	"outline_strength": 2.35,
@@ -30,8 +44,8 @@ const POSTFX_PARAM_DEFAULTS: Dictionary = {
 	"outlines_layer_depth_sensitivity": 1.6,
 	"outlines_layer_depth_threshold": 0.055,
 	"outlines_layer_normal_sensitivity": 1.3,
-	"outlines_layer_opacity": 0.48,
-	"outlines_layer_enabled": false,
+	"outlines_layer_opacity": 0.52,
+	"outlines_layer_enabled": true,
 	"outlines_layer_color": Color(0.01, 0.01, 0.01, 1.0),
 }
 
@@ -133,6 +147,7 @@ const BUILTIN_PRESETS: Dictionary = {
 func _ready() -> void:
 	_viewport.disable_3d = false
 	_viewport.world_3d = get_viewport().world_3d
+	_viewport.transparent_bg = true
 	_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	_sync_viewport_size()
 
@@ -144,8 +159,11 @@ func _ready() -> void:
 	_overlay.texture = _viewport.get_texture()
 	if _overlay.material is ShaderMaterial:
 		_default_shader = (_overlay.material as ShaderMaterial).shader
+	quality_preset = _normalize_quality_preset(quality_preset)
+	_apply_render_scale_for_quality()
+	set_postfx_intensity(postfx_intensity)
 	_set_enabled(enabled)
-	set_performance_mode(performance_mode)
+	_apply_quality_preset()
 
 func _process(_delta: float) -> void:
 	_sync_viewport_size()
@@ -158,26 +176,72 @@ func set_enabled(value: bool) -> void:
 func set_performance_mode(value: bool) -> void:
 	performance_mode = value
 	if ultra_performance_mode:
-		_render_scale = 0.4
+		set_quality_preset(QUALITY_LOW)
+	elif performance_mode:
+		set_quality_preset(QUALITY_MEDIUM)
 	else:
-		_render_scale = 0.5 if performance_mode else 1.0
-	_apply_quality_preset()
-	_sync_viewport_size()
+		set_quality_preset(QUALITY_HIGH)
 
 func set_ultra_performance_mode(value: bool) -> void:
 	ultra_performance_mode = value
 	if ultra_performance_mode:
 		performance_mode = true
-	_render_scale = 0.4 if ultra_performance_mode else (0.5 if performance_mode else 1.0)
-	_apply_quality_preset()
-	_sync_viewport_size()
+	set_quality_preset(QUALITY_LOW if ultra_performance_mode else (QUALITY_MEDIUM if performance_mode else QUALITY_HIGH))
 
 func get_render_scale() -> float:
 	return _render_scale
 
 func set_lightweight_mode(value: bool) -> void:
 	lightweight_mode = value
+	if lightweight_mode and quality_preset == QUALITY_HIGH:
+		quality_preset = QUALITY_MEDIUM
 	_apply_quality_preset()
+
+
+func set_quality_preset(value: String) -> void:
+	quality_preset = _normalize_quality_preset(value)
+	ultra_performance_mode = quality_preset == QUALITY_LOW
+	performance_mode = quality_preset != QUALITY_HIGH
+	_apply_render_scale_for_quality()
+	_apply_quality_preset()
+	_sync_viewport_size()
+
+
+func get_quality_preset() -> String:
+	return quality_preset
+
+
+func set_postfx_intensity(value: float) -> void:
+	postfx_intensity = clampf(value, 0.0, 1.0)
+	if _overlay.material is ShaderMaterial:
+		(_overlay.material as ShaderMaterial).set_shader_parameter("postfx_intensity", postfx_intensity)
+
+
+func get_postfx_intensity() -> float:
+	return postfx_intensity
+
+
+func set_world_layer_mask(value: int) -> void:
+	world_layer_mask = max(1, value)
+
+
+func set_sky_layer_mask(value: int) -> void:
+	sky_layer_mask = max(1, value)
+
+
+func _normalize_quality_preset(value: String) -> String:
+	var lower: String = value.to_lower()
+	if lower == "low":
+		return QUALITY_LOW
+	if lower == "medium":
+		return QUALITY_MEDIUM
+	if lower == "high":
+		return QUALITY_HIGH
+	return QUALITY_MEDIUM
+
+
+func _apply_render_scale_for_quality() -> void:
+	_render_scale = float(QUALITY_RENDER_SCALE.get(quality_preset, 0.67))
 
 
 func set_sculpt_mode(sculpt_enabled: bool) -> void:
@@ -201,53 +265,50 @@ func _apply_quality_preset() -> void:
 	if not (_overlay.material is ShaderMaterial):
 		return
 	var material := _overlay.material as ShaderMaterial
-	var base_outline_strength: float = 2.35
-	var base_line_darken: float = 0.085
-	if performance_mode:
-		if ultra_performance_mode:
-			material.set_shader_parameter("outline_thickness", 0.0)
-			material.set_shader_parameter("outline_strength", 0.0)
-			material.set_shader_parameter("hatch_opacity", 0.0)
-			material.set_shader_parameter("hatch_scale", 320.0)
-			material.set_shader_parameter("paper_strength", 0.0)
-			material.set_shader_parameter("line_darken", 0.0)
-			material.set_shader_parameter("daytime_brightness", 1.0)
-			material.set_shader_parameter("daytime_contrast", 1.0)
-			return
-		material.set_shader_parameter("outline_thickness", 2.6)
-		base_outline_strength = 1.35
-		material.set_shader_parameter("hatch_opacity", 0.08)
-		material.set_shader_parameter("hatch_scale", 420.0)
-		material.set_shader_parameter("paper_strength", 0.01)
+	var base_outline_strength: float = 2.55
+	var base_line_darken: float = 0.075
+	if quality_preset == QUALITY_LOW:
+		material.set_shader_parameter("fast_mode", true)
+		material.set_shader_parameter("outline_thickness", 2.0)
+		base_outline_strength = 1.15
+		material.set_shader_parameter("hatch_opacity", 0.06)
+		material.set_shader_parameter("hatch_scale", 400.0)
+		material.set_shader_parameter("paper_strength", 0.008)
+		material.set_shader_parameter("bloom_strength", 0.03)
 		base_line_darken = 0.02
-	elif lightweight_mode:
+	elif quality_preset == QUALITY_MEDIUM:
+		material.set_shader_parameter("fast_mode", true)
 		material.set_shader_parameter("outline_thickness", 3.0)
 		base_outline_strength = 1.7
 		material.set_shader_parameter("hatch_opacity", 0.12)
-		material.set_shader_parameter("hatch_scale", 500.0)
+		material.set_shader_parameter("hatch_scale", 460.0)
 		material.set_shader_parameter("paper_strength", 0.02)
+		material.set_shader_parameter("bloom_strength", 0.07)
 		base_line_darken = 0.04
 	else:
-		material.set_shader_parameter("outline_thickness", 4.0)
-		base_outline_strength = 2.35
-		material.set_shader_parameter("hatch_opacity", 0.24)
-		material.set_shader_parameter("hatch_scale", 560.0)
-		material.set_shader_parameter("paper_strength", 0.05)
-		base_line_darken = 0.085
+		material.set_shader_parameter("fast_mode", false)
+		material.set_shader_parameter("outline_thickness", 4.3)
+		base_outline_strength = 2.55
+		material.set_shader_parameter("hatch_opacity", 0.28)
+		material.set_shader_parameter("hatch_scale", 540.0)
+		material.set_shader_parameter("paper_strength", 0.06)
+		material.set_shader_parameter("bloom_strength", 0.12)
+		base_line_darken = 0.075
 
 	# Daylight softens line crush and raises tonal lift to keep afternoons bright.
-	var daytime_outline_strength: float = lerpf(base_outline_strength, base_outline_strength * 0.78, _daylight_factor)
-	var daytime_line_darken: float = lerpf(base_line_darken, base_line_darken * 0.65, _daylight_factor)
+	var daytime_outline_strength: float = lerpf(base_outline_strength, base_outline_strength * 0.82, _daylight_factor)
+	var daytime_line_darken: float = lerpf(base_line_darken, base_line_darken * 0.72, _daylight_factor)
 
 	# Sculpt mode further reduces shadow crushing for maximum shape readability.
 	if _sculpt_mode:
-		daytime_outline_strength *= 0.68
-		daytime_line_darken *= 0.45
+		daytime_outline_strength *= 0.72
+		daytime_line_darken *= 0.5
 
 	material.set_shader_parameter("outline_strength", daytime_outline_strength)
 	material.set_shader_parameter("line_darken", daytime_line_darken)
 	material.set_shader_parameter("daytime_brightness", lerpf(1.0, 1.07, _daylight_factor) + (0.06 if _sculpt_mode else 0.0))
 	material.set_shader_parameter("daytime_contrast", lerpf(1.0, 0.95, _daylight_factor) - (0.03 if _sculpt_mode else 0.0))
+	material.set_shader_parameter("postfx_intensity", postfx_intensity)
 
 
 func get_preview_texture() -> Texture2D:
@@ -299,6 +360,10 @@ func apply_custom_shader_code(shader_code: String) -> bool:
 func get_live_postfx_state() -> Dictionary:
 	var state: Dictionary = {
 		"enabled": enabled,
+		"quality_preset": quality_preset,
+		"intensity": postfx_intensity,
+		"world_layer_mask": world_layer_mask,
+		"sky_layer_mask": sky_layer_mask,
 		"effects": [],
 		"color_tint": Color(1.0, 1.0, 1.0, 1.0),
 	}
@@ -316,8 +381,8 @@ func get_live_postfx_state() -> Dictionary:
 	return state
 
 
-func save_ppf(path: String, name: String, author: String, description: String, custom_shader_code: String = "") -> bool:
-	var data: Dictionary = _build_ppf_data(name, author, description, custom_shader_code)
+func save_ppf(path: String, preset_name: String, author: String, description: String, custom_shader_code: String = "") -> bool:
+	var data: Dictionary = _build_ppf_data(preset_name, author, description, custom_shader_code)
 	var file := FileAccess.open(path, FileAccess.WRITE)
 	if file == null:
 		return false
@@ -366,6 +431,14 @@ func apply_ppf_data(ppf: Dictionary) -> bool:
 		set_effect_value("color_tint", ppf.get("color_tint"))
 	if ppf.has("enabled"):
 		set_enabled(bool(ppf.get("enabled")))
+	if ppf.has("quality_preset"):
+		set_quality_preset(String(ppf.get("quality_preset", QUALITY_MEDIUM)))
+	if ppf.has("intensity"):
+		set_postfx_intensity(float(ppf.get("intensity", 1.0)))
+	if ppf.has("world_layer_mask"):
+		set_world_layer_mask(int(ppf.get("world_layer_mask", 1)))
+	if ppf.has("sky_layer_mask"):
+		set_sky_layer_mask(int(ppf.get("sky_layer_mask", 2)))
 	return true
 
 
@@ -401,15 +474,19 @@ func get_builtin_preset_names() -> PackedStringArray:
 	return names
 
 
-func _build_ppf_data(name: String, author: String, description: String, custom_shader_code: String) -> Dictionary:
+func _build_ppf_data(preset_name: String, author: String, description: String, custom_shader_code: String) -> Dictionary:
 	var state: Dictionary = get_live_postfx_state()
 	return {
-		"name": name,
+		"name": preset_name,
 		"author": author,
 		"description": description,
 		"effects": state.get("effects", []),
 		"color_tint": state.get("color_tint", Color(1.0, 1.0, 1.0, 1.0)),
 		"enabled": state.get("enabled", true),
+		"quality_preset": quality_preset,
+		"intensity": postfx_intensity,
+		"world_layer_mask": world_layer_mask,
+		"sky_layer_mask": sky_layer_mask,
 		"custom_shader_code": custom_shader_code,
 	}
 
@@ -442,6 +519,9 @@ func _sync_capture_camera() -> void:
 	_capture_camera.size = main_camera.size
 	_capture_camera.near = main_camera.near
 	_capture_camera.far = main_camera.far
+	_capture_camera.cull_mask = max(1, world_layer_mask)
+	_capture_camera.environment = main_camera.environment
+	_capture_camera.attributes = main_camera.attributes
 
 func _resolve_main_camera() -> Camera3D:
 	var root := get_tree().current_scene
